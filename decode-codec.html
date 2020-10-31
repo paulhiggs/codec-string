@@ -41,7 +41,7 @@ function AVCconstraint(val, constraint) {
 function decodeAVC(val) {
 	var parts=val.split(".")
 	var res=""
-	res+="[1]="+parts[0]+" [2]="+parts[1]+"<br>"
+//	res+="[1]="+parts[0]+" [2]="+parts[1]+"<br>"
 	
 	if (parts[1].length==6) {
 		if (hexDigits(parts[1])) {
@@ -104,6 +104,7 @@ function decodeAVC(val) {
 				case 60: res+="6"; break
 				case 61: res+="6.1"; break
 				case 62: res+="6.2"; break
+				default: res+="undefined";
 			}
 			res+=" ("+prof[2].toString(16)+")<br>"
 		}
