@@ -68,32 +68,28 @@ function bitSet32(val, bit) {
 	return (val & Math.pow(2, bit))
 }
 
-function HEVCprofile(general_profile_idc, cap, gopocf) {
-	if (general_profile_idc==1 || bitSet32(cap,1))
-		return "Main (1)"
-	
-	if (general_profile_idc==2 || bitSet32(cap,2))
-		return "Main 10 "+(gopocf?"Still Picture ":"")+"(2)"
-	
-	if (general_profile_idc==3 || bitSet32(cap,3))	
-		return "Main Still Picture (3)"
-		
-	if (general_profile_idc==4 || bitSet32(cap,4))
-		return "Range Extensions (4)"
 
-	if (general_profile_idc==5 || bitSet32(cap,5))
-		return "High Throughput (5)"
-	
-	if (general_profile_idc==9 || bitSet32(cap,9))
-		return "Screen Content Coding (9)"
-
-	if (general_profile_idc==11 || bitSet32(cap,11))
-		return "High Throughput Screen Content Coding (11)"
-	
-	return err("unknown")
-
+function hexDigits(str) {
+	var i,rc=true;
+	res=str.match(/[\da-fA-F]+/)
+	return res?res==str:false;
 }
+
+
+
 function decodeHEVC(val) {
+
+	function HEVCprofile(general_profile_idc, cap, gopocf) {
+		if (general_profile_idc==1 || bitSet32(cap,1)) return "Main (1)"	
+		if (general_profile_idc==2 || bitSet32(cap,2)) return "Main 10 "+(gopocf?"Still Picture ":"")+"(2)"		
+		if (general_profile_idc==3 || bitSet32(cap,3)) return "Main Still Picture (3)"
+		if (general_profile_idc==4 || bitSet32(cap,4)) return "Range Extensions (4)"
+		if (general_profile_idc==5 || bitSet32(cap,5)) return "High Throughput (5)"
+		if (general_profile_idc==9 || bitSet32(cap,9)) return "Screen Content Coding (9)"
+		if (general_profile_idc==11 || bitSet32(cap,11)) return "High Throughput Screen Content Coding (11)"		
+		return err("unknown")
+	}
+
 	var parts=val.split(".")
 
 	if (parts.length<5) 
@@ -245,31 +241,26 @@ function decodeHEVC(val) {
 	if (lev) res+="Level "+lev
 	res+=BREAK
 	
-
-
-	
-	
 	return res+constraints
 }
 
-function hexDigits(str) {
-	var i,rc=true;
-	res=str.match(/[\da-fA-F]+/)
-	return res?res==str:false;
-}
 
 
-function AVCconstraint(val, constraint) {
-	// constraint 012345--
-	// bit        76543210	
-	if (constraint<0 || constraint>5) return false;
-	return (val & Math.pow(2, 7-constraint))	
-}
+
+
 /**
  * https://blog.pearce.org.nz/2013/11/what-does-h264avc1-codecs-parameters.html
  * https://en.wikipedia.org/wiki/Advanced_Video_Coding
  **/
 function decodeAVC(val) {
+
+	function AVCconstraint(val, constraint) {
+		// constraint 012345--
+		// bit        76543210	
+		if (constraint<0 || constraint>5) return false;
+		return (val & Math.pow(2, 7-constraint))	
+	}
+
 	var parts=val.split(".")
 	let res=""
 //	res+="[1]="+parts[0]+" [2]="+parts[1]+BREAK
@@ -359,10 +350,10 @@ function decode(val) {
 	switch (codec.toLowerCase()) {
 		case "hev1":
 		case "hvc1":
-			res="HEVC/H.265<br>"+decodeHEVC(val)
+			res="HEVC/H.265"+BREAK+decodeHEVC(val)
 			break
 		case "avc1":
-			res="AVC/H.264<br>"+decodeAVC(val)
+			res="AVC/H.264"+BREAK+decodeAVC(val)
 			break
 		default:
 			res=err("unsupported codec="+codec)
