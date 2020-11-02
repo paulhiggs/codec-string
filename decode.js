@@ -1,8 +1,7 @@
 
 const BREAK="<br>"
-function err(str) {
-	return "<span style=\"color:red\">"+str+"</span>"
-}
+function err(str) { return "<span style=\"color:red\">"+str+"</span>" }
+function bold(str) { return "<span style=\"font-weight;bold\">"+str+"</span>" }
 
 class BitList {
 	bytes=[]
@@ -53,8 +52,16 @@ function hexDigits(str) {
 var handlers=[]
 function addHandler(FourCC, Label, Handler) {
 	if (!Handler) return
-	if (!handlers.find(handler => handler.cccc == FourCC.toLowerCase()))
-		handlers.push({cccc: FourCC.toLowerCase(), label: Label, func: Handler})
+	
+	if (typeof(FourCC) == "string") 
+		if (!handlers.find(handler => handler.cccc == FourCC.toLowerCase()))
+			handlers.push({cccc: FourCC.toLowerCase(), label: Label, func: Handler})
+		
+	if (typeof(FourCC) == "object")
+		FourCC.forEach(cc =>{
+			if (!handlers.find(handler => handler.cccc == cc.toLowerCase()))
+				handlers.push({cccc: cc.toLowerCase(), label: Label, func: Handler})
+		})
 }
 
 
@@ -63,14 +70,21 @@ addHandler("ec-3", "Enhanced AC-3", noHandler)
 
 
 function decode(val) {
-	var codec=(val.indexOf(".") == -1)?val:val.substr(0, val.indexOf("."))
-	var res=""
-
-	let handler=handlers.find(h => h.cccc == codec.toLowerCase())
-	if (handler)
-		res=handler.label+BREAK+handler.func(val)
-	else
-		res=err("unsupported codec="+codec)
 	
+	var res=""
+	
+	var codecs=val.split(",")
+	
+	codecs.forEach(component => {
+		component=component.replace(/\s/gm,'')
+		console.log(component)
+		var codec=(component.indexOf(".") == -1)?component:component.substr(0, component.indexOf("."))
+		let handler=handlers.find(h => h.cccc == codec.toLowerCase())
+		if (handler)
+			res+=bold(handler.label)+BREAK+handler.func(component)
+		else
+			res+=err("unsupported codec="+codec)
+		res+=BREAK+BREAK
+	})
 	return res;
 }

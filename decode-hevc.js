@@ -165,5 +165,4 @@ function decodeHEVC(val) {
 	return res+constraints
 }
 
-addHandler("hev1", "HEVC/H.265", decodeHEVC)
-addHandler("hvc1", "HEVC/H.265", decodeHEVC)
+addHandler(["hev1", "hvc1"], "HEVC/H.265", decodeHEVC)

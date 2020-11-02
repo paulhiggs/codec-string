@@ -64,25 +64,25 @@ function decodeAVC(val) {
 	
 	res+="level="
 	switch (prof[2]) {
-		case 10: res+="1"; break
-		case 11: res+=(AVCconstraint(prof[1], 3)?"1b":"1.1"); break
-		case 12: res+="1.2"; break
-		case 13: res+="1.3"; break
-		case 20: res+="2"; break
-		case 21: res+="2.1"; break
-		case 22: res+="2.2"; break
-		case 30: res+="3"; break
-		case 31: res+="3.1"; break
-		case 32: res+="3.2"; break
-		case 40: res+="4"; break
-		case 41: res+="4.1"; break
-		case 42: res+="4.2"; break
-		case 50: res+="5"; break
-		case 51: res+="5.1"; break
-		case 52: res+="5.2"; break
-		case 60: res+="6"; break
-		case 61: res+="6.1"; break
-		case 62: res+="6.2"; break
+		case 0x0a: res+="1"; break
+		case 0x0b: res+=(AVCconstraint(prof[1], 3)?"1b":"1.1"); break
+		case 0x0c: res+="1.2"; break
+		case 0x1d: res+="1.3"; break
+		case 0x14: res+="2"; break
+		case 0x15: res+="2.1"; break
+		case 0x16: res+="2.2"; break
+		case 0x1e: res+="3"; break
+		case 0x1f: res+="3.1"; break
+		case 0x20: res+="3.2"; break
+		case 0x28: res+="4"; break
+		case 0x29: res+="4.1"; break
+		case 0x2a: res+="4.2"; break
+		case 0x32: res+="5"; break
+		case 0x33: res+="5.1"; break
+		case 0x34: res+="5.2"; break
+		case 0x3c: res+="6"; break
+		case 0x3d: res+="6.1"; break
+		case 0x3f: res+="6.2"; break
 		default: res+=err("undefined");
 	}
 	res+=" ("+prof[2].toString(16)+")"+BREAK
@@ -90,5 +90,6 @@ function decodeAVC(val) {
 	return res;
 }
 
-addHandler("avc1", "AVC/H.264", decodeAVC)
-addHandler("avc3", "AVC/H.264", decodeAVC)
+addHandler(["avc1","avc2","avc3"], "AVC/H.264", decodeAVC)
+addHandler(["mvc1", "mvc2"], "Multiview Coding", decodeAVC)
+addHandler("svc1", "Scalable Video Coding", decodeAVC)
