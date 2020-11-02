@@ -278,30 +278,30 @@ function decodeAVC(val) {
 	
 	res+="profile="
 	switch (prof[0]) {
+		case 0x2c: res+="CAVLC 4:4:4"; break
 		case 0x42: res+=(AVCconstraint(prof[1], 1)?"Constrained ":"")+"Baseline"; break
 		case 0x4d: res+=(AVCconstraint(prof[1], 1)?"Constrained ":"")+"Main"; break
+		case 0x53: res+="Scalable "+(AVCconstraint(prof[1], 5)?"Constrained ":""+"Base"); break
+		case 0x56: res+="Scalable "
+			if (!AVCconstraint(prof[1], 3) && AVCconstraint(prof[1], 5)) res+="Constrained "
+			if (AVCconstraint(prof[1], 3) && !AVCconstraint(prof[1], 5)) res+="Intra "
+			res+="High"; break
+		case 0x58: res+="Extended"; break
+		case 0x63: res+="High 10"+(AVCconstraint(prof[1], 3)?" Intra":""); break
 		case 0x64: 
 			if (AVCconstraint(prof[1], 4) && !AVCconstraint(prof[1], 5))
 				res+="Progressive "
 			if (!AVCconstraint(prof[1], 4) && AVCconstraint(prof[1], 5))
 				res+="Constrained "	
 			res+="High"; break
-		case 0x7a: res+="High 4:2:2"+(AVCconstraint(prof[1], 3)?" Intra":""); break
-		case 0x63: res+="High 10"+(AVCconstraint(prof[1], 3)?" Intra":""); break
-		case 0xf4: res+="High 4:4:4 "+(AVCconstraint(prof[1], 3)?" Intra":" Predictive"); break
-		case 0x58: res+="Extended"; break
-		case 0x2c: res+="CAVLC 4:4:4"; break
-		case 0x53: res+="Scalable "+(AVCconstraint(prof[1], 5)?"Constrained ":""+"Base"); break
-		case 0x56: res+="Scalable "
-			if (!AVCconstraint(prof[1], 3) && AVCconstraint(prof[1], 5)) res+="Constrained "
-			if (AVCconstraint(prof[1], 3) && !AVCconstraint(prof[1], 5)) res+="Intra "
-			res+="High"; break
 		case 0x76: res+="Multiview High"; break
+		case 0x7a: res+="High 4:2:2"+(AVCconstraint(prof[1], 3)?" Intra":""); break
 		case 0x80: res+="Stereo High"; break
 		case 0x86: res+="MFC High"; break
 		case 0x87: res+="MFC Depth High"; break
 		case 0x8a: res+="Multiview Depth High High"; break
 		case 0x8b: res+="Enhanced Multiview Depth High High"; break
+		case 0xf4: res+="High 4:4:4 "+(AVCconstraint(prof[1], 3)?" Intra":" Predictive"); break
 		default:
 			res+=err("unknown")					
 	}
@@ -366,7 +366,6 @@ function decodeAVC(val) {
 
 function decodeAAC(val) {
 	var parts=val.split(".")
-	let res=""
 	if (parts.length<2)
 		return err("invalid format")
 	if (!hexDigits(parts[1]))
@@ -374,7 +373,7 @@ function decodeAAC(val) {
 	
 	// https://wiki.whatwg.org/wiki/video_type_parameters#Audio_Codecs_3
 	// https://cconcolato.github.io/media-mime-support/
-	
+	let res=""
 	let MP4oti=sscanf(parts[1], "%x")
 	switch (MP4oti[0]) {
 		case 0x40: 
@@ -431,6 +430,71 @@ function decodeAAC(val) {
 }
 
 
+function decodeAV1(val) {
+	var parts=val.split(".")
+	if (parts.length!=4)
+		return err("invalid format")
+
+	let res=""
+	
+	switch (parts[1]) {
+		case "0": res+="Main Profile"; break
+		case "1": res+="High Profile"; break
+		case "2": res+="Professional Profile"; break
+		default: res+=err("unknown profile ("+parts[1]+")")
+	}
+	res+=BREAK
+	
+	levelAndTier=sscanf(parts[2], "%d%c")
+	res+="Level "
+	switch (levelAndTier[0]) {
+		case 0: res+="2.0"; break
+		case 1: res+="2.1"; break
+		case 2: res+="2.2"; break
+		case 3: res+="2.3"; break
+		case 4: res+="3.0"; break
+		case 5: res+="3.1"; break
+		case 6: res+="3.2"; break
+		case 7: res+="3.3"; break
+		case 8: res+="4.0"; break
+		case 9: res+="4.1"; break
+		case 10: res+="4.2"; break
+		case 11: res+="4.3"; break
+		case 12: res+="5.0"; break
+		case 13: res+="5.1"; break
+		case 14: res+="5.2"; break
+		case 15: res+="5.3"; break
+		case 16: res+="6.0"; break
+		case 17: res+="6.1"; break
+		case 18: res+="6.2"; break
+		case 19: res+="6.3"; break
+		case 20: res+="7.0"; break
+		case 21: res+="7.1"; break
+		case 22: res+="7.2"; break
+		case 23: res+="7.3"; break
+		case 31: res+="Max"; break
+		default: res+=err("unknown ("+levelAndTier[0]+")")
+	}
+	res+=BREAK
+	switch (levelAndTier[1].toUpperCase()) {
+		case "M":
+			res+="Main tier"; break
+		case "H":
+			res+="High tier"; break
+		default:
+			res+=err("unknown tier ("+levelAndTier[1]+")")
+	}	
+	
+	switch (parts[3]) {
+		case "08": res+="8 bit"; break
+		case "10": res+="10 bit"; break
+		case "12": res+="12 bit"; break
+		default: res+=err("unknown bit depth ("+parts[3]+")")
+	}
+	
+	return res
+}
+
 function decode(val) {
 
 	var codec=(val.indexOf(".") == -1)?val:val.substr(0, val.indexOf("."))
@@ -450,6 +514,9 @@ function decode(val) {
 			break
 		case "ec-3":
 			res="Enhanced AC-3"+BREAK
+			break
+		case "av01":
+			res="AV1"+BREAK+decodeAV1(val)
 			break
 		default:
 			res=err("unsupported codec="+codec)
