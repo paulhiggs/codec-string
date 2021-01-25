@@ -1,5 +1,10 @@
 function decodeHEVC(val) {
 
+	// regex from DVB TM-STREAM0087: /(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fa-F\d]{1,8}\.[LH]\d{1,3}/
+	// but needs to include the 6 btyes from the decoder constraint flags
+	
+	const HEVCregex = /(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fa-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fa-F\d]{1,2}){,6}/
+
 	function HEVCprofile(general_profile_idc, cap, gopocf) {
 		if (general_profile_idc==1 || bitSet32(cap,1)) return "Main (1)"	
 		if (general_profile_idc==2 || bitSet32(cap,2)) return "Main 10 "+(gopocf?"Still Picture ":"")+"(2)"		

@@ -4,6 +4,8 @@
  **/
 function decodeAVC(val) {
 
+	// regex from DVB TM-STREAM0087:  /avc[1-4]\.[a-fA-F\d]{6}/
+	
 	function AVCconstraint(val, constraint) {
 		// constraint 012345--
 		// bit        76543210	
@@ -90,6 +92,6 @@ function decodeAVC(val) {
 	return res;
 }
 
-addHandler(["avc1","avc2","avc3"], "AVC/H.264", decodeAVC)
+addHandler(["avc1", "avc2", "avc3", "avc4"], "AVC/H.264", decodeAVC)
 addHandler(["mvc1", "mvc2"], "Multiview Coding", decodeAVC)
 addHandler("svc1", "Scalable Video Coding", decodeAVC)
