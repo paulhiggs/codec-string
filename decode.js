@@ -1,7 +1,11 @@
 
 const BREAK="<br>"
 function err(str) { return "<span style=\"color:red\">"+str+"</span>" }
-function bold(str) { return "<span style=\"font-weight;bold\">"+str+"</span>" }
+function warn(str) { return "<span style=\"color:orange\">"+str+"</span>" }
+function bold(str) { return "<span style=\"font-weight:bold\">"+str+"</span>" }
+function title(str) { return "<span style=\"font-style:italic\">"+str+"</span>" }
+
+function cell(str, span=1) { return "<td"+(span!=1?(" colspan=\""+span+"\""):"")+">"+str+"</td>" }
 
 class BitList {
 	bytes=[]
@@ -24,6 +28,7 @@ class BitList {
 		if (bit==0) bit=8
 		return "<i>"+bitNo+"="+idx+":"+bit+"</i>"+BREAK
 	}
+
 	toString() {
 		let i=0, res=""
 		while (i<this.bytes.length) {
