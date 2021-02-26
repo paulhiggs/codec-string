@@ -22,7 +22,7 @@ function decodeMPEGH(val) {
         case 0x10: res+="BL Profile Level 1"; break
         case 0x11: res+="BL Profile Level 2"; break
         case 0x12: res+="BL Profile Level 3"; break
-        default: res+=err('invalid level')
+        default: return err('invalid level')+BREAK
     }
     if (parts[0]=="mhm2")
         res+=", multi-steam"

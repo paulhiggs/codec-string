@@ -156,10 +156,6 @@ function ISOIEC23091_2_VideoFramePackingType(value) {
     return warn("Reserved -- For future use by ITU-T | ISO/IEC")   
 }
 
-function ISOIEC23091_2_QuincunxSamplingFlag(value) {
-
-}
-
 function decodeEVC(val) {
 
     function printBitDepth(args) {
@@ -227,7 +223,7 @@ function decodeEVC(val) {
         if (!args.value)
             return cell("no frame packing is used",2)
         let qsf=Math.floor(args.value/10), vfpt=args.value%10
-        return cell(args.value)+cell("QuincunxSamplingFlag="+ISOIEC23091_2_QuincunxSamplingFlag(qsf)
+        return cell(args.value)+cell("QuincunxSamplingFlag="+qsf
                     +", VideoFramePackingType="+ISOIEC23091_2_VideoFramePackingType(vfpt))    
     }
     function printPackedContentInterpretationType(args) {
