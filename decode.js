@@ -57,7 +57,7 @@ function addHandler(FourCC, Label, Handler) {
 		if (!handlers.find(handler => handler.cccc == FourCC.toLowerCase()))
 			handlers.push({cccc: FourCC.toLowerCase(), label: Label, func: Handler})
 		
-	if (typeof(FourCC) == "object")
+	if (Array.isArray(FourCC))
 		FourCC.forEach(cc =>{
 			if (!handlers.find(handler => handler.cccc == cc.toLowerCase()))
 				handlers.push({cccc: cc.toLowerCase(), label: Label, func: Handler})
@@ -66,7 +66,7 @@ function addHandler(FourCC, Label, Handler) {
 
 
 function noHandler(v) {return ""}
-addHandler("ec-3", "Enhanced AC-3", noHandler)
+addHandler("ec-3", "Enhanced AC-3", noHandler) 	// Dolby Digital+, E-AC-3
 
 
 function decode(val) {
@@ -77,7 +77,6 @@ function decode(val) {
 	
 	codecs.forEach(component => {
 		component=component.replace(/\s/gm,'')
-		console.log(component)
 		var codec=(component.indexOf(".") == -1)?component:component.substr(0, component.indexOf("."))
 		let handler=handlers.find(h => h.cccc == codec.toLowerCase())
 		if (handler)

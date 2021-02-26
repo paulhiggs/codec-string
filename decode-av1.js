@@ -1,4 +1,7 @@
 function decodeAV1(val) {
+
+	// defined in https://aomediacodec.github.io/av1-isobmff/#codecsparam
+	
 	var parts=val.split(".")
 	if (parts.length!=4)
 		return err("invalid format")
