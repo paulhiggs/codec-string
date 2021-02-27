@@ -23,7 +23,25 @@ class BitList {
 			
 		return (this.bytes[idx] & 1<<(bit-1))?true:false
 	}
-	
+
+	bitsetB(bitNo) {
+		if (bitNo<0 || bitNo>((this.bytes.length*8)-1))
+			return false
+		let idx=Math.floor(bitNo/8)
+		let bit=1<<(7-(bitNo%8))
+
+		return (this.bytes[idx] & bit)?true:false	
+	}
+
+	valueB(bitNo, length) {
+		let tot=0
+		for (let i=0; i<length; i++) {
+			tot=tot<<1
+			tot+=this.bitsetB(bitNo+i)?1:0
+		}
+		return tot
+	}
+
 	pointers(bitNo) {
 		let idx=this.bytes.length-Math.floor((bitNo-1)/8)-1
 		let bit=bitNo%8
