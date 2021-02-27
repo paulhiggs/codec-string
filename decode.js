@@ -2,8 +2,10 @@
 const BREAK="<br>"
 function err(str) { return "<span style=\"color:red\">"+str+"</span>" }
 function warn(str) { return "<span style=\"color:orange\">"+str+"</span>" }
+
 function bold(str) { return "<span style=\"font-weight:bold\">"+str+"</span>" }
 function title(str) { return "<span style=\"font-style:italic\">"+str+"</span>" }
+function unprocessed(str) { return "<span style=\"color:orange\">"+str+"</span>" }
 
 function cell(str, span=1) { return "<td"+(span!=1?(" colspan=\""+span+"\""):"")+">"+str+"</td>" }
 

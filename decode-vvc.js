@@ -32,6 +32,7 @@ function decodeVVC(val) {
         res+=BREAK
         let lev=null
         switch (op_level_idc) {
+            // table 135 in VVC
             case 16: lev="1.0"; break
             case 32: lev="2.0"; break
             case 35: lev="2.1"; break
@@ -53,20 +54,20 @@ function decodeVVC(val) {
 
 
     function printConstraints(general_constraint_info) {
-        let res=""
-
+        let res="" 
+        res+="Constraints="+unprocessed(general_constraint_info)     
         return res+=BREAK
     }
 
     function printSubProfile(general_sub_profile_idc) {
         let res=""
-
+        res+="SubProfile="+unprocessed(general_sub_profile_idc)
         return res+=BREAK
     }
 
     function printTemporalLayers(indexes) {
         let res=""
-
+        res+="TemporalLayers="+unprocessed(indexes)
         return res+=BREAK
     }
     let VVCregex=/^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-fA-F\d]{1,2})?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/
@@ -99,10 +100,8 @@ function decodeVVC(val) {
                 case 'O':
                     res+=printTemporalLayers(part.substring(2))
                     break
-                
             }
         }
-    
     })
 
 
