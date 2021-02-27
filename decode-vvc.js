@@ -61,14 +61,30 @@ function decodeVVC(val) {
 
     function printSubProfile(general_sub_profile_idc) {
         let res=""
-        res+="SubProfile="+unprocessed(general_sub_profile_idc)
-        return res+=BREAK
+        let i=1, subProfiles=general_sub_profile_idc.split("+")
+
+        // VVC says
+        //general_sub_profile_idc[ i ] specifies the i-th interoperability indicator registered as specified by Rec. ITU-T T.35, 
+        // the contents of which are not specified in this document.
+        // ITU T.35 (2000) - Procedure for the allocation of ITU-T defined codes for non-standard facilities
+
+        subProfiles.forEach(profile => {
+            let p=parseInt(profile, 16)
+            res+="Sub profile ("+ i++ + ")="+p+BREAK
+        })
+        return res
     }
 
     function printTemporalLayers(indexes) {
         let res=""
-        res+="TemporalLayers="+unprocessed(indexes)
-        return res+=BREAK
+        let layerIndexes=indexes.split("+")
+        if (layerIndexes[0]) {
+            res+="Output Layer Set index (<em>OlsIdx</em>)="+layerIndexes[0]+BREAK
+        }
+        if (layerIndexes[1]) {
+            res+="Maximum Temporal Id (<em>MaxTid</em>)="+layerIndexes[1]+BREAK            
+        }
+        return res
     }
     let VVCregex=/^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-fA-F\d]{1,2})?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/
 
@@ -103,7 +119,6 @@ function decodeVVC(val) {
             }
         }
     })
-
 
     return res
 }
