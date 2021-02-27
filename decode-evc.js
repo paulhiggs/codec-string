@@ -248,8 +248,12 @@ function decodeEVC(val) {
 
         let t=values.find(elem=>elem.key==key)
         if (t) {
-            t.value=sscanf(value, "%d")[0]
-            t.default=false
+            if (!t.default) {
+                return err('key '+key+' can only be provied once')
+            } else {
+                t.value=sscanf(value, "%d")[0]
+                t.default=false
+            }
         }
         return ""
     }
