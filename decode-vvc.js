@@ -6,6 +6,9 @@
 
 function decodeVVC(val) {
 
+    const VVCregex=/^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-fA-F\d]+)?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/
+    const VVCformat="<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}"
+
     function printProfile(profile) {
         let res="", general_profile_idc=sscanf(profile, "%d")[0]
 
@@ -27,7 +30,7 @@ function decodeVVC(val) {
         switch (tier) {
             case "L": res+="Main Tier (L)"; break
             case "H": res+="High Tier (H)"; break
-            default: res+=err("unknown Tier ("+tier[0]+")"); break
+            default: res+=err("unknown Tier ("+tier+")"); break
         }
         res+=BREAK
         let lev=null
@@ -46,12 +49,11 @@ function decodeVVC(val) {
             case 96: lev="6.0"; break
             case 99: lev="6.1"; break
             case 102: lev="6.2"; break
-            default: res+=err("unknown Level ("+tier[1]+")")
+            default: res+=err("unknown Level ("+op_level_idc+")")
         }
         if (lev) res+="Level "+lev
         return res+=BREAK
     }
-
 
     let VVC_general_constraints=[
         {bit:0, name:"gci_present_flag", existance:true},
@@ -153,44 +155,39 @@ function decodeVVC(val) {
                     if (constraintFlags.bitsetB(constraint.bit))
                         res+=constraint.name+BREAK
                 }
-
             }
         })
-   
         return res
     }
 
     function printSubProfile(general_sub_profile_idc) {
         let res=""
-        let i=1, subProfiles=general_sub_profile_idc.split("+")
+        let subProfiles=general_sub_profile_idc.split("+")
 
         // VVC says
         //general_sub_profile_idc[ i ] specifies the i-th interoperability indicator registered as specified by Rec. ITU-T T.35, 
         // the contents of which are not specified in this document.
         // ITU T.35 (2000) - Procedure for the allocation of ITU-T defined codes for non-standard facilities
 
-        subProfiles.forEach(profile => {
-            let p=parseInt(profile, 16)
-            res+="Sub profile ("+ i++ + ")="+p+BREAK
-        })
+        for (let i=0; i< subProfiles.length; i++) {
+            let p=parseInt(subProfiles[i], 16)
+            res+="Sub profile ("+(i+1)+")="+p+BREAK
+        }
         return res
     }
 
     function printTemporalLayers(indexes) {
         let res=""
         let layerIndexes=indexes.split("+")
-        if (layerIndexes[0]) {
+        if (layerIndexes[0])
             res+="Output Layer Set index (<em>OlsIdx</em>)="+layerIndexes[0]+BREAK
-        }
-        if (layerIndexes[1]) {
+        if (layerIndexes[1])
             res+="Maximum Temporal Id (<em>MaxTid</em>)="+layerIndexes[1]+BREAK            
-        }
         return res
     }
-    let VVCregex=/^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-fA-F\d]+)?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/
 
     if (!VVCregex.test(val))
-        return err('Regex mismatch!')
+        return err('Regex mismatch!')+BREAK+err(VVCformat)+BREAK
 
     let x=val.match(VVCregex)
     var res=""
@@ -203,10 +200,8 @@ function decodeVVC(val) {
             }
             else switch (cmd) {
                 case 'L':
-                    res+=printTier('L', part.substring(2))
-                    break
                 case 'H':
-                    res+=printTier('H', part.substring(2))
+                    res+=printTier(cmd, part.substring(2))
                     break
                 case 'C':
                     res+=printConstraints(part.substring(2))
