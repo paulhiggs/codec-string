@@ -169,7 +169,7 @@ function decodeVP9(val) {
     }
     function printVideoFullRangeFlag(args) {
         //  0=legal range, 1=full-range chroma/luma encoding
-        let flag=args.value, res=cell(flag), desc=null
+        let flag=args.value, res="", desc=null
         switch (flag) {
             case 0: desc="legal range"; break
             case 1: desc="full-range chroma/luma encoding"; break
