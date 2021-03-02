@@ -10,7 +10,7 @@ function decodeVVC(val) {
     const VVCformat="<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}"
 
     function printProfile(profile) {
-        let res="", general_profile_idc=sscanf(profile, "%d")[0]
+        let res="", general_profile_idc=parseInt(profile)
 
         switch (general_profile_idc) {
             case 1: res+="Main 10"; break
@@ -25,7 +25,7 @@ function decodeVVC(val) {
     }
 
     function printTier(tier, level) {
-        let res="", op_level_idc=sscanf(level, "%d")[0]
+        let res="", op_level_idc=parseInt(level)
 
         switch (tier) {
             case "L": res+="Main Tier (L)"; break

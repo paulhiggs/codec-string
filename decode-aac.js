@@ -32,12 +32,12 @@ function decodeAAC(val) {
 	// https://wiki.whatwg.org/wiki/video_type_parameters#Audio_Codecs_3
 	// https://cconcolato.github.io/media-mime-support/
 	let res=""
-	let MP4oti=sscanf(parts[1], "%x")
+	let MP4oti=parseInt(parts[1], 16)
 	switch (MP4oti[0]) {
 		case 0x40: 
 			res+="MPEG-4 AAC (40)"+BREAK; 
 			if (parts[2]) {
-				let aacMode=sscanf(parts[2], "%d")
+				let aacMode=parseInt(parts[2])
 				let vals=[ {i:1, s:"Main"},
 						   {i:2, s:"Low-Complexity AAC"},
 						   {i:3, s:"SSR AAC"},

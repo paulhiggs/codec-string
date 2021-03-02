@@ -26,7 +26,7 @@ function decodeHEVC(val) {
 	if (!hexDigits(parts[2]))
 		argErr+=err("general_profile_compatibility_flag not expressed in hexadecimal ("+parts[2]+")")+BREAK
  
-	let general_profile_compatibility_flag=sscanf(parts[2], "%x")	
+	let general_profile_compatibility_flag=parseInt(parts[2], 16)	
 	let general_profile_idc=-1, general_profile_space=-1
 	
 	if (parts[1][0]=="A" || parts[1][0]=="B" || parts[1][0]=="C") {
@@ -40,7 +40,7 @@ function decodeHEVC(val) {
 	}
 	else {
 		general_profile_space=0
-		general_profile_idc=sscanf(parts[1], "%d")
+		general_profile_idc=parseInt(parts[1])
 	}
  
 	// process the constraints as we need to extract the general_one_picture_only_constraint_flag
@@ -53,7 +53,7 @@ function decodeHEVC(val) {
 			if (!hexDigits(parts[i])) 
 				argErr+=err("constraint flags not specified in hexadecimal ("+parts[i]+")")+BREAK
 			else
-				bFlags=sscanf(parts[i].toLowerCase(), "%x")
+				bFlags=parseInt(parts[i].toLowerCase(), 16)
 		}
 		constraintFlags.push(bFlags)
 		i++

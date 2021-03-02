@@ -13,7 +13,7 @@ function decodeMPEGH(val) {
 		return err("MPEG-H audio requires 2 parts")+BREAK
 
     let res=""
-    let level=sscanf(parts[1], "%x")
+    let level=parseInt(parts[1], 16)
 
     switch (level[0]) {
         case 0x0b: res+="LC Profile Level 1"; break
