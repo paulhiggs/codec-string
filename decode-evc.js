@@ -95,7 +95,7 @@ function ISOIEC23091_2_MatrixCoefficients(value) {
                     "Rec. ITU-R BT.1700-0 NTSC", "Society of Motion Picture and Television Engineers ST 170 (2004)"]
         case  7: return ["Society of Motion Picture and Television Engineers ST 240 (1999)"]
         case  8: return [title("YCgCo")]
-        case  9: return ["Rec. ITU-R BT.2020-2 (non-constant luminance)", "Rec. ITU-R BT.2100-2 Y′CbCr"]
+        case  9: return ["Rec. ITU-R BT.2020-2 (non-constant luminance)", "Rec. ITU-R BT.2100-2 Y'CbCr"]
         case 10: return ["Rec. ITU-R BT.2020-2 (constant luminance)"]
         case 11: return ["Society of Motion Picture and Television Engineers ST 2085 (2015)"]
         case 12: return ["Chromaticity-derived non-constant luminance system"]
@@ -158,6 +158,9 @@ function ISOIEC23091_2_VideoFramePackingType(value) {
 
 function decodeEVC(val) {
 
+    const BASELINE_PROFILE=0, MAIN_PROFILE=1, BASELINE_STILL_PROFILE=2, MAIN_STILL_PROFILE=3
+    const ProfileNames=["Baseline profile", "Main profile", "Baseline Still Picture profile","Main Still Picture profile"]
+
     function printBitDepth(args) {
         let luma=Math.floor(args.value/10), chroma=args.value%10
         return cell(args.value)+cell("luma="+(luma+8)+"bit, chroma="+(chroma+8)+"bit")
@@ -181,11 +184,13 @@ function decodeEVC(val) {
         // accprding to Annex A.3 of ISO/IEC 23094-1 (FDIS is w19229)
         let res=""
         switch (args.value) {
-            case 0: res="Baseline profile"; break
-            case 1: res="Main profile"; break
-            case 2: res="Baseline Still Picture profile"; break
-            case 3: res="Main Still Picture profile"; break
-            default: res=err('invalid'); break
+            case BASELINE_PROFILE: 
+            case MAIN_PROFILE: 
+            case BASELINE_STILL_PROFILE: 
+            case MAIN_STILL_PROFILE: 
+                res+=ProfileNames[args.value]
+                break
+            default: res+=err('invalid'); break
         }
         return cell(args.value)+cell(res)
     }
@@ -235,14 +240,48 @@ function decodeEVC(val) {
         return describe(args.value, ISOIEC23091_2_SampleAspectRatio)
     }
 
-
-    function printHex3(args) {
-        let enc=args.value.toString(16)
+    function printHex3(value) {
+        let enc=value.toString(16)
         while (enc.length<6) enc="0"+enc
-        return cell("0x"+enc)+cell("")
+        return "0x"+enc
     }
     
-    function SetKeyValue(values, key, value, expression) {
+    function evaluate(tool, highBit, lowBit, profile_idc ) {
+        if (profile_idc==BASELINE_PROFILE && (highBit | lowBit) )
+            return err(" --> must be 0 for "+ProfileNames[BASELINE_PROFILE])
+        return ""
+    }
+
+    function analyseToolset(toolset_idc_h, toolset_idc_l, profile_idc) {
+        let res=""
+        toolset.forEach(t => {
+            res+=t.tool+" [h:"+(bitSet32(toolset_idc_h, t.bit)?"1":"0")+" l:"+(bitSet32(toolset_idc_l, t.bit)?"1":"0")+"]"
+               +evaluate(t.tool, bitSet32(toolset_idc_h, t.bit), bitSet32(toolset_idc_l, t.bit), profile_idc)
+               +BREAK
+        })
+        return res
+    }
+
+    function printToolset(values) {
+        let res="", h=values.find(v => v.key==KEY_TOOLSET_HIGH), l=values.find(v => v.key==KEY_TOOLSET_LOW)
+        let p=values.find(v => v.key==KEY_PROFILE)
+        if (!h || !l || !p) return "<tr>"+cell(error("cant decode toolset"))+"</tr>"
+
+        res+="<tr>"+cell(h.key)+cell(h.label)+cell(printHex3(h.value))
+           +cell(analyseToolset(h.value, l.value, p.value), 1, 2)
+           +cell(h.default?"(default)":"")
+           +"</tr>"
+
+        res+="<tr>"+cell(h.key)+cell(l.label)+cell(printHex3(l.value))
+           +cell(l.default?"(default)":"")
+           +"</tr>"
+        return res
+    }
+
+
+
+
+    function SetKeyValue(values, key, value, expression, hexadecimal=false) {
         if (!expression.test(value)) 
             return err('invalid value for key='+key)+BREAK
 
@@ -251,7 +290,7 @@ function decodeEVC(val) {
             if (!t.default) {
                 return err('key '+key+' can only be provied once')
             } else {
-                t.value=sscanf(value, "%d")[0]
+                t.value=parseInt(value, hexadecimal?16:10)
                 t.default=false
             }
         }
@@ -265,11 +304,36 @@ function decodeEVC(val) {
     const KEY_XFER_CHAR='vtrc', KEY_MATRIX_COEFF='vmac', KEY_FULL_RANGE='vfrf'
     const KEY_FRAME_PACK='vfpq', KEY_INTERPRETATION='vpci', KEY_SAR='vsar'
 
+
+    let toolset=[
+        {bit:0, tool:"sps_btt_flag"},
+        {bit:1, tool:"sps_suco_flag"},
+        {bit:2, tool:"sps_amvr_flag"},
+        {bit:3, tool:"sps_mmvd_flag"},
+        {bit:4, tool:"sps_affine_flag"},
+        {bit:5, tool:"sps_dmvr_flag"},
+        {bit:6, tool:"sps_alf_flag"},
+        {bit:7, tool:"sps_admvp_flag"},
+        {bit:8, tool:"sps_eipd_flag"},
+        {bit:9, tool:"sps_adcc_flag"},
+        {bit:10, tool:"sps_ibc_flag"},
+        {bit:11, tool:"sps_iqt_flag"},
+        {bit:12, tool:"sps_htdf_flag"},
+        {bit:13, tool:"sps_addb_flag"},
+        {bit:14, tool:"sps_cm_init_flag"},
+        {bit:15, tool:"sps_ats_flag"},
+        {bit:16, tool:"sps_rpl_flag"},
+        {bit:17, tool:"sps_pocs_flag"},
+        {bit:18, tool:"sps_dquant_flag"},
+        {bit:19, tool:"sps_dra_flag"},
+        {bit:20, tool:"sps_hmvp_flag"},
+      ]
+
     let values=[
         {key:KEY_PROFILE, label: 'Profile', value:1, default:true, printFn:printProfile},
         {key:KEY_LEVEL, label: 'Level', value:51, default:true, printFn:printLevel},
-        {key:KEY_TOOLSET_HIGH, label: 'Toolset High', value:0x1ffff, default:true, printFn:printHex3},
-        {key:KEY_TOOLSET_LOW, label: 'Toolset Low', value:0x000000, default:true, printFn:printHex3},
+        {key:KEY_TOOLSET_HIGH, label: 'Toolset High', value:0x1fffff, default:true, deferredPrint:true},
+        {key:KEY_TOOLSET_LOW, label: 'Toolset Low', value:0x000000, default:true, deferredPrint:true},
         {key:KEY_BIT_DEPTH, label: 'Bit Depth', value:0, default:true, printFn:printBitDepth},
         {key:KEY_CHROMA, label: 'Chroma Subsampling', value:420, default:true, printFn:printChroma},
         {key:KEY_PRIMARIES, label: 'Colour Primaries', value:1, default:true, printFn:printColourPrimaries},
@@ -296,8 +360,12 @@ function decodeEVC(val) {
                 res+=SetKeyValue(values, key, value, LevelRegex)
                 break
             case KEY_TOOLSET_HIGH:
+                const ToolsetHighRegex=/^[a-f\d]{6}$/i
+                res+=SetKeyValue(values, key, value, ToolsetHighRegex, true)
                 break
             case KEY_TOOLSET_LOW:
+                const ToolsetLowRegex=/^[a-f\d]{6}$/i
+                res+=SetKeyValue(values, key, value, ToolsetLowRegex, true)
                 break
             case KEY_BIT_DEPTH:
                 const BitDepthRegex=/^\d\d$/i
@@ -342,15 +410,14 @@ function decodeEVC(val) {
     }
 
     res+="<table>"
-    values.forEach(k=>{
-
-        res+=cell(k.key)+cell(k.label)
-        if (k.printFn) {res+=k.printFn(k) }
-        else {res+=cell(k.value, 2)}   
-        res+=cell(k.default?"(default)":"")
-        res+="</tr>" 
-
+    values.forEach(k => { 
+        if (!k.deferredPrint)
+            res+="<tr>"+cell(k.key)+cell(k.label)
+               +(k.printFn?k.printFn(k):cell(k.value, 2))   
+               +cell(k.default?"(default)":"")
+               +"</tr>" 
     })
+    res+=printToolset(values)
     res+="</table>"
     return res+BREAK
 }
