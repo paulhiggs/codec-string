@@ -80,7 +80,7 @@ var handlers=[]
 function addHandler(FourCC, Label, Handler) {
 	if (!Handler) return
 	
-	if (typeof(FourCC) == "string") 
+	if (typeof(FourCC) == "string" || FourCC instanceof String) 
 		if (!handlers.find(handler => handler.cccc == FourCC.toLowerCase()))
 			handlers.push({cccc: FourCC.toLowerCase(), label: Label, func: Handler})
 		
@@ -90,10 +90,6 @@ function addHandler(FourCC, Label, Handler) {
 				handlers.push({cccc: cc.toLowerCase(), label: Label, func: Handler})
 		})
 }
-
-
-function noHandler(v) {return ""}
-addHandler("ec-3", "Enhanced AC-3", noHandler) 	// Dolby Digital+, E-AC-3
 
 
 function decode(val) {

@@ -26,20 +26,20 @@ function decodeAVC(val) {
 		return err("parameters contains non-hex digits")+BREAK	
 	
 	let prof=sscanf(parts[1], "%2x%2x%2x")	
-	res+="profile_idc="+prof[0]+" constraint_set="+prof[1]+" level_idc="+prof[2]+BREAK
+	res+=`profile_idc=${prof[0]} constraint_set=${prof[1]} level_idc=${prof[2]}${BREAK}`
 	
 	res+="profile="
 	switch (prof[0]) {
 		case 0x2c: res+="CAVLC 4:4:4"; break
-		case 0x42: res+=(AVCconstraint(prof[1], 1)?"Constrained ":"")+"Baseline"; break
-		case 0x4d: res+=(AVCconstraint(prof[1], 1)?"Constrained ":"")+"Main"; break
-		case 0x53: res+="Scalable "+(AVCconstraint(prof[1], 5)?"Constrained ":""+"Base"); break
+		case 0x42: res+=`${AVCconstraint(prof[1], 1)?"Constrained ":""}Baseline`; break
+		case 0x4d: res+=`${AVCconstraint(prof[1], 1)?"Constrained ":""}Main`; break
+		case 0x53: res+=`Scalable ${AVCconstraint(prof[1], 5)?"Constrained ":""}Base`; break
 		case 0x56: res+="Scalable "
 			if (!AVCconstraint(prof[1], 3) && AVCconstraint(prof[1], 5)) res+="Constrained "
 			if (AVCconstraint(prof[1], 3) && !AVCconstraint(prof[1], 5)) res+="Intra "
 			res+="High"; break
 		case 0x58: res+="Extended"; break
-		case 0x63: res+="High 10"+(AVCconstraint(prof[1], 3)?" Intra":""); break
+		case 0x63: res+=`High 10${AVCconstraint(prof[1], 3)?" Intra":""}`; break
 		case 0x64: 
 			if (AVCconstraint(prof[1], 4) && !AVCconstraint(prof[1], 5))
 				res+="Progressive "
@@ -47,17 +47,17 @@ function decodeAVC(val) {
 				res+="Constrained "	
 			res+="High"; break
 		case 0x76: res+="Multiview High"; break
-		case 0x7a: res+="High 4:2:2"+(AVCconstraint(prof[1], 3)?" Intra":""); break
+		case 0x7a: res+=`High 4:2:2${AVCconstraint(prof[1], 3)?" Intra":""}`; break
 		case 0x80: res+="Stereo High"; break
 		case 0x86: res+="MFC High"; break
 		case 0x87: res+="MFC Depth High"; break
 		case 0x8a: res+="Multiview Depth High High"; break
 		case 0x8b: res+="Enhanced Multiview Depth High High"; break
-		case 0xf4: res+="High 4:4:4 "+(AVCconstraint(prof[1], 3)?" Intra":" Predictive"); break
+		case 0xf4: res+=`High 4:4:4${AVCconstraint(prof[1], 3)?" Intra":" Predictive"}`; break
 		default:
 			res+=err("unknown")					
 	}
-	res+=" ("+prof[0].toString(16)+")"+BREAK
+	res+=` (${prof[0].toString(16)})${BREAK}`
 	
 	res+="constraints="
 	for (var i=0; i<=5; i++)
@@ -87,7 +87,7 @@ function decodeAVC(val) {
 		case 0x3f: res+="6.2"; break
 		default: res+=err("undefined");
 	}
-	res+=" ("+prof[2].toString(16)+")"+BREAK
+	res+=` (${prof[2].toString(16)})${BREAK}`
 
 	return res;
 }
