@@ -64,8 +64,8 @@ function decodeVP9(val) {
 
     function printProfile(args) {
         if (args.value<PROFILE_0 || args.value>PROFILE_3)
-            return cell(err("invalid profile ("+args.value+")"),2)
-        return cell(args.value)+cell("Profile "+args.value)
+            return cell(err(`invalid profile (${args.value})`),2)
+        return cell(args.value)+cell(`Profile ${args.value}`)
     }
     function printLevel(args) {
         let lev=null, res=""
@@ -83,15 +83,15 @@ function decodeVP9(val) {
             case 60: lev="6"; break
             case 61: lev="6.1"; break
             case 62: lev="6.2"; break
-            default: res+=cell(err("unknown Level ("+args.value+")"),2)
+            default: res+=cell(err(`unknown Level (${args.value})`),2)
         }
-        if (lev) res+=cell(args.value)+cell("Level "+lev)
+        if (lev) res+=cell(args.value)+cell(`Level ${lev}`)
         return res        
     }
     function printColourBits(args) {
         let res="", bitDepth=args.value, profile=ProfileValue(fields)
         if (bitDepth!=8 && bitDepth!=10 && bitDepth!=12)
-            return cell(err("invalid Colour Bit Depth ("+args.value+")"),2)
+            return cell(err(`invalid Colour Bit Depth (${args.value})`),2)
 
         res+=cell(args.value)
         if (bitDepth==BITS8 && (profile==PROFILE_2 || profile==PROFILE_3))  
@@ -117,12 +117,12 @@ function decodeVP9(val) {
                 ev="4:2:0 chroma sampling is not permitted with Profile 1 and 3"
             else if (matrix==0 && chroma!=CHROMA444)
                 ev="4:4:4 chroma sampling is required matricCoefficients=0 (RGB)"
-            res+=cell(chroma)+cell(sample+(ev?(" "+warn("note! "+ev)):""))
+            res+=cell(chroma)+cell(sample+(ev?(" "+warn(`note! ${ev}`)):""))
         }
         else {
             if (chroma>=4 && chroma<=7)
                 res+=cell(chroma)+cell(warn("Reserved"))
-            else res+=cell(err("invalid value for chroma subsampling ("+chroma+")"), 2)
+            else res+=cell(err(`invalid value for chroma subsampling (${chroma})`), 2)
         }
     }
     function printColourPrimaries(args) {
@@ -132,7 +132,7 @@ function decodeVP9(val) {
             case 1: desc="ITU-R BT.709"; break
             case 9: desc="ITU-R BT.2020 primaries"; break
 
-            default: res+=cell(err("invalid value for colour primaries ("+primaries+")"), 2)
+            default: res+=cell(err(`invalid value for colour primaries (${primaries})`), 2)
         }
         if (desc)
             res+=cell(primaries)+cell(desc)
@@ -146,7 +146,7 @@ function decodeVP9(val) {
             case 1: desc="ITU-R BT.709"; break
             case 16: desc="ST 2084 EOTF"; break
 
-            default: res+=cell(err("invalid value for transfer characteristics ("+transferC+")"), 2)
+            default: res+=cell(err(`invalid value for transfer characteristics (${transferC})`), 2)
         }  
         if (desc)
             res+=cell(transferC)+cell(desc)     
@@ -160,7 +160,7 @@ function decodeVP9(val) {
             case 1: desc="ITU-R BT.709"; break
             case 9: desc="ITU-R BT.2020 non-constant luminance color matrix"; break
 
-            default: res+=cell(err("invalid value formatrix coefficients ("+matrix+")"), 2)
+            default: res+=cell(err(`invalid value formatrix coefficients (${matrix})`), 2)
         }    
         if (desc)
             res+=cell(matrix)+cell(desc)
@@ -174,7 +174,7 @@ function decodeVP9(val) {
             case 0: desc="legal range"; break
             case 1: desc="full-range chroma/luma encoding"; break
 
-            default: res+=cell(err("invalid value full range flag("+flag+")"), 2)
+            default: res+=cell(err(`invalid value full range flag(${flag})`), 2)
         }
         if (desc)
             res+=cell(flag)+cell(desc)

@@ -4,7 +4,7 @@
 
 function ISOIEC23091_2_ColourPrimaries(value) {
     if (value > 255)
-        return [err('invalid value ('+value+')')]
+        return [err(`invalid value (${value})`)]
     switch (value) {
         case 1:  return [
                     "Rec. ITU-R BT.709-6",
@@ -41,7 +41,7 @@ function ISOIEC23091_2_ColourPrimaries(value) {
 
 function ISOIEC23091_2_TransferCharacteristics(value) {
     if (value > 255)
-        return [err('invalid value ('+value+')')]
+        return [err(`invalid value (${value})`)]
     switch (value) {
         case  1: return ["Rec. ITU-R BT.709-6", 
                     "Rec. ITU-R BT.1361-0 conventional colour gamut system (historical)"]
@@ -80,7 +80,7 @@ function ISOIEC23091_2_TransferCharacteristics(value) {
 
 function ISOIEC23091_2_MatrixCoefficients(value) {
     if (value > 255)
-        return [err('invalid value ('+value+')')]
+        return [err(`invalid value (${value})`)]
     switch (value) {
         case  0: return [title("Identity"), "The identity matrix.", 
                     "Typically used for GBR (often referred to as RGB); however, may also be used for YZX (often referred to as XYZ);",
@@ -107,7 +107,7 @@ function ISOIEC23091_2_MatrixCoefficients(value) {
 
 function ISOIEC23091_2_PackedContentInterpretationType(value) {
     if (value > 15)
-        return [err('invalid value ('+value+')')]
+        return [err(`invalid value (${value})`)]
     switch (value) {
         case  0: return ["Unspecified relationship between the frame packed constituent frames"]
         case  1: return ["Indicates that the two constituent frames form the left and right views of a stereo view scene, with frame 0 being associated with the left view and frame 1 being associated with the right view"]
@@ -118,7 +118,7 @@ function ISOIEC23091_2_PackedContentInterpretationType(value) {
 
 function ISOIEC23091_2_SampleAspectRatio(value) {
     if (value > 255)
-        return [err('invalid value ('+value+')')]
+        return [err(`invalid value (${value})`)]
     switch (value) {
         case  0: return ["Unspecified"]
         case  1: return ["1:1"]
@@ -163,12 +163,12 @@ function decodeEVC(val) {
 
     function printBitDepth(args) {
         let luma=Math.floor(args.value/10), chroma=args.value%10
-        return cell(args.value)+cell("luma="+(luma+8)+"bit, chroma="+(chroma+8)+"bit")
+        return cell(args.value)+cell(`luma=${luma+8}bit, chroma=${chroma+8}bit`)
     }
 
     function printChroma(args) {
         let J=Math.floor(args.value/100), a=Math.floor((args.value-(J*100))/10), b=args.value%10
-        return cell(args.value)+cell(J+":"+a+":"+b)
+        return cell(args.value)+cell(`{$J}:${a}:${b}`)
     }
 
     function describe(value, infoFunction) {
@@ -226,10 +226,9 @@ function decodeEVC(val) {
     }
     function printFramePackingType(args) {
         if (!args.value)
-            return cell("no frame packing is used",2)
+            return cell("no frame packing is used", 2)
         let qsf=Math.floor(args.value/10), vfpt=args.value%10
-        return cell(args.value)+cell("QuincunxSamplingFlag="+qsf
-                    +", VideoFramePackingType="+ISOIEC23091_2_VideoFramePackingType(vfpt))    
+        return cell(args.value)+cell(`QuincunxSamplingFlag=${qsf}, VideoFramePackingType=${ISOIEC23091_2_VideoFramePackingType(vfpt)}`)    
     }
     function printPackedContentInterpretationType(args) {
         if (!args.value)
@@ -243,19 +242,19 @@ function decodeEVC(val) {
     function printHex3(value) {
         let enc=value.toString(16)
         while (enc.length<6) enc="0"+enc
-        return "0x"+enc
+        return `0x${enc}`
     }
     
     function evaluate(tool, highBit, lowBit, profile_idc ) {
         if (profile_idc==BASELINE_PROFILE && (highBit | lowBit) )
-            return err(" --> must be 0 for "+ProfileNames[BASELINE_PROFILE])
+            return err(` --> must be 0 for ${ProfileNames[BASELINE_PROFILE]}`)
         return ""
     }
 
     function analyseToolset(toolset_idc_h, toolset_idc_l, profile_idc) {
         let res=""
         toolset.forEach(t => {
-            res+=t.tool+" [h:"+(bitSet32(toolset_idc_h, t.bit)?"1":"0")+" l:"+(bitSet32(toolset_idc_l, t.bit)?"1":"0")+"]"
+            res+=t.tool+` [h:${showbit(bitSet32(toolset_idc_h, t.bit))} l:${showbit(bitSet32(toolset_idc_l, t.bit))}]`
                +evaluate(t.tool, bitSet32(toolset_idc_h, t.bit), bitSet32(toolset_idc_l, t.bit), profile_idc)
                +BREAK
         })
@@ -265,7 +264,7 @@ function decodeEVC(val) {
     function printToolset(values) {
         let res="", h=values.find(v => v.key==KEY_TOOLSET_HIGH), l=values.find(v => v.key==KEY_TOOLSET_LOW)
         let p=values.find(v => v.key==KEY_PROFILE)
-        if (!h || !l || !p) return "<tr>"+cell(error("cant decode toolset"))+"</tr>"
+        if (!h || !l || !p) return `<tr>${cell(error('cant decode toolset'))}</tr>`
 
         res+="<tr>"+cell(h.key)+cell(h.label)+cell(printHex3(h.value))
            +cell(analyseToolset(h.value, l.value, p.value), 1, 2)
@@ -283,12 +282,12 @@ function decodeEVC(val) {
 
     function SetKeyValue(values, key, value, expression, hexadecimal=false) {
         if (!expression.test(value)) 
-            return err('invalid value for key='+key)+BREAK
+            return `${err(`invalid value for key=${key}`)}${BREAK}`
 
         let t=values.find(elem=>elem.key==key)
         if (t) {
             if (!t.default) {
-                return err('key '+key+' can only be provied once')
+                return err(`key ${key} can only be provied once`)
             } else {
                 t.value=parseInt(value, hexadecimal?16:10)
                 t.default=false

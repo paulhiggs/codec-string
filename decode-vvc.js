@@ -30,7 +30,7 @@ function decodeVVC(val) {
         switch (tier) {
             case "L": res+="Main Tier (L)"; break
             case "H": res+="High Tier (H)"; break
-            default: res+=err("unknown Tier ("+tier+")"); break
+            default: res+=err(`unknown Tier (${tier})`); break
         }
         res+=BREAK
         let lev=null
@@ -49,9 +49,9 @@ function decodeVVC(val) {
             case 96: lev="6.0"; break
             case 99: lev="6.1"; break
             case 102: lev="6.2"; break
-            default: res+=err("unknown Level ("+op_level_idc+")")
+            default: res+=err(`unknown Level (${op_level_idc})`)
         }
-        if (lev) res+="Level "+lev
+        if (lev) res+=`Level ${lev}`
         return res+=BREAK
     }
 
@@ -145,11 +145,11 @@ function decodeVVC(val) {
             if (constraint.existance) {
                 if (constraintFlags.bitsetB(constraint.bit))
                     gotFlags=true
-                res+=constraint.name+'='+constraintFlags.bitsetB(constraint.bit)+BREAK
+                res+=`${constraint.name}=${constraintFlags.bitsetB(constraint.bit)}${BREAK}`
             } 
             else if (gotFlags) {
                 if (constraint.length) {
-                    res+=constraint.name+'='+constraintFlags.valueB(constraint.bit, constraint.length)+BREAK
+                    res+=`${constraint.name}=${constraintFlags.valueB(constraint.bit, constraint.length)}${BREAK}`
                 }
                 else {
                     if (constraintFlags.bitsetB(constraint.bit))
@@ -171,7 +171,7 @@ function decodeVVC(val) {
 
         for (let i=0; i< subProfiles.length; i++) {
             let p=parseInt(subProfiles[i], 16)
-            res+="Sub profile ("+(i+1)+")="+p+BREAK
+            res+=`Sub profile (${i+1})=${p}${BREAK}`
         }
         return res
     }
@@ -180,9 +180,9 @@ function decodeVVC(val) {
         let res=""
         let layerIndexes=indexes.split("+")
         if (layerIndexes[0])
-            res+="Output Layer Set index (<em>OlsIdx</em>)="+layerIndexes[0]+BREAK
+            res+=`Output Layer Set index (${em('OlsIdx')})=${layerIndexes[0]}${BREAK}`
         if (layerIndexes[1])
-            res+="Maximum Temporal Id (<em>MaxTid</em>)="+layerIndexes[1]+BREAK            
+            res+=`Maximum Temporal Id (${em('MaxTid')})=${layerIndexes[1]}${BREAK}`            
         return res
     }
 

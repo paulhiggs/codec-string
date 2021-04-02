@@ -12,7 +12,7 @@ function decodeAV1(val) {
 		case "0": res+="Main Profile"; break
 		case "1": res+="High Profile"; break
 		case "2": res+="Professional Profile"; break
-		default: res+=err("unknown profile ("+parts[1]+")")
+		default: res+=err(`unknown profile (${parts[1]})`)
 	}
 	res+=BREAK
 	
@@ -44,7 +44,7 @@ function decodeAV1(val) {
 		case 22: res+="7.2"; break
 		case 23: res+="7.3"; break
 		case 31: res+="Max"; break
-		default: res+=err("unknown ("+levelAndTier[0]+")")
+		default: res+=err(`unknown (${levelAndTier[0]})`)
 	}
 	res+=BREAK
 	switch (levelAndTier[1].toUpperCase()) {
@@ -53,14 +53,14 @@ function decodeAV1(val) {
 		case "H":
 			res+="High tier"; break
 		default:
-			res+=err("unknown tier ("+levelAndTier[1]+")")
+			res+=err(`unknown tier (${levelAndTier[1]})`)
 	}	
 	res+=BREAK
 	switch (parts[3]) {
 		case "08": res+="8 bit"; break
 		case "10": res+="10 bit"; break
 		case "12": res+="12 bit"; break
-		default: res+=err("unknown bit depth ("+parts[3]+")")
+		default: res+=err(`unknown bit depth (${parts[3]})`)
 	}
 	
 	return res

@@ -1,13 +1,16 @@
 
 const BREAK="<br>"
-function err(str) { return "<span style=\"color:red\">"+str+"</span>" }
-function warn(str) { return "<span style=\"color:orange\">"+str+"</span>" }
+function err(str) { return `<span style=\"color:red\">${str}</span>` }
+function warn(str) { return `<span style=\"color:orange\">${str}</span>` }
 
-function bold(str) { return "<span style=\"font-weight:bold\">"+str+"</span>" }
-function title(str) { return "<span style=\"font-style:italic\">"+str+"</span>" }
-function unprocessed(str) { return "<span style=\"color:orange\">"+str+"</span>" }
+function em(str) { return `<em>${str}</em>`}
+function bold(str) { return `<span style=\"font-weight:bold\">${str}</span>` }
+function title(str) { return `<span style=\"font-style:italic\">${str}</span>` }
+function unprocessed(str) { return `<span style=\"color:orange\">${str}</span>` }
 
-function cell(str, colspan=1, rowspan=1) { return "<td"+(colspan!=1?(" colspan=\""+colspan+"\""):"")+(rowspan!=1?(" rowspan=\""+rowspan+"\""):"")+">"+str+"</td>" }
+Object.assign(String.prototype, {quote(using='"') {return using+this+using}});
+
+function cell(str, colspan=1, rowspan=1) { return `<td${colspan!=1?` colspan=${colspan.quote()}`:""}${rowspan!=1?` rowspan=${rowspan.quoue()}`:""}>${str}</td>` }
 
 class BitList {
 	bytes=[]
@@ -46,7 +49,7 @@ class BitList {
 		let idx=this.bytes.length-Math.floor((bitNo-1)/8)-1
 		let bit=bitNo%8
 		if (bit==0) bit=8
-		return "<i>"+bitNo+"="+idx+":"+bit+"</i>"+BREAK
+		return `<i>${bitNo}=${idx}:${bit}</i>${BREAK}`
 	}
 
 	toString() {
@@ -69,7 +72,6 @@ function bitSet32(val, bit) {
 
 
 function hexDigits(str) {
-	var i,rc=true;
 	res=str.match(/[\da-fA-F]+/)
 	return res?res==str:false;
 }
@@ -107,7 +109,7 @@ function decode(val) {
 		if (handler)
 			res+=bold(handler.label)+BREAK+handler.func(component)
 		else
-			res+=err("unsupported codec="+codec)
+			res+=err(`unsupported codec=${codec}`)
 		res+=BREAK+BREAK
 	})
 	return res;

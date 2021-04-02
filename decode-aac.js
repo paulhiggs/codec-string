@@ -35,7 +35,7 @@ function decodeAAC(val) {
 	let MP4oti=parseInt(parts[1], 16)
 	switch (MP4oti[0]) {
 		case 0x40: 
-			res+="MPEG-4 AAC (40)"+BREAK; 
+			res+="MPEG-4 AAC (40)"+BREAK
 			if (parts[2]) {
 				let aacMode=parseInt(parts[2])
 				let vals=[ {i:1, s:"Main"},
@@ -71,7 +71,7 @@ function decodeAAC(val) {
 						   {i:36, s:"MPEG-4 ALS"}
 							]		
 				const found=vals.find(elem => aacMode[0]==elem.i)
-				res+=(found)?(found.s+" ("+found.i+")"):err("invalid AAC OTI ("+aacMode[0]+")")
+				res+=(found)?(`${found.s} (${found.i})`):err(`invalid AAC OTI (${aacMode[0]})`)
 				res+=BREAK
 			}			
 			break
@@ -81,7 +81,7 @@ function decodeAAC(val) {
 		case 0x69: res+="MPEG-2 Audio Part 3 (69)"; break
 		case 0x6b: res+="MPEG-1 Part 3 (6B)"; break
 		default:
-			res+=err("invalid MP4 OTI ("+MP4oti.toString(16)+")")
+			res+=err(`invalid MP4 OTI (${MP4oti.toString(16)})`)
 	}
 	res+=BREAK
 	return res

@@ -20,7 +20,7 @@ function decodeAVC(val) {
 		return err("invalid format")+BREAK
 	
 	if (parts[1].length!=6) 
-		return err("invalid parameters length ("+parts[1].length+") - should be 6")+BREAK
+		return err(`invalid parameters length (${parts[1].length}) - should be 6`)+BREAK
 	
 	if (!hexDigits(parts[1])) 
 		return err("parameters contains non-hex digits")+BREAK	
