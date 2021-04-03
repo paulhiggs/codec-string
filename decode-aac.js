@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 /* RFC6381 - https://tools.ietf.org/html/rfc6381
    When the first element of a value is 'mp4a' (indicating some kind of
    MPEG-4 audio), or 'mp4v' (indicating some kind of MPEG-4 part-2
@@ -23,21 +25,21 @@
 
 
 function decodeAAC(val) {
-	var parts=val.split(".")
+	var parts=val.split(".");
 	if (parts.length<2)
-		return err("invalid format")
+		return err("invalid format");
 	if (!hexDigits(parts[1]))
-		return err("OTI must be expressed in hexadecimal")
+		return err("OTI must be expressed in hexadecimal");
 	
 	// https://wiki.whatwg.org/wiki/video_type_parameters#Audio_Codecs_3
 	// https://cconcolato.github.io/media-mime-support/
-	let res=""
-	let MP4oti=parseInt(parts[1], 16)
+	let res="";
+	let MP4oti=parseInt(parts[1], 16);
 	switch (MP4oti[0]) {
 		case 0x40: 
-			res+="MPEG-4 AAC (40)"+BREAK
+			res+="MPEG-4 AAC (40)"+BREAK;
 			if (parts[2]) {
-				let aacMode=parseInt(parts[2])
+				let aacMode=parseInt(parts[2]);
 				let vals=[ {i:1, s:"Main"},
 						   {i:2, s:"Low-Complexity AAC"},
 						   {i:3, s:"SSR AAC"},
@@ -69,22 +71,22 @@ function decodeAAC(val) {
 						   {i:34, s:"MPEG-4 LAYER3"},
 						   {i:35, s:"MPEG-4 DST"},
 						   {i:36, s:"MPEG-4 ALS"}
-							]		
-				const found=vals.find(elem => aacMode[0]==elem.i)
-				res+=(found)?(`${found.s} (${found.i})`):err(`invalid AAC OTI (${aacMode[0]})`)
-				res+=BREAK
-			}			
-			break
-		case 0x66: res+="MPEG-2 AAC Main Profile (66)"; break
-		case 0x67: res+="MPEG-2 AAC Low Complexity Profile (67)"; break
-		case 0x68: res+="MPEG-2 AAC Scalable Sampling Rate Profile (68)"; break
-		case 0x69: res+="MPEG-2 Audio Part 3 (69)"; break
-		case 0x6b: res+="MPEG-1 Part 3 (6B)"; break
+							];	
+				const found=vals.find(elem => aacMode[0]==elem.i);
+				res+=(found)?(`${found.s} (${found.i})`):err(`invalid AAC OTI (${aacMode[0]})`);
+				res+=BREAK;
+			}		
+			break;
+		case 0x66: res+="MPEG-2 AAC Main Profile (66)"; break;
+		case 0x67: res+="MPEG-2 AAC Low Complexity Profile (67)"; break;
+		case 0x68: res+="MPEG-2 AAC Scalable Sampling Rate Profile (68)"; break;
+		case 0x69: res+="MPEG-2 Audio Part 3 (69)"; break;
+		case 0x6b: res+="MPEG-1 Part 3 (6B)"; break;
 		default:
-			res+=err(`invalid MP4 OTI (${MP4oti.toString(16)})`)
+			res+=err(`invalid MP4 OTI (${MP4oti.toString(16)})`);
 	}
-	res+=BREAK
-	return res
+	res+=BREAK;
+	return res;
 }
 
-addHandler("mp4a", "AAC", decodeAAC)
+addHandler("mp4a", "AAC", decodeAAC);
