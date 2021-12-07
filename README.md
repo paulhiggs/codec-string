@@ -11,3 +11,4 @@ supports
 * EVC - refer annex E.9 of ISO/IEC 14496-15:2019 Amd.2 
 * VVC - refer annex E.6 of ISO/IEC 14496-15:2019 Amd.2
 * MPEG-H
+* AVS3
