@@ -10,7 +10,7 @@ function unprocessed(str) { return `<span style=\"color:orange\">${str}</span>`;
 
 Object.assign(String.prototype, {quote(using='"') {return `${using}${this}${using}`;}});
 
-function cell(str, colspan=1, rowspan=1) { return `<td${colspan!=1?` colspan=${colspan.quote()}`:""}${rowspan!=1?` rowspan=${rowspan.quoue()}`:""}>${str}</td>`; }
+function cell(str, colspan=1, rowspan=1) { return `<td${colspan!=1?` colspan=\"${colspan}\"`:""}${rowspan!=1?` rowspan=\"${rowspan}\"`:""}>${str}</td>`; }
 
 class BitList {
 	constructor() {
