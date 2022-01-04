@@ -31,11 +31,10 @@ function decodeAAC(val) {
 	if (!hexDigits(parts[1]))
 		return err("OTI must be expressed in hexadecimal");
 	
-	// https://wiki.whatwg.org/wiki/video_type_parameters#Audio_Codecs_3
 	// https://cconcolato.github.io/media-mime-support/
 	let res="";
 	let MP4oti=parseInt(parts[1], 16);
-	switch (MP4oti[0]) {
+	switch (MP4oti) {
 		case 0x40: 
 			res+="MPEG-4 AAC (40)"+BREAK;
 			if (parts[2]) {
@@ -72,8 +71,8 @@ function decodeAAC(val) {
 						   {i:35, s:"MPEG-4 DST"},
 						   {i:36, s:"MPEG-4 ALS"}
 							];	
-				const found=vals.find(elem => aacMode[0]==elem.i);
-				res+=(found)?(`${found.s} (${found.i})`):err(`invalid AAC OTI (${aacMode[0]})`);
+				const found=vals.find(elem => aacMode==elem.i);
+				res+=(found)?(`${found.s} (${found.i})`):err(`invalid AAC OTI (${aacMode})`);
 				res+=BREAK;
 			}		
 			break;
@@ -83,7 +82,7 @@ function decodeAAC(val) {
 		case 0x69: res+="MPEG-2 Audio Part 3 (69)"; break;
 		case 0x6b: res+="MPEG-1 Part 3 (6B)"; break;
 		default:
-			res+=err(`invalid MP4 OTI (${MP4oti.toString(16)})`);
+			res+=err(`invalid MP4 OTI (${MP4oti})`);
 	}
 	res+=BREAK;
 	return res;
