@@ -2,6 +2,7 @@
 const BREAK="<br>";
 function err(str) { return `<span style=\"color:red\">${str}</span>`; }
 function warn(str) { return `<span style=\"color:orange\">${str}</span>`; }
+function dflt(str) { return `<span style=\"font-style:italic\">${str}</span>`; }
 
 function em(str) { return `<em>${str}</em>`; }
 function bold(str) { return `<span style=\"font-weight:bold\">${str}</span>`; }
