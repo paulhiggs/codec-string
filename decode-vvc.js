@@ -6,7 +6,7 @@
 
 function decodeVVC(val) {
 
-    const VVCregex=/^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-fA-F\d]+)?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/;
+    const VVCregex=/^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-zA-Z2-7]+)?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/;
     const VVCformat="<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}";
 
     function printProfile(profile) {
@@ -128,7 +128,8 @@ function decodeVVC(val) {
     function printConstraints(general_constraint_info) {
         let res="";
         
-        let byteset=general_constraint_info;
+		// general_constraint_info is base32, so convert it to hex
+        let byteset=parseInt(general_constraint_info, 32).toString(16);
         while (byteset.length%2) byteset+='0';
 
         let i=0, constraintFlags=new BitList();
