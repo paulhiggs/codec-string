@@ -32,7 +32,8 @@ function noHandler(v) {return "";}
 addHandler("ec-3", "Enhanced AC-3", noHandler); 	// Dolby Digital+, E-AC-3
 
 addHandler("dtsc", "DTS Core", noHandler); // ETSI TS 102 114 annex H
-addHandler("dtsh", "DTS-HD core+extension", noHandler); // ETSI TS 102 114 annex H
-addHandler("dtse", "DTS-HD LBR", noHandler); // ETSI TS 102 114 annex H
+addHandler("dtsh", "DTS-HD audio", noHandler); // ETSI TS 102 114 annex H
+addHandler("dtsl", "DTS-HD Lossless", noHandler); // ETSI TS 102 114 annex H
+addHandler("dtse", "DTS-HD Low Bit Rare", noHandler); // ETSI TS 102 114 annex H
 addHandler("dtsx", "DTS-UHD Profile 2", noHandler); // ETSI TS 103 491 annex E
 addHandler("dtsy", "DTS-UHD Profile 3", noHandler); // ETSI TS 103 491 annex E
