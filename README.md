@@ -12,3 +12,11 @@ supports
 * VVC - refer annex E.6 of ISO/IEC 14496-15:2019 Amd.2
 * MPEG-H
 * AVS3
+
+### License
+
+This software is distributed under the terms of the Simplified BSD License.
+See the file `LICENSE.txt` for details.
+
+*Copyright (c) 2021-2023, Paul Higgs*<br/>
+*All rights reserved*
