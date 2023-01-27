@@ -1,7 +1,9 @@
 /*jshint esversion: 6 */
 // see https://locutus.io/php/strings/sscanf/
+try {
+   module.exports = exports = sscanf;
+} catch (e) {}
 
-// module.exports = 
 function sscanf (str, format) {
   //  discuss at: https://locutus.io/php/sscanf/
   // original by: Brett Zamir (https://brett-zamir.me)
