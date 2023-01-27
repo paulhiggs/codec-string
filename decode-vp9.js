@@ -116,6 +116,7 @@ function decodeVP9(val) {
 		if (lev) res+=cell(args.value)+cell(`Level ${lev}`);
 		return res;     
 	}
+
 	function printColourBits(args) {
 		let res="", bitDepth=args.value, profile=ProfileValue(fields);
 		if (bitDepth!=8 && bitDepth!=10 && bitDepth!=12)
@@ -129,6 +130,7 @@ function decodeVP9(val) {
 		else res+=cell("");
 		return res;
 	}
+
 	function printChroma(args) {
 		let sample=null, res="", chroma=args.value;
 		switch (chroma) {
@@ -152,7 +154,9 @@ function decodeVP9(val) {
 				res+=cell(chroma)+cell(warn("Reserved"));
 			else res+=cell(err(`invalid value for chroma subsampling (${chroma})`), 2);
 		}
+		return res;
 	}
+
 	function printColourPrimaries(args) {
 		// colourPrimaries is an integer that is defined by the "Colour primaries" section of ISO/IEC 23001-8:2016.
 		let primaries=args.value, res="", desc=null;
@@ -164,22 +168,22 @@ function decodeVP9(val) {
 		}
 		if (desc)
 			res+=cell(primaries)+cell(desc);
-
 		return res;
 	}
+
 	function printTransferCharacteristics(args) {
 		// transferCharacteristics is an integer that is defined by the "Transfer characteristics" section of ISO/IEC 23001-8:2016.
 		let transferC=args.value, res="", desc=null;
 		switch (transferC) {
 			case 1: desc="ITU-R BT.709"; break;
 			case 16: desc="ST 2084 EOTF"; break;
-
 			default: res+=cell(err(`invalid value for transfer characteristics (${transferC})`), 2);
 		}  
 		if (desc)
 			res+=cell(transferC)+cell(desc); 
 		return res;
 	}
+
 	function printMartixCoefficients(args) {
 		// matrixCoefficients is an integer that is defined by the "Matrix coefficients" section of ISO/IEC 23001-8:2016.
 		let matrix=args.value, res="", desc=null;
@@ -187,21 +191,19 @@ function decodeVP9(val) {
 			case 0: desc="RGB"; break;
 			case 1: desc="ITU-R BT.709"; break;
 			case 9: desc="ITU-R BT.2020 non-constant luminance color matrix"; break;
-
 			default: res+=cell(err(`invalid value formatrix coefficients (${matrix})`), 2);
 		}	
 		if (desc)
 			res+=cell(matrix)+cell(desc);
-			
 		return res;
 	}
+
 	function printVideoFullRangeFlag(args) {
 		//  0=legal range, 1=full-range chroma/luma encoding
 		let flag=args.value, res="", desc=null;
 		switch (flag) {
 			case 0: desc="legal range"; break;
 			case 1: desc="full-range chroma/luma encoding"; break;
-
 			default: res+=cell(err(`invalid value full range flag(${flag})`), 2);
 		}
 		if (desc)
