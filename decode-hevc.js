@@ -47,7 +47,7 @@ function decodeHEVC(val) {
 
 	function showbit(v) {return v?"1":"0";}
 
-	var parts=val.split(".");
+	let parts=val.split(".");
 
 	if (parts.length<5) 
 		return err("HEVC codec requires at least 5 parts")+BREAK;
@@ -96,7 +96,7 @@ function decodeHEVC(val) {
 	constraints+=`<i>constraintFlags=${constraintFlags.toString()}</i>${BREAK}`;
 	
 	let general_progressive_source_flag=constraintFlags.bitset(48),
-	    general_interlaced_source_flag=constraintFlags.bitset(47);
+		general_interlaced_source_flag=constraintFlags.bitset(47);
 			
 	if (general_progressive_source_flag && !general_interlaced_source_flag)
 		constraints+="scan=progressive";
@@ -112,13 +112,13 @@ function decodeHEVC(val) {
 	constraints+=`general_frame_only_constraint_flag=${showbit(constraintFlags.bitset(45))}${BREAK}`;
 	
 	if (general_profile_idc==4 || bitSet32(general_profile_compatibility_flag, 4) ||
-	    general_profile_idc==5 || bitSet32(general_profile_compatibility_flag, 5) ||
-	    general_profile_idc==6 || bitSet32(general_profile_compatibility_flag, 6) ||
-	    general_profile_idc==7 || bitSet32(general_profile_compatibility_flag, 7) ||
-	    general_profile_idc==8 || bitSet32(general_profile_compatibility_flag, 8) ||
-	    general_profile_idc==9 || bitSet32(general_profile_compatibility_flag, 9) ||
-	    general_profile_idc==10 || bitSet32(general_profile_compatibility_flag, 10) ||
-	    general_profile_idc==11 || bitSet32(general_profile_compatibility_flag, 11) ) {
+		general_profile_idc==5 || bitSet32(general_profile_compatibility_flag, 5) ||
+		general_profile_idc==6 || bitSet32(general_profile_compatibility_flag, 6) ||
+		general_profile_idc==7 || bitSet32(general_profile_compatibility_flag, 7) ||
+		general_profile_idc==8 || bitSet32(general_profile_compatibility_flag, 8) ||
+		general_profile_idc==9 || bitSet32(general_profile_compatibility_flag, 9) ||
+		general_profile_idc==10 || bitSet32(general_profile_compatibility_flag, 10) ||
+		general_profile_idc==11 || bitSet32(general_profile_compatibility_flag, 11) ) {
 			
 		constraints+=`general_max_12bit_constraint_flag=${showbit(constraintFlags.bitset(44))}${BREAK}`;
 		constraints+=`general_max_10bit_constraint_flag=${showbit(constraintFlags.bitset(43))}${BREAK}`;

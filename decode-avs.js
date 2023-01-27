@@ -81,7 +81,7 @@ function decodeAVS3(val) {
 	let profile_id=parseInt(parts[1], 16), level_id=parseInt(parts[2], 16);
 	let res="";
 
-	let prof="";
+	let prof=null;
 	switch (profile_id) {
 		case avs3.profileMain8: prof="Main 8-bit profile"; break;
 		case avs3.profileMain10: prof="Main 10-bit profile"; break;
@@ -92,7 +92,7 @@ function decodeAVS3(val) {
 	if (prof) res+=prof;
 	res+=BREAK;
 
-	let lev="";
+	let lev=null;
 	switch (level_id) {
 		case 0x00: res+=warn('forbidden'); break;
 		case avs3.level2_0_15: lev="2.0.15"; break;

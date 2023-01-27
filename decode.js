@@ -7,10 +7,10 @@
  * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
+ *	this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ *	notice, this list of conditions and the following disclaimer in the
+ *	documentation and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -45,7 +45,7 @@ class BitList {
 	constructor() {
 		this.bytes=[];
 	}
-	
+
 	push(b) {this.bytes.push(b & 0xFF);}
 	
 	bitset(bitNo) {
@@ -95,26 +95,26 @@ class BitList {
 
 
 function bitSet32(val, bit) {
-    // bit  3          2         1
-	//      10987654321098765432109876543210	
+	// bit  3		  2		 1
+	//	  10987654321098765432109876543210	
 	if (bit <0 || bit >31) return false;
 	return (val & Math.pow(2, bit));
 }
 
 
 function hexDigits(str) {
-	res=str.match(/[\da-fA-F]+/);
+	let res=str.match(/[\da-fA-F]+/);
 	return res?res==str:false;
 }
 
 var handlers=[];
 function addHandler(FourCC, Label, Handler) {
 	if (!Handler) return;
-	
+
 	if (typeof(FourCC) == "string" || FourCC instanceof String) 
 		if (!handlers.find(handler => handler.cccc == FourCC.toLowerCase()))
 			handlers.push({cccc: FourCC.toLowerCase(), label: Label, func: Handler});
-		
+
 	if (Array.isArray(FourCC))
 		FourCC.forEach(cc =>{
 			if (!handlers.find(handler => handler.cccc == cc.toLowerCase()))
@@ -124,11 +124,8 @@ function addHandler(FourCC, Label, Handler) {
 
 
 function decode(val) {
-	
-	var res="";
-	
-	var codecs=val.split(",");
-	
+	let res="", codecs=val.split(",");
+
 	codecs.forEach(component => {
 		component=component.replace(/\s/gm,'');
 		var codec=(component.indexOf(".") == -1)?component:component.substr(0, component.indexOf("."));

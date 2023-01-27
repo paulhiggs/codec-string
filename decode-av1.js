@@ -34,12 +34,12 @@ function decodeAV1(val) {
 		<sample entry 4CC>.<profile>.<level><tier>.<bitDepth>.<monochrome>.<chromaSubsampling>.
 		<colorPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>
 	 */
-	var parts=val.split(".");
+	let parts=val.split(".");
 	if (parts.length<4)
 		return err("invalid format");
 
 	let res="";
-	
+
 	switch (parts[1]) {
 		case "0": res+="Main Profile"; break;
 		case "1": res+="High Profile"; break;
@@ -47,7 +47,7 @@ function decodeAV1(val) {
 		default: res+=err(`unknown profile (${parts[1]})`);
 	}
 	res+=BREAK;
-	
+
 	let levelAndTier=sscanf(parts[2], "%d%c");
 	res+="Level ";
 	switch (levelAndTier[0]) {
@@ -137,7 +137,6 @@ function decodeAV1(val) {
 					res+=err('third digit must be 0 when first or second digit are not set to 1');
 		}
 	else res+=dflt('110 4:2:0');
-	
 
 	res+=BREAK;
 	if (parts.length>6)

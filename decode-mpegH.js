@@ -34,27 +34,27 @@ function decodeMPEGH(val) {
 
 	const MHAregex = /^(mhm1|mhm2)\.0x[a-fA-F\d]{2}$/;
 
-    var parts=val.split(".");
+	let parts=val.split(".");
 
 	if (parts.length!=2) 
 		return err("MPEG-H audio requires 2 parts")+BREAK;
 
-    let res="";
-    let level=parseInt(parts[1], 16);
+	let res="";
+	let level=parseInt(parts[1], 16);
 
-    switch (level[0]) {
-        case 0x0b: res+="LC Profile Level 1"; break;
-        case 0x0c: res+="LC Profile Level 2"; break;
-        case 0x0d: res+="LC Profile Level 3"; break;
-        case 0x10: res+="BL Profile Level 1"; break;
-        case 0x11: res+="BL Profile Level 2"; break;
-        case 0x12: res+="BL Profile Level 3"; break;
-        default: return err('invalid level')+BREAK;
-    }
-    if (parts[0]=="mhm2")
-        res+=", multi-steam";
+	switch (level[0]) {
+		case 0x0b: res+="LC Profile Level 1"; break;
+		case 0x0c: res+="LC Profile Level 2"; break;
+		case 0x0d: res+="LC Profile Level 3"; break;
+		case 0x10: res+="BL Profile Level 1"; break;
+		case 0x11: res+="BL Profile Level 2"; break;
+		case 0x12: res+="BL Profile Level 3"; break;
+		default: return err('invalid level')+BREAK;
+	}
+	if (parts[0]=="mhm2")
+		res+=", multi-steam";
 
-    return res+BREAK;
+	return res+BREAK;
 }
 
 addHandler(["mhm1", "mhm2"], "MPEG-H Audio", decodeMPEGH);

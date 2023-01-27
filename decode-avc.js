@@ -31,12 +31,11 @@
  * https://blog.pearce.org.nz/2013/11/what-does-h264avc1-codecs-parameters.html
  * https://en.wikipedia.org/wiki/Advanced_Video_Coding
  **/
-//import {sscanf} from "sscanf-func.js"
  
 function decodeAVC(val) {
 
 	// regex from DVB TM-STREAM0087:  /avc[1-4]\.[a-fA-F\d]{6}/
-	
+
 	function AVCconstraint(val, constraint) {
 		// constraint 012345--
 		// bit        76543210	
@@ -44,21 +43,21 @@ function decodeAVC(val) {
 		return (val & Math.pow(2, 7-constraint))?true:false;
 	}
 
-	var parts=val.split(".");
+	let parts=val.split(".");
 	let res="";
 	
 	if (parts.length!=2)
 		return err("invalid format")+BREAK;
-	
+
 	if (parts[1].length!=6) 
 		return err(`invalid parameters length (${parts[1].length}) - should be 6`)+BREAK;
-	
+
 	if (!hexDigits(parts[1])) 
 		return err("parameters contains non-hex digits")+BREAK;	
-	
+
 	let prof=sscanf(parts[1], "%2x%2x%2x");	
 	res+=`profile_idc=${prof[0]} constraint_set=${prof[1]} level_idc=${prof[2]}${BREAK}`;
-	
+
 	res+="profile=";
 	switch (prof[0]) {
 		case 0x2c: res+="CAVLC 4:4:4"; break;
@@ -89,12 +88,12 @@ function decodeAVC(val) {
 			res+=err("unknown")		;			
 	}
 	res+=` (${prof[0].toString(16)})${BREAK}`;
-	
+
 	res+="constraints=";
-	for (var i=0; i<=5; i++)
+	for (let i=0; i<=5; i++)
 		res+=(AVCconstraint(prof[1], i)?i:"-");
 	res+=BREAK;
-	
+
 	res+="level=";
 	switch (prof[2]) {
 		case 0x0a: res+="1"; break;

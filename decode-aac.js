@@ -53,12 +53,12 @@
 
 
 function decodeAAC(val) {
-	var parts=val.split(".");
+	let parts=val.split(".");
 	if (parts.length<2)
 		return err("invalid format");
 	if (!hexDigits(parts[1]))
 		return err("OTI must be expressed in hexadecimal");
-	
+
 	// https://cconcolato.github.io/media-mime-support/
 	let res="";
 	let MP4oti=parseInt(parts[1], 16);
