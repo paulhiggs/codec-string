@@ -32,16 +32,16 @@ function decodeHEVC(val) {
 	// regex from DVB TM-STREAM0087: /(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fa-F\d]{1,8}\.[LH]\d{1,3}/
 	// but needs to include the 6 btyes from the decoder constraint flags
 	
-	const HEVCregex = /^(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){,6}$/;
+	// const HEVCregex = /^(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){1,6}$/;
 
 	function HEVCprofile(general_profile_idc, cap, gopocf) {
-		if (general_profile_idc==1 || bitSet32(cap,1)) return "Main (1)";
-		if (general_profile_idc==2 || bitSet32(cap,2)) return `Main 10 ${gopocf?"Still Picture ":""}(2)`;
-		if (general_profile_idc==3 || bitSet32(cap,3)) return "Main Still Picture (3)";
-		if (general_profile_idc==4 || bitSet32(cap,4)) return "Range Extensions (4)";
-		if (general_profile_idc==5 || bitSet32(cap,5)) return "High Throughput (5)";
-		if (general_profile_idc==9 || bitSet32(cap,9)) return "Screen Content Coding (9)";
-		if (general_profile_idc==11 || bitSet32(cap,11)) return "High Throughput Screen Content Coding (11)";
+		if (general_profile_idc==1 || bitSet32(cap,0)) return "Main (1)";
+		if (general_profile_idc==2 || bitSet32(cap,1)) return `Main 10 ${gopocf?"Still Picture ":""}(2)`;
+		if (general_profile_idc==3 || bitSet32(cap,2)) return "Main Still Picture (3)";
+		if (general_profile_idc==4 || bitSet32(cap,3)) return "Range Extensions (4)";
+		if (general_profile_idc==5 || bitSet32(cap,4)) return "High Throughput (5)";
+		if (general_profile_idc==9 || bitSet32(cap,8)) return "Screen Content Coding (9)";
+		if (general_profile_idc==11 || bitSet32(cap,10)) return "High Throughput Screen Content Coding (11)";
 		return err("unknown");
 	}
 
@@ -77,7 +77,7 @@ function decodeHEVC(val) {
 	// process the constraints as we need to extract the general_one_picture_only_constraint_flag
 
 	let constraintFlags=new BitList();
-	let i=4, constraints="", general_one_picture_only_constraint_flag=0	;
+	let i=4, constraints="", general_one_picture_only_constraint_flag=0;
 	while (i<10) {
 		let bFlags=0;
 		if (parts[i]) {
@@ -111,14 +111,14 @@ function decodeHEVC(val) {
 	constraints+=`general_non_packed_constraint_flag=${showbit(constraintFlags.bitset(46))}${BREAK}`;
 	constraints+=`general_frame_only_constraint_flag=${showbit(constraintFlags.bitset(45))}${BREAK}`;
 	
-	if (general_profile_idc==4 || bitSet32(general_profile_compatibility_flag, 4) ||
-		general_profile_idc==5 || bitSet32(general_profile_compatibility_flag, 5) ||
-		general_profile_idc==6 || bitSet32(general_profile_compatibility_flag, 6) ||
-		general_profile_idc==7 || bitSet32(general_profile_compatibility_flag, 7) ||
-		general_profile_idc==8 || bitSet32(general_profile_compatibility_flag, 8) ||
-		general_profile_idc==9 || bitSet32(general_profile_compatibility_flag, 9) ||
-		general_profile_idc==10 || bitSet32(general_profile_compatibility_flag, 10) ||
-		general_profile_idc==11 || bitSet32(general_profile_compatibility_flag, 11) ) {
+	if (general_profile_idc==4 || bitSet32(general_profile_compatibility_flag, 3) ||
+		general_profile_idc==5 || bitSet32(general_profile_compatibility_flag, 4) ||
+		general_profile_idc==6 || bitSet32(general_profile_compatibility_flag, 5) ||
+		general_profile_idc==7 || bitSet32(general_profile_compatibility_flag, 6) ||
+		general_profile_idc==8 || bitSet32(general_profile_compatibility_flag, 7) ||
+		general_profile_idc==9 || bitSet32(general_profile_compatibility_flag, 8) ||
+		general_profile_idc==10 || bitSet32(general_profile_compatibility_flag, 9) ||
+		general_profile_idc==11 || bitSet32(general_profile_compatibility_flag, 10) ) {
 			
 		constraints+=`general_max_12bit_constraint_flag=${showbit(constraintFlags.bitset(44))}${BREAK}`;
 		constraints+=`general_max_10bit_constraint_flag=${showbit(constraintFlags.bitset(43))}${BREAK}`;
@@ -131,10 +131,10 @@ function decodeHEVC(val) {
 		general_one_picture_only_constraint_flag=constraintFlags.bitset(37);
 		constraints+=`general_lower_bit_rate_constraint_flag=${showbit(constraintFlags.bitset(36))}${BREAK}`;
 		
-		if (general_profile_idc==5 || bitSet32(general_profile_compatibility_flag, 5) ||
-			general_profile_idc==9 || bitSet32(general_profile_compatibility_flag, 9) ||
-			general_profile_idc==10 || bitSet32(general_profile_compatibility_flag, 10) ||
-			general_profile_idc==11 || bitSet32(general_profile_compatibility_flag, 11)) {
+		if (general_profile_idc==5 || bitSet32(general_profile_compatibility_flag, 4) ||
+			general_profile_idc==9 || bitSet32(general_profile_compatibility_flag, 8) ||
+			general_profile_idc==10 || bitSet32(general_profile_compatibility_flag, 9) ||
+			general_profile_idc==11 || bitSet32(general_profile_compatibility_flag, 10)) {
 			
 			constraints+=`general_max_12bit_constraint_flag=${showbit(constraintFlags.bitset(35))}${BREAK}`;
 			// general_reserved_zero_33bits
@@ -143,7 +143,7 @@ function decodeHEVC(val) {
 			// general_reserved_zero_34bits
 		}
 	}
-	else if (general_profile_idc==2 || bitSet32(general_profile_compatibility_flag, 2)) {
+	else if (general_profile_idc==2 || bitSet32(general_profile_compatibility_flag, 1)) {
 	
 		// general_reserved_zero_7bits
 		constraints+=`general_one_picture_only_constraint_flag=${showbit(constraintFlags.bitset(37))}${BREAK}`;
@@ -154,13 +154,13 @@ function decodeHEVC(val) {
 		// general_reserved_zero_43bits
 	}
 	
-	if (general_profile_idc==1 || bitSet32(general_profile_compatibility_flag, 1) ||
-	    general_profile_idc==2 || bitSet32(general_profile_compatibility_flag, 2) ||
-	    general_profile_idc==3 || bitSet32(general_profile_compatibility_flag, 3) ||
-	    general_profile_idc==4 || bitSet32(general_profile_compatibility_flag, 4) ||
-	    general_profile_idc==5 || bitSet32(general_profile_compatibility_flag, 5) ||
-	    general_profile_idc==9 || bitSet32(general_profile_compatibility_flag, 9) ||
-	    general_profile_idc==11 || bitSet32(general_profile_compatibility_flag, 11) ) {
+	if (general_profile_idc==1 || bitSet32(general_profile_compatibility_flag, 0) ||
+	    general_profile_idc==2 || bitSet32(general_profile_compatibility_flag, 1) ||
+	    general_profile_idc==3 || bitSet32(general_profile_compatibility_flag, 2) ||
+	    general_profile_idc==4 || bitSet32(general_profile_compatibility_flag, 3) ||
+	    general_profile_idc==5 || bitSet32(general_profile_compatibility_flag, 4) ||
+	    general_profile_idc==9 || bitSet32(general_profile_compatibility_flag, 8) ||
+	    general_profile_idc==11 || bitSet32(general_profile_compatibility_flag, 10) ) {
 		
 		constraints+=`general_inbld_flag=${showbit(constraintFlags.bitset(1))}${BREAK}`;
 	}
