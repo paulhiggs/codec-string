@@ -95,8 +95,8 @@ class BitList {
 
 
 function bitSet32(val, bit) {
-	// bit  3		  2		 1
-	//	  10987654321098765432109876543210	
+	// bit  3         2         1
+	//     10987654321098765432109876543210
 	if (bit <0 || bit >31) return false;
 	return (val & Math.pow(2, bit));
 }
