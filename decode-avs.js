@@ -86,7 +86,7 @@ function decodeAVS3(val) {
 		case avs3.profileMain8: prof="Main 8-bit profile"; break;
 		case avs3.profileMain10: prof="Main 10-bit profile"; break;
 		case avs3.profileHigh8: prof="High 8-bit profile"; break;
-		case avs3.rofileHigh10: prof="High 10-bit profile"; break;
+		case avs3.profileHigh10: prof="High 10-bit profile"; break;
 		default: res+=err(`invalid profile_id (${parts[1]}) specified`);
 	}
 	if (prof) res+=prof;
@@ -150,4 +150,5 @@ function decodeAVS3(val) {
 	return res+BREAK;
  }
 
- addHandler(["av3e"], "AVS3 Video", decodeAVS3);
+ addHandler(["avs3"], "AVS3 Video", decodeAVS3);
+ addHandler(["lav3"], "AVS3 Library Track", decodeAVS3);
