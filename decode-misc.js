@@ -27,9 +27,11 @@
  */
 
 /*jshint esversion: 6 */
-function noHandler(v) {return "";}
+function noHandler(v) {
+  return "";
+}
 
-addHandler("ec-3", "Enhanced AC-3", noHandler); 	// Dolby Digital+, E-AC-3
+addHandler("ec-3", "Enhanced AC-3", noHandler); // Dolby Digital+, E-AC-3
 
 addHandler("dtsc", "DTS Core", noHandler); // ETSI TS 102 114 annex H
 addHandler("dtsh", "DTS-HD audio", noHandler); // ETSI TS 102 114 annex H
