@@ -13,6 +13,31 @@ supports
 * MPEG-H
 * AVS3
 
+### Installation
+Install [nodejs](https://nodejs.org/en)
+Install required packages:
+
+```sh
+npm ci
+```
+
+Create the `codec-string.min.js` bundle:
+
+```sh
+npm run build
+```
+
+This will produce a `dist` directory with the `codec-string.min.js`
+library and an example application (`app.min.js` and `index.html`).
+
+### Usage
+
+```javascript
+import { decode } from 'codec-string';
+
+console.log(decode('avc1.64002A'));
+```
+
 ### License
 
 This software is distributed under the terms of the Simplified BSD License.
