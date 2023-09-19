@@ -6,7 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const webpackSettings = ({ scriptLoading } ) => ({
   entry : {
-    "codec-string": "./src/decode.js",
+    "codec-string": "./src/index.js",
     app: {
       dependOn: "codec-string",
       "import": "./src/app.js"

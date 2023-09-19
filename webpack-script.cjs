@@ -9,16 +9,17 @@ module.exports = merge(
     scriptLoading: 'blocking'
   }), {
     entry : {
-      "codec-string": "./src/global/codec-string.js",
+      "codec-string": "./src/index.cjs",
       app: {
         dependOn: "codec-string",
         "import": "./src/global/app.js"
       }
     },
     output: {
-      path:  path.resolve(__dirname, 'dist/dflt'),
+      path:  path.resolve(__dirname, 'dist/script'),
       library: {
-        type: "module"
+        name: 'CodecString',
+        type: 'window'
       }
     },
     experiments: {

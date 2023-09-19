@@ -8,14 +8,15 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/esm/app.js",
-      "require": "./dist/cjs/app.js",
-      "default": "./dist/dflt/app.js"
+      "import": "./src/index.js",
+      "require": "./src/index.cjs",
+      "script": "./src/index.cjs"
     },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "webpack --config ./webpack-esm.cjs --mode production && webpack --config ./webpack-cjs.cjs --mode production --no-output-clean && webpack --config ./webpack-dflt.cjs --mode production --no-output-clean",
+    "clean": "rm -rf dist",
+    "build": "webpack --config ./webpack-esm.cjs --mode production && webpack --config ./webpack-cjs.cjs --mode production --no-output-clean && webpack --config ./webpack-script.cjs --mode production --no-output-clean",
     "lint": "eslint 'src/*.js'",
     "start": "webpack serve --config ./webpack-esm.cjs --mode development",
     "test": "echo \"Error: no test specified\" && exit 0"

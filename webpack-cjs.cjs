@@ -11,6 +11,7 @@ module.exports = merge(
     output: {
       path:  path.resolve(__dirname, 'dist/cjs'),
       library: {
+        name: 'codec-string',
         type: 'commonjs'
       }
     }

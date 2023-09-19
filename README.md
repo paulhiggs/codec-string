@@ -33,7 +33,7 @@ package:
 
 * ESM module (in the `dist/esm` directory)
 * CommonJS module (in the `dist/cjs` directory)
-* Legacy global namespace (in the `dist/dflt` directory)
+* Legacy global namespace (in the `dist/script` directory)
 
 Each directory will contain a `codec-string.js` file containing the
 library and an example application (`app.js` and `index.html`).
@@ -51,7 +51,7 @@ console.log(decode('avc1.64002A'));
 ### CommonJS module
 
 ```javascript
-const { decode } = require('csj/codec-string.js');
+const { decode } = require('cjs/codec-string.js');
 
 console.log(decode('avc1.64002A'));
 ```
@@ -62,11 +62,11 @@ console.log(decode('avc1.64002A'));
 <!doctype html>
 <html>
 <head>
-<script src="dflt/codec-string.js"></script>
+<script src="script/codec-string.js"></script>
 </head>
 <body>
 <script type="application/javascript">
-console.log(window.codecDecode('avc1.64002A'));
+console.log(window.CodecString.decode('avc1.64002A'));
 </script>
 </body>
 </html>
