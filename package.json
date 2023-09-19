@@ -2,13 +2,27 @@
   "name": "codec-string",
   "version": "0.0.1",
   "description": "decode the codec= string in a media mime type",
-  "main": "src/decode.js",
+  "type": "module",
+  "engines": {
+    "node": ">=16"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/esm/app.js",
+      "require": "./dist/cjs/app.js",
+      "default": "./dist/dflt/app.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "webpack --config ./webpack.config.js --mode production",
+    "build": "webpack --config ./webpack-esm.cjs --mode production && webpack --config ./webpack-cjs.cjs --mode production --no-output-clean && webpack --config ./webpack-dflt.cjs --mode production --no-output-clean",
     "lint": "eslint 'src/*.js'",
-    "start": "webpack serve --config ./webpack.config.js --mode development",
+    "start": "webpack serve --config ./webpack-esm.cjs --mode development",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
+  "sideEffects": [
+    "./src/decode.js"
+  ],
   "keywords": [],
   "author": "paul_higgs@hotmail.com",
   "license": "BSD",
@@ -18,7 +32,8 @@
     "clean-webpack-plugin": "^4.0.0",
     "eslint-plugin-import-quotes": "^0.0.1",
     "eslint-webpack-plugin": "^4.0.1",
-    "html-webpack-plugin": "^5.5.3"
+    "html-webpack-plugin": "^5.5.3",
+    "webpack-merge": "^5.9.0"
   },
   "devDependencies": {
     "webpack-cli": "^5.1.4",

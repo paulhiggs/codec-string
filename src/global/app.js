@@ -1,15 +1,13 @@
 
-import { BREAK } from './markup.js';
-import { decode } from './decode.js';
-
-function checkCodec() {
-  const val = document.getElementById("param").value;
-  const res = decode(val);
-  document.getElementById("results").innerHTML="<hr><h2>Results</h2>"+BREAK+res;
-}
-
 (function() {
-  let done = false;
+  var done = false;
+
+  function checkCodec() {
+    var val = document.getElementById("param").value;
+    var res = window.codecDecode(val);
+    document.getElementById("results").innerHTML = "<hr><h2>Results</h2><br>" + res;
+  }
+
   function addClickListener() {
     if (!done && document.readyState !== 'loading') {
       done = true;

@@ -32,9 +32,9 @@
  * https://en.wikipedia.org/wiki/Advanced_Video_Coding
  **/
 
-import { BREAK, err } from './markup';
-import { hexDigits } from './hexDigits';
-import { sscanf } from './sscanf-func';
+import { BREAK, err } from './markup.js';
+import { hexDigits } from './hexDigits.js';
+import { sscanf } from './sscanf-func.js';
 
 export function decodeAVC(val) {
   // regex from DVB TM-STREAM0087:  /avc[1-4]\.[a-fA-F\d]{6}/

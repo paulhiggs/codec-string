@@ -26,7 +26,7 @@
  *
  */
 
-import { BREAK } from './markup';
+import { BREAK } from './markup.js';
 
 export class BitList {
   constructor() {

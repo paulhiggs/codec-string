@@ -26,10 +26,10 @@
  *
  */
 
-import { BitList, bitSet32 } from './bits';
-import { hexDigits } from './hexDigits';
-import { sscanf } from './sscanf-func';
-import { BREAK, err } from './markup';
+import { BitList, bitSet32 } from './bits.js';
+import { hexDigits } from './hexDigits.js';
+import { sscanf } from './sscanf-func.js';
+import { BREAK, err } from './markup.js';
 
 /*jshint esversion: 6 */
 export function decodeHEVC(val) {

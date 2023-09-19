@@ -30,8 +30,8 @@
 // see annex E.9 of  ISO/IEC 14496-15:2019 Amd.2 "Carriage of VVC and EVC in ISOBMFF" (w19454)
 // and ISO/IEC 23091-2 (MDS19669_WG05_N00011)
 
-import { bitSet32 } from './bits';
-import { BREAK, cell, err, title, warn } from './markup';
+import { bitSet32 } from './bits.js';
+import { BREAK, cell, err, title, warn } from './markup.js';
 
 function ISOIEC23091_2_ColourPrimaries(value) {
   if (value > 255) return [err(`invalid value (${value})`)];

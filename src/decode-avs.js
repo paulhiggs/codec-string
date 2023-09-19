@@ -28,8 +28,8 @@
 
 /*jshint esversion: 6 */
 
-import { BREAK, err, warn } from './markup';
-import { hexDigits } from './hexDigits';
+import { BREAK, err, warn } from './markup.js';
+import { hexDigits } from './hexDigits.js';
 
 const avs3 = {
   profileMain8: 0x20,

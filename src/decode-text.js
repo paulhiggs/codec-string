@@ -26,7 +26,7 @@
  *
  */
 
-import { err, warn } from './markup';
+import { err, warn } from './markup.js';
 
 export function decodeSTPP(val) {
   const parts = val.split(".");

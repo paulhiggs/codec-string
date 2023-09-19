@@ -26,8 +26,8 @@
  *
  */
 
-import { BREAK, err, bold } from './markup';
-import { findHandler } from './handler';
+import { BREAK, err, bold } from './markup.js';
+import { findHandler } from './handler.js';
 
 export function decode(val) {
   const codecs = val.split(",");

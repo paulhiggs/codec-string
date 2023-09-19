@@ -51,8 +51,8 @@
    [MP41] - "Information technology--Coding of audio-visual objects -- Part 1: Systems", ISO/IEC 14496-1:2010.
   */
 
-import { BREAK, err } from './markup';
-import { hexDigits } from './hexDigits';
+import { BREAK, err } from './markup.js';
+import { hexDigits } from './hexDigits.js';
 
 export function decodeAAC(val) {
   const parts = val.split(".");

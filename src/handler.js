@@ -1,15 +1,15 @@
-import { registerAAC } from './decode-aac';
-import { registerAC4 } from './decode-ac4';
-import { registerAV1 } from './decode-av1';
-import { registerAVC } from './decode-avc';
-import { registerAVS3 } from './decode-avs';
-import { registerEVC } from './decode-evc';
-import { registerHEVC } from './decode-hevc';
-import { registerMisc } from './decode-misc';
-import { registerMPEGH } from './decode-mpegH';
-import { registerText } from './decode-text';
-import { registerVP9 } from './decode-vp9';
-import { registerVVC } from './decode-vvc';
+import { registerAAC } from './decode-aac.js';
+import { registerAC4 } from './decode-ac4.js';
+import { registerAV1 } from './decode-av1.js';
+import { registerAVC } from './decode-avc.js';
+import { registerAVS3 } from './decode-avs.js';
+import { registerEVC } from './decode-evc.js';
+import { registerHEVC } from './decode-hevc.js';
+import { registerMisc } from './decode-misc.js';
+import { registerMPEGH } from './decode-mpegH.js';
+import { registerText } from './decode-text.js';
+import { registerVP9 } from './decode-vp9.js';
+import { registerVVC } from './decode-vvc.js';
 
 const handlers = [];
 

@@ -25,8 +25,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-import { BREAK, dflt, err, warn } from './markup';
-import { sscanf } from './sscanf-func';
+import { BREAK, dflt, err, warn } from './markup.js';
+import { sscanf } from './sscanf-func.js';
 
 /*jshint esversion: 6 */
 export function decodeAV1(val) {

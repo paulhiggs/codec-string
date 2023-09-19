@@ -30,7 +30,7 @@
 // see ISO/IEC 23000-19:2019 Amd.2 "CMAF Media Profiles for MPEG-H 3D Audio, EVC, VVC and other technologies"
 // MDS19970_WG03_N00137
 
-import { BREAK, err } from './markup';
+import { BREAK, err } from './markup.js';
 
 export function decodeMPEGH(val) {
   //const MHAregex = /^(mhm1|mhm2)\.0x[a-fA-F\d]{2}$/;

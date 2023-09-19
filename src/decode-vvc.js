@@ -32,8 +32,8 @@
 
 // VVC - ISO/IEC 23090-3  - w19470
 
-import { BitList } from './bits';
-import { BREAK, err, em } from './markup';
+import { BitList } from './bits.js';
+import { BREAK, err, em } from './markup.js';
 
 export function decodeVVC(val) {
   const VVCregex =
