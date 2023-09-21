@@ -172,19 +172,50 @@ let VideoTerms = [
 	{ term: "1.9.13", codec: "avc1", profile: "Stereo*", level: "4.1" },
 	{ term: "1.9.14", codec: "avc1", profile: "Stereo*", level: "4.2" },
 
-	{ term: "2", codec: "" },
+	{ term: "2", codec: "wvc1" },
+
+	{ term: "3", codec: "h262" },
+
+	{ term: "4", codec: "hev1" },
+
+	{ term: "5", codec: "avs3" },
+	{ term: "5.1", codec: "avs3", profile: "High 10*" },
+	{ term: "5.1.1", codec: "avs3", profile: "High 10*", level: "2.0.15" },
+	{ term: "5.1.2", codec: "avs3", profile: "High 10*", level: "2.0.30" },
+	{ term: "5.1.3", codec: "avs3", profile: "High 10*", level: "2.0.60" },
+	{ term: "5.1.4", codec: "avs3", profile: "High 10*", level: "4.0.30" },
+	{ term: "5.1.5", codec: "avs3", profile: "High 10*", level: "4.0.60" },
+	{ term: "5.1.6", codec: "avs3", profile: "High 10*", level: "6.0.30" },
+	{ term: "5.1.7", codec: "avs3", profile: "High 10*", level: "6.4.30" },
+	{ term: "5.1.8", codec: "avs3", profile: "High 10*", level: "6.0.60" },
+	{ term: "5.1.9", codec: "avs3", profile: "High 10*", level: "6.4.60" },
+	{ term: "5.1.10", codec: "avs3", profile: "High 10*", level: "6.0.120" },
+	{ term: "5.1.11", codec: "avs3", profile: "High 10*", level: "6.4.120" },
+	{ term: "5.1.12", codec: "avs3", profile: "High 10*", level: "8.0.30" },
+	{ term: "5.1.13", codec: "avs3", profile: "High 10*", level: "8.4.30" },
+	{ term: "5.1.14", codec: "avs3", profile: "High 10*", level: "8.0.60" },
+	{ term: "5.1.15", codec: "avs3", profile: "High 10*", level: "8.4.60" },
+	{ term: "5.1.16", codec: "avs3", profile: "High 10*", level: "8.0.120" },
+	{ term: "5.1.17", codec: "avs3", profile: "High 10*", level: "8.4.120" },
+	{ term: "5.1.18", codec: "avs3", profile: "High 10*", level: "10.0.30" },
+	{ term: "5.1.19", codec: "avs3", profile: "High 10*", level: "10.4.30" },
+	{ term: "5.1.20", codec: "avs3", profile: "High 10*", level: "10.0.60" },
+	{ term: "5.1.21", codec: "avs3", profile: "High 10*", level: "10.4.60" },
+	{ term: "5.1.22", codec: "avs3", profile: "High 10*", level: "10.0.120" },
+	{ term: "5.1.23", codec: "avs3", profile: "High 10*", level: "10.4.120" },
+
+	{ term: "6", codec: "vvc1" },
 ];
 
 function tableLookup(entry) {
 	let res = true;
 	let ek = Object.keys(entry),
 		tk = Object.keys(this);
-	let match_count = (keys_count = 0);
-
-	//dbg console.log(`ek["profile"]==${ek["profile"]}`);
-	//dbg console.dir(ek);
-	//dbg console.dir(tk);
 	if (ek.length != tk.length) return false;
+
+	let match_count = 0,
+		keys_count = 0;
+
 	ek.forEach((key, index) => {
 		if (key != "term") {
 			keys_count++;
@@ -193,20 +224,17 @@ function tableLookup(entry) {
 				let wc = entry[key].indexOf("*");
 				let ek2 = wc == -1 ? entry[key] : entry[key].substring(0, wc);
 				let tk2 = wc == -1 ? this[key] : this[key].substring(0, wc);
-				//dbg console.log(`${key}: ${ek2} == ${tk2} => ${ek2 == tk2}`);
 				if (ek2 === tk2) match_count++;
 			}
 		}
 	});
 
 	let rc = keys_count != 0 && match_count == keys_count;
-	//dbg console.log(`keys_count=${keys_count} match_count=${match_count} ==> rc=${rc}`);
 	return rc;
 }
 
 function match(cs, terms, params) {
 	let found = terms.find(tableLookup, params);
-	// console.dir(found);
 	return found ? `${cs}:${found.term}` : "";
 }
 
@@ -225,3 +253,5 @@ function DVBclassification(params) {
 //dbg console.log(`1: ${DVBclassification({ type: "video", codec: "avc1", profile: "High", level: "3.2" })}`);
 //dbg console.log(`2: ${DVBclassification({ type: "video", codec: "avc1", profile: "High" })}`);
 //dbg console.log(`3: ${DVBclassification({ type: "video", codec: "avc1", profile: "Scalable Exh", level: "4.1" })}`);
+
+//dbgconsole.log(`4: ${DVBclassification({ type: "video", codec: "avs3", profile: "High 10", level: "2.0.60" })}`);
