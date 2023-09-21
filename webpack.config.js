@@ -4,24 +4,28 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const isProduction = process.env.NODE_ENV == "production";
-
+let old = [
+  "./src/decode-aac.js",
+  "./src/decode-ac4.js",
+  "./src/decode-av1.js",
+  "./src/decode-avc.js",
+  "./src/decode-avs.js",
+  "./src/decode-evc.js",
+  "./src/decode-hevc.js",
+  "./src/decode-misc.js",
+  "./src/decode-mpegH.js",
+  "./src/decode-text.js",
+  "./src/decode-vp9.js",
+  "./src/decode-vvc.js",
+];
 const config = {
-  entry: [
-    "./src/decode.js",
-    "./src/sscanf-func.js",
-    "./src/decode-aac.js",
-    "./src/decode-ac4.js",
-    "./src/decode-av1.js",
-    "./src/decode-avc.js",
-    "./src/decode-avs.js",
-    "./src/decode-evc.js",
-    "./src/decode-hevc.js",
-    "./src/decode-misc.js",
-    "./src/decode-mpegH.js",
-    "./src/decode-text.js",
-    "./src/decode-vp9.js",
-    "./src/decode-vvc.js",
-  ],
+  entry: {
+    home: "./src/decode.js",
+  },
+  sscanf: {
+    home: "./src/sscanf-func.js",
+  },
+
   output: {
     path: path.resolve(__dirname, "dist"),
   },
