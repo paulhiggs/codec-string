@@ -1,7 +1,7 @@
 /**
  * @copyright: Copyright (c) 2021-2023
  * @author: Paul Higgs
- * @file: decode-mpegH.js
+ * @file: decode.js
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,45 +26,39 @@
  *
  */
 
-/*jshint esversion: 6 */
-// see ISO/IEC 23000-19:2019 Amd.2 "CMAF Media Profiles for MPEG-H 3D Audio, EVC, VVC and other technologies"
-// MDS19970_WG03_N00137
+export const BREAK = "<br>";
 
-function decodeMPEGH(val) {
-  const MHAregex = /^(mhm1|mhm2)\.0x[a-fA-F\d]{2}$/;
-
-  let parts = val.split(".");
-
-  if (parts.length != 2) return err("MPEG-H audio requires 2 parts") + BREAK;
-
-  let res = "";
-  let level = parseInt(parts[1], 16);
-
-  switch (level[0]) {
-    case 0x0b:
-      res += "LC Profile Level 1";
-      break;
-    case 0x0c:
-      res += "LC Profile Level 2";
-      break;
-    case 0x0d:
-      res += "LC Profile Level 3";
-      break;
-    case 0x10:
-      res += "BL Profile Level 1";
-      break;
-    case 0x11:
-      res += "BL Profile Level 2";
-      break;
-    case 0x12:
-      res += "BL Profile Level 3";
-      break;
-    default:
-      return err("invalid level") + BREAK;
-  }
-  if (parts[0] == "mhm2") res += ", multi-steam";
-
-  return res + BREAK;
+export function err(str) {
+  return `<span style="color:red">${str}</span>`;
 }
 
-addHandler(["mhm1", "mhm2"], "MPEG-H Audio", decodeMPEGH);
+export function warn(str) {
+  return `<span style="color:orange">${str}</span>`;
+}
+
+export function dflt(str) {
+  return `<span style="font-style:italic">${str}</span>`;
+}
+
+export function em(str) {
+  return `<em>${str}</em>`;
+}
+
+export function bold(str) {
+  return `<span style="font-weight:bold">${str}</span>`;
+}
+
+export function title(str) {
+  return `<span style="font-style:italic">${str}</span>`;
+}
+
+export function unprocessed(str) {
+  return `<span style="color:orange">${str}</span>`;
+}
+
+export function cell(str, colspan = 1, rowspan = 1) {
+  return `<td${colspan != 1 ? ` colspan="${colspan}"` : ""}${
+    rowspan != 1 ? ` rowspan="${rowspan}"` : ""
+  }>${str}</td>`;
+}
+

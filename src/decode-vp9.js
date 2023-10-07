@@ -67,7 +67,9 @@ mutually inclusive (all or none) fields. If not specified then the processing de
 in the table below as defaults when deciding if the device is able to decode and potentially render the video.
 */
 
-function decodeVP9(val) {
+import { BREAK, cell, err, warn } from './markup.js';
+
+export function decodeVP9(val) {
   const VP9regex = /^(vp09)(\.\d\d){3}(\.\d{0,2}){0,5}$/;
   const VP9format =
     "<sample entry 4CC>.<profile>.<level>.<bitDepth>.<chromaSubsampling>.<colourPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>";
@@ -87,7 +89,7 @@ function decodeVP9(val) {
     CHROMA444 = 3,
     CHROMA440 = 100; /* unsure hot 4:4:0 is signalled */
 
-  let fields = [
+  const fields = [
     {
       index: 1,
       name: "profile",
@@ -155,56 +157,56 @@ function decodeVP9(val) {
     let lev = null,
       res = "";
     switch (args.value) {
-      case 10:
-        lev = "1";
-        break;
-      case 20:
-        lev = "2";
-        break;
-      case 21:
-        lev = "2.1";
-        break;
-      case 30:
-        lev = "3";
-        break;
-      case 31:
-        lev = "3.1";
-        break;
-      case 40:
-        lev = "4";
-        break;
-      case 41:
-        lev = "4.1";
-        break;
-      case 50:
-        lev = "5";
-        break;
-      case 51:
-        lev = "5.1";
-        break;
-      case 52:
-        lev = "5.2";
-        break;
-      case 60:
-        lev = "6";
-        break;
-      case 61:
-        lev = "6.1";
-        break;
-      case 62:
-        lev = "6.2";
-        break;
-      default:
-        res += cell(err(`unknown Level (${args.value})`), 2);
+    case 10:
+      lev = "1";
+      break;
+    case 20:
+      lev = "2";
+      break;
+    case 21:
+      lev = "2.1";
+      break;
+    case 30:
+      lev = "3";
+      break;
+    case 31:
+      lev = "3.1";
+      break;
+    case 40:
+      lev = "4";
+      break;
+    case 41:
+      lev = "4.1";
+      break;
+    case 50:
+      lev = "5";
+      break;
+    case 51:
+      lev = "5.1";
+      break;
+    case 52:
+      lev = "5.2";
+      break;
+    case 60:
+      lev = "6";
+      break;
+    case 61:
+      lev = "6.1";
+      break;
+    case 62:
+      lev = "6.2";
+      break;
+    default:
+      res += cell(err(`unknown Level (${args.value})`), 2);
     }
     if (lev) res += cell(args.value) + cell(`Level ${lev}`);
     return res;
   }
 
   function printColourBits(args) {
-    let res = "",
-      bitDepth = args.value,
-      profile = ProfileValue(fields);
+    const bitDepth = args.value;
+    const profile = ProfileValue(fields);
+    let res = "";
     if (bitDepth != 8 && bitDepth != 10 && bitDepth != 12)
       return cell(err(`invalid Colour Bit Depth (${args.value})`), 2);
 
@@ -221,30 +223,29 @@ function decodeVP9(val) {
   }
 
   function printChroma(args) {
-    let sample = null,
-      res = "",
-      chroma = args.value;
+    const chroma = args.value;
+    let sample = null, res = "";
     switch (chroma) {
-      case CHROMA420_vert:
-        sample = "4:2:0 vertical";
-        break;
-      case CHROMA420_luma:
-        sample = "4:2:0 colocated with luma (0,0)";
-        break;
-      case CHROMA422:
-        sample = "4:2:2";
-        break;
-      case CHROMA444:
-        sample = "4:4:4";
-        break;
+    case CHROMA420_vert:
+      sample = "4:2:0 vertical";
+      break;
+    case CHROMA420_luma:
+      sample = "4:2:0 colocated with luma (0,0)";
+      break;
+    case CHROMA422:
+      sample = "4:2:2";
+      break;
+    case CHROMA444:
+      sample = "4:4:4";
+      break;
     }
     if (sample) {
-      let ev = null,
-        profile = ProfileValue(fields),
-        matrix = MatrixCoefficientsValue(fields);
+      const profile = ProfileValue(fields);
+      const matrix = MatrixCoefficientsValue(fields);
+      let ev = null;
       if (
         (profile == PROFILE_0 || profile == PROFILE_2) &&
-        (chroma == CHROMA440 || chroma == CHROMA444 || CHROMA == CHROMA422)
+        (chroma == CHROMA440 || chroma == CHROMA444 || chroma == CHROMA422)
       )
         ev = "Profile 0 and 2 must be 4:2:0";
       else if (
@@ -256,33 +257,30 @@ function decodeVP9(val) {
         ev = "4:4:4 chroma sampling is required matricCoefficients=0 (RGB)";
       res +=
         cell(chroma) + cell(sample + (ev ? " " + warn(`note! ${ev}`) : ""));
-    } else {
-      if (chroma >= 4 && chroma <= 7)
-        res += cell(chroma) + cell(warn("Reserved"));
-      else
-        res += cell(err(`invalid value for chroma subsampling (${chroma})`), 2);
-    }
+    } else if (chroma >= 4 && chroma <= 7)
+      res += cell(chroma) + cell(warn("Reserved"));
+    else
+      res += cell(err(`invalid value for chroma subsampling (${chroma})`), 2);
     return res;
   }
 
   function printColourPrimaries(args) {
     // colourPrimaries is an integer that is defined by the "Colour primaries" section of ISO/IEC 23001-8:2016.
-    let primaries = args.value,
-      res = "",
-      desc = null;
+    const primaries = args.value;
+    let res = "", desc = null;
     switch (primaries) {
-      case 1:
-        desc = "ITU-R BT.709";
-        break;
-      case 9:
-        desc = "ITU-R BT.2020 primaries";
-        break;
+    case 1:
+      desc = "ITU-R BT.709";
+      break;
+    case 9:
+      desc = "ITU-R BT.2020 primaries";
+      break;
 
-      default:
-        res += cell(
-          err(`invalid value for colour primaries (${primaries})`),
-          2
-        );
+    default:
+      res += cell(
+        err(`invalid value for colour primaries (${primaries})`),
+        2
+      );
     }
     if (desc) res += cell(primaries) + cell(desc);
     return res;
@@ -290,21 +288,20 @@ function decodeVP9(val) {
 
   function printTransferCharacteristics(args) {
     // transferCharacteristics is an integer that is defined by the "Transfer characteristics" section of ISO/IEC 23001-8:2016.
-    let transferC = args.value,
-      res = "",
-      desc = null;
+    const transferC = args.value;
+    let res = "", desc = null;
     switch (transferC) {
-      case 1:
-        desc = "ITU-R BT.709";
-        break;
-      case 16:
-        desc = "ST 2084 EOTF";
-        break;
-      default:
-        res += cell(
-          err(`invalid value for transfer characteristics (${transferC})`),
-          2
-        );
+    case 1:
+      desc = "ITU-R BT.709";
+      break;
+    case 16:
+      desc = "ST 2084 EOTF";
+      break;
+    default:
+      res += cell(
+        err(`invalid value for transfer characteristics (${transferC})`),
+        2
+      );
     }
     if (desc) res += cell(transferC) + cell(desc);
     return res;
@@ -312,21 +309,20 @@ function decodeVP9(val) {
 
   function printMartixCoefficients(args) {
     // matrixCoefficients is an integer that is defined by the "Matrix coefficients" section of ISO/IEC 23001-8:2016.
-    let matrix = args.value,
-      res = "",
-      desc = null;
+    const matrix = args.value;
+    let res = "", desc = null;
     switch (matrix) {
-      case 0:
-        desc = "RGB";
-        break;
-      case 1:
-        desc = "ITU-R BT.709";
-        break;
-      case 9:
-        desc = "ITU-R BT.2020 non-constant luminance color matrix";
-        break;
-      default:
-        res += cell(err(`invalid value formatrix coefficients (${matrix})`), 2);
+    case 0:
+      desc = "RGB";
+      break;
+    case 1:
+      desc = "ITU-R BT.709";
+      break;
+    case 9:
+      desc = "ITU-R BT.2020 non-constant luminance color matrix";
+      break;
+    default:
+      res += cell(err(`invalid value formatrix coefficients (${matrix})`), 2);
     }
     if (desc) res += cell(matrix) + cell(desc);
     return res;
@@ -334,29 +330,28 @@ function decodeVP9(val) {
 
   function printVideoFullRangeFlag(args) {
     //  0=legal range, 1=full-range chroma/luma encoding
-    let flag = args.value,
-      res = "",
-      desc = null;
+    const flag = args.value;
+    let res = "", desc = null;
     switch (flag) {
-      case 0:
-        desc = "legal range";
-        break;
-      case 1:
-        desc = "full-range chroma/luma encoding";
-        break;
-      default:
-        res += cell(err(`invalid value full range flag(${flag})`), 2);
+    case 0:
+      desc = "legal range";
+      break;
+    case 1:
+      desc = "full-range chroma/luma encoding";
+      break;
+    default:
+      res += cell(err(`invalid value full range flag(${flag})`), 2);
     }
     if (desc) res += cell(flag) + cell(desc);
     return res;
   }
 
-  let res = "",
-    parts = val.split(".");
+  const parts = val.split(".");
+  let res = "";
   for (let i = 1; i < parts.length; i++)
     if (parts[i] != "") {
       /* jslint -W083 */
-      let t = fields.find((elem) => elem.index == i);
+      const t = fields.find((elem) => elem.index == i);
       /* jslint +W083 */
       if (t) {
         t.value = parseInt(parts[i]);
@@ -378,4 +373,6 @@ function decodeVP9(val) {
   return res;
 }
 
-addHandler("vp09", "VP9", decodeVP9);
+export function registerVP9(addHandler) {
+  addHandler("vp09", "VP9", decodeVP9);
+}
