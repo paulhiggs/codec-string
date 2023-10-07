@@ -1,7 +1,7 @@
 /**
  * @copyright: Copyright (c) 2021-2023
  * @author: Paul Higgs
- * @file: decode-ac4.js
+ * @file: decode-mpegH.js
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -27,54 +27,48 @@
  */
 
 /*jshint esversion: 6 */
-/**
- * ETSI TS 103-190-2 annex E.13 - https://www.etsi.org/deliver/etsi_ts/103100_103199/10319002/01.02.01_60/ts_10319002v010201p.pdf
+// see ISO/IEC 23000-19:2019 Amd.2 "CMAF Media Profiles for MPEG-H 3D Audio, EVC, VVC and other technologies"
+// MDS19970_WG03_N00137
 
- **/
+import { BREAK, err } from './markup.js';
 
-function decodeAC4(val) {
-  let res = "",
-    parts = val.split(".");
+export function decodeMPEGH(val) {
+  //const MHAregex = /^(mhm1|mhm2)\.0x[a-fA-F\d]{2}$/;
 
-  if (parts.length != 4) return err("invalid format") + BREAK;
+  const parts = val.split(".");
 
-  if (!hexDigits(parts[1]) || !hexDigits(parts[2]) || !hexDigits(parts[3]))
-    return err("parameters contain non-hex digits") + BREAK;
+  if (parts.length != 2) return err("MPEG-H audio requires 2 parts") + BREAK;
 
-  res += `bitstream_version: ${parseInt(
-    parts[1],
-    16
-  )}${BREAK}presentation_version: ${parseInt(parts[2], 16)}${BREAK}`;
+  let res = "";
+  const level = parseInt(parts[1], 16);
 
-  res += "maximum channels: ";
-  switch (parseInt(parts[3], 16)) {
-    case 0:
-      res += "2";
-      break;
-    case 1:
-      res += "6";
-      break;
-    case 2:
-      res += "9";
-      break;
-    case 3:
-      res += "11";
-      break;
-    case 4:
-      res += "13";
-      break;
-    case 5:
-    case 6:
-      res += warn("Reserved");
-      break;
-    case 7:
-      res += "Unrestricted";
-      break;
-    default:
-      res += err(`invalid value (${parseInt(parts[3], 16)})`);
+  switch (level[0]) {
+  case 0x0b:
+    res += "LC Profile Level 1";
+    break;
+  case 0x0c:
+    res += "LC Profile Level 2";
+    break;
+  case 0x0d:
+    res += "LC Profile Level 3";
+    break;
+  case 0x10:
+    res += "BL Profile Level 1";
+    break;
+  case 0x11:
+    res += "BL Profile Level 2";
+    break;
+  case 0x12:
+    res += "BL Profile Level 3";
+    break;
+  default:
+    return err("invalid level") + BREAK;
   }
-  res += BREAK;
-  return res;
+  if (parts[0] == "mhm2") res += ", multi-steam";
+
+  return res + BREAK;
 }
 
-addHandler("ac-4", "Digital Audio Compression (AC-4)", decodeAC4);
+export function registerMPEGH(addHandler) {
+  addHandler(["mhm1", "mhm2"], "MPEG-H Audio", decodeMPEGH);
+}

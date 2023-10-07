@@ -1,7 +1,7 @@
 /**
  * @copyright: Copyright (c) 2021-2023
  * @author: Paul Higgs
- * @file: decode-misc.js
+ * @file: decode.js
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,16 +26,23 @@
  *
  */
 
-/*jshint esversion: 6 */
-function noHandler(v) {
-  return "";
+import { BREAK, err, bold } from './markup.js';
+import { findHandler } from './handler.js';
+
+export function decode(val) {
+  const codecs = val.split(",");
+  let res = "";
+
+  codecs.forEach((component) => {
+    component = component.replace(/\s/gm, "");
+    var codec =
+      component.indexOf(".") == -1
+        ? component
+        : component.substr(0, component.indexOf("."));
+    const handler = findHandler(codec);
+    if (handler) res += bold(handler.label) + BREAK + handler.func(component);
+    else res += err(`unsupported codec=${codec}`);
+    res += BREAK + BREAK;
+  });
+  return res;
 }
-
-addHandler("ec-3", "Enhanced AC-3", noHandler); // Dolby Digital+, E-AC-3
-
-addHandler("dtsc", "DTS Core", noHandler); // ETSI TS 102 114 annex H
-addHandler("dtsh", "DTS-HD audio", noHandler); // ETSI TS 102 114 annex H
-addHandler("dtsl", "DTS-HD Lossless", noHandler); // ETSI TS 102 114 annex H
-addHandler("dtse", "DTS-HD Low Bit Rare", noHandler); // ETSI TS 102 114 annex H
-addHandler("dtsx", "DTS-UHD Profile 2", noHandler); // ETSI TS 103 491 annex E
-addHandler("dtsy", "DTS-UHD Profile 3", noHandler); // ETSI TS 103 491 annex E

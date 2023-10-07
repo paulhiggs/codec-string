@@ -51,79 +51,84 @@
    [MP41] - "Information technology--Coding of audio-visual objects -- Part 1: Systems", ISO/IEC 14496-1:2010.
   */
 
-function decodeAAC(val) {
-  let parts = val.split(".");
+import { BREAK, err } from './markup.js';
+import { hexDigits } from './hexDigits.js';
+
+export function decodeAAC(val) {
+  const parts = val.split(".");
   if (parts.length < 2) return err("invalid format");
   if (!hexDigits(parts[1])) return err("OTI must be expressed in hexadecimal");
 
   // https://cconcolato.github.io/media-mime-support/
   let res = "";
-  let MP4oti = parseInt(parts[1], 16);
+  const MP4oti = parseInt(parts[1], 16);
   switch (MP4oti) {
-    case 0x40:
-      res += "MPEG-4 AAC (40)" + BREAK;
-      if (parts[2]) {
-        let aacMode = parseInt(parts[2]);
-        let vals = [
-          { i: 1, s: "Main" },
-          { i: 2, s: "Low-Complexity AAC" },
-          { i: 3, s: "SSR AAC" },
-          { i: 4, s: "LTP AAC" },
-          { i: 5, s: "High-Efficiency (SBR) AAC" },
-          { i: 6, s: "MPEG-4 AAC-Scalable" },
-          { i: 7, s: "MPEG-4 TWIN VQ" },
-          { i: 8, s: "MPEG-4 CELP" },
-          { i: 9, s: "MPEG-4 HVCX" },
-          { i: 12, s: "MPEG-4 TTSI" },
-          { i: 13, s: "MPEG-4 Main Synthetic" },
-          { i: 14, s: "MPEG-4 Wavetable Synthetis" },
-          { i: 15, s: "MPEG-4 General Midi" },
-          { i: 16, s: "MPEG-4 ALGO_SYNTH_AUDIO_FX" },
-          { i: 17, s: "MPEG-4 ER_AAC_LC" },
-          { i: 19, s: "MPEG-4 ER_AAC_LTP" },
-          { i: 20, s: "MPEG-4 ER_AAC_SCALABLE" },
-          { i: 21, s: "MPEG-4 ER_TWINVQ" },
-          { i: 22, s: "MPEG-4 ER_BSAC" },
-          { i: 23, s: "MPEG-4 ER_AAC_LD" },
-          { i: 24, s: "MPEG-4 ER_AAC_LD" },
-          { i: 25, s: "MPEG-4 ER_HVXC" },
-          { i: 26, s: "MPEG-4 ER_HILN" },
-          { i: 27, s: "MPEG-4 ER_PARAMETRIC" },
-          { i: 28, s: "MPEG-4 SSC" },
-          { i: 29, s: "MPEG-4 AAC_PS" },
-          { i: 32, s: "MPEG-4 LAYER1" },
-          { i: 33, s: "MPEG-4 LAYER2" },
-          { i: 34, s: "MPEG-4 LAYER3" },
-          { i: 35, s: "MPEG-4 DST" },
-          { i: 36, s: "MPEG-4 ALS" },
-        ];
-        const found = vals.find((elem) => aacMode == elem.i);
-        res += found
-          ? `${found.s} (${found.i})`
-          : err(`invalid AAC OTI (${aacMode})`);
-        res += BREAK;
-      }
-      break;
-    case 0x66:
-      res += "MPEG-2 AAC Main Profile (66)";
-      break;
-    case 0x67:
-      res += "MPEG-2 AAC Low Complexity Profile (67)";
-      break;
-    case 0x68:
-      res += "MPEG-2 AAC Scalable Sampling Rate Profile (68)";
-      break;
-    case 0x69:
-      res += "MPEG-2 Audio Part 3 (69)";
-      break;
-    case 0x6b:
-      res += "MPEG-1 Part 3 (6B)";
-      break;
-    default:
-      res += err(`invalid MP4 OTI (${MP4oti})`);
+  case 0x40:
+    res += "MPEG-4 AAC (40)" + BREAK;
+    if (parts[2]) {
+      const aacMode = parseInt(parts[2]);
+      const vals = [
+        { i: 1, s: "Main" },
+        { i: 2, s: "Low-Complexity AAC" },
+        { i: 3, s: "SSR AAC" },
+        { i: 4, s: "LTP AAC" },
+        { i: 5, s: "High-Efficiency (SBR) AAC" },
+        { i: 6, s: "MPEG-4 AAC-Scalable" },
+        { i: 7, s: "MPEG-4 TWIN VQ" },
+        { i: 8, s: "MPEG-4 CELP" },
+        { i: 9, s: "MPEG-4 HVCX" },
+        { i: 12, s: "MPEG-4 TTSI" },
+        { i: 13, s: "MPEG-4 Main Synthetic" },
+        { i: 14, s: "MPEG-4 Wavetable Synthetis" },
+        { i: 15, s: "MPEG-4 General Midi" },
+        { i: 16, s: "MPEG-4 ALGO_SYNTH_AUDIO_FX" },
+        { i: 17, s: "MPEG-4 ER_AAC_LC" },
+        { i: 19, s: "MPEG-4 ER_AAC_LTP" },
+        { i: 20, s: "MPEG-4 ER_AAC_SCALABLE" },
+        { i: 21, s: "MPEG-4 ER_TWINVQ" },
+        { i: 22, s: "MPEG-4 ER_BSAC" },
+        { i: 23, s: "MPEG-4 ER_AAC_LD" },
+        { i: 24, s: "MPEG-4 ER_AAC_LD" },
+        { i: 25, s: "MPEG-4 ER_HVXC" },
+        { i: 26, s: "MPEG-4 ER_HILN" },
+        { i: 27, s: "MPEG-4 ER_PARAMETRIC" },
+        { i: 28, s: "MPEG-4 SSC" },
+        { i: 29, s: "MPEG-4 AAC_PS" },
+        { i: 32, s: "MPEG-4 LAYER1" },
+        { i: 33, s: "MPEG-4 LAYER2" },
+        { i: 34, s: "MPEG-4 LAYER3" },
+        { i: 35, s: "MPEG-4 DST" },
+        { i: 36, s: "MPEG-4 ALS" },
+      ];
+      const found = vals.find((elem) => aacMode == elem.i);
+      res += found
+        ? `${found.s} (${found.i})`
+        : err(`invalid AAC OTI (${aacMode})`);
+      res += BREAK;
+    }
+    break;
+  case 0x66:
+    res += "MPEG-2 AAC Main Profile (66)";
+    break;
+  case 0x67:
+    res += "MPEG-2 AAC Low Complexity Profile (67)";
+    break;
+  case 0x68:
+    res += "MPEG-2 AAC Scalable Sampling Rate Profile (68)";
+    break;
+  case 0x69:
+    res += "MPEG-2 Audio Part 3 (69)";
+    break;
+  case 0x6b:
+    res += "MPEG-1 Part 3 (6B)";
+    break;
+  default:
+    res += err(`invalid MP4 OTI (${MP4oti})`);
   }
   res += BREAK;
   return res;
 }
 
-addHandler("mp4a", "AAC", decodeAAC);
+export function registerAAC(addHandler) {
+  addHandler("mp4a", "AAC", decodeAAC);
+}

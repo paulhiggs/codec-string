@@ -1,0 +1,40 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "eslint:recommended"
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "plugins": [
+      "import-quotes"
+    ],
+    "rules": {
+        "indent": [
+            "warn",
+            2
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "import-quotes/import-quotes": [
+          "warn",
+          "single"
+        ],
+        "quotes": "off",
+        "no-lonely-if": "warn",
+        "no-tabs": [
+            "error"
+        ],
+        "prefer-const": "error",
+        "semi": [
+            "warn",
+            "always"
+        ]
+    }
+}

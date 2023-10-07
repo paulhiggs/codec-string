@@ -26,8 +26,13 @@
  *
  */
 
+import { BitList, bitSet32 } from './bits.js';
+import { hexDigits } from './hexDigits.js';
+import { sscanf } from './sscanf-func.js';
+import { BREAK, err } from './markup.js';
+
 /*jshint esversion: 6 */
-function decodeHEVC(val) {
+export function decodeHEVC(val) {
   // regex from DVB TM-STREAM0087: /(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fa-F\d]{1,8}\.[LH]\d{1,3}/
   // but needs to include the 6 btyes from the decoder constraint flags
 
@@ -54,7 +59,7 @@ function decodeHEVC(val) {
     return v ? "1" : "0";
   }
 
-  let parts = val.split(".");
+  const parts = val.split(".");
 
   if (parts.length < 5)
     return err("HEVC codec requires at least 5 parts") + BREAK;
@@ -68,22 +73,22 @@ function decodeHEVC(val) {
         `general_profile_compatibility_flag not expressed in hexadecimal (${parts[2]})`
       ) + BREAK;
 
-  let general_profile_compatibility_flag = parseInt(parts[2], 16);
+  const general_profile_compatibility_flag = parseInt(parts[2], 16);
   let general_profile_idc = -1,
     general_profile_space = -1;
 
   if (parts[1][0] == "A" || parts[1][0] == "B" || parts[1][0] == "C") {
-    let gp = sscanf(parts[1], "%c%d");
+    const gp = sscanf(parts[1], "%c%d");
     switch (gp[0].toUpperCase()) {
-      case "A":
-        general_profile_space = 1;
-        break;
-      case "B":
-        general_profile_space = 2;
-        break;
-      case "C":
-        general_profile_space = 3;
-        break;
+    case "A":
+      general_profile_space = 1;
+      break;
+    case "B":
+      general_profile_space = 2;
+      break;
+    case "C":
+      general_profile_space = 3;
+      break;
     }
     general_profile_idc = gp[1];
   } else {
@@ -93,7 +98,7 @@ function decodeHEVC(val) {
 
   // process the constraints as we need to extract the general_one_picture_only_constraint_flag
 
-  let constraintFlags = new BitList();
+  const constraintFlags = new BitList();
   let i = 4,
     constraints = "",
     general_one_picture_only_constraint_flag = 0;
@@ -114,7 +119,7 @@ function decodeHEVC(val) {
 
   constraints += `<i>constraintFlags=${constraintFlags.toString()}</i>${BREAK}`;
 
-  let general_progressive_source_flag = constraintFlags.bitset(48),
+  const general_progressive_source_flag = constraintFlags.bitset(48),
     general_interlaced_source_flag = constraintFlags.bitset(47);
 
   if (general_progressive_source_flag && !general_interlaced_source_flag)
@@ -245,62 +250,62 @@ function decodeHEVC(val) {
     general_one_picture_only_constraint_flag
   )}${BREAK}`;
 
-  let tier = sscanf(parts[3], "%c%d");
+  const tier = sscanf(parts[3], "%c%d");
   switch (tier[0].toUpperCase()) {
-    case "L":
-      res += "Main Tier (L)";
-      break;
-    case "H":
-      res += "High Tier (H)";
-      break;
-    default:
-      res += err(`unknown Tier (${tier[0]})`);
-      break;
+  case "L":
+    res += "Main Tier (L)";
+    break;
+  case "H":
+    res += "High Tier (H)";
+    break;
+  default:
+    res += err(`unknown Tier (${tier[0]})`);
+    break;
   }
   res += " ";
   let lev = null;
   switch (tier[1]) {
-    case 30:
-      lev = "1";
-      break;
-    case 60:
-      lev = "2";
-      break;
-    case 63:
-      lev = "2.1";
-      break;
-    case 90:
-      lev = "3";
-      break;
-    case 93:
-      lev = "3.1";
-      break;
-    case 120:
-      lev = "4";
-      break;
-    case 123:
-      lev = "4.1";
-      break;
-    case 150:
-      lev = "5";
-      break;
-    case 153:
-      lev = "5.1";
-      break;
-    case 156:
-      lev = "5.2";
-      break;
-    case 180:
-      lev = "6";
-      break;
-    case 183:
-      lev = "6.1";
-      break;
-    case 186:
-      lev = "6.2";
-      break;
-    default:
-      res += err(`unknown Level (${tier[1]})`);
+  case 30:
+    lev = "1";
+    break;
+  case 60:
+    lev = "2";
+    break;
+  case 63:
+    lev = "2.1";
+    break;
+  case 90:
+    lev = "3";
+    break;
+  case 93:
+    lev = "3.1";
+    break;
+  case 120:
+    lev = "4";
+    break;
+  case 123:
+    lev = "4.1";
+    break;
+  case 150:
+    lev = "5";
+    break;
+  case 153:
+    lev = "5.1";
+    break;
+  case 156:
+    lev = "5.2";
+    break;
+  case 180:
+    lev = "6";
+    break;
+  case 183:
+    lev = "6.1";
+    break;
+  case 186:
+    lev = "6.2";
+    break;
+  default:
+    res += err(`unknown Level (${tier[1]})`);
   }
   if (lev) res += `Level ${lev}`;
   res += BREAK;
@@ -308,4 +313,6 @@ function decodeHEVC(val) {
   return res + constraints;
 }
 
-addHandler(["hev1", "hvc1"], "HEVC/H.265", decodeHEVC);
+export function registerHEVC(addHandler) {
+  addHandler(["hev1", "hvc1"], "HEVC/H.265", decodeHEVC);
+}

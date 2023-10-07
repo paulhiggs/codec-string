@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<head>
+<title><%= htmlWebpackPlugin.options.title %></title>
+<%= htmlWebpackPlugin.tags.headTags %>
+</head>
+
+<body>
+<h1><%= htmlWebpackPlugin.options.title %></h1>
+
+<p>Enter string: codecs="<input type="text" id="param"/>"
+<button type="button" id="check-codec">Decode</button>
+</p>
+<div id="results"/>
+<%= htmlWebpackPlugin.tags.bodyTags %>
+</body>
+</html>
