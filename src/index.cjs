@@ -5,6 +5,7 @@ const { decodeAVC } = require('./decode-avc.js');
 const { decodeAVS3 } = require('./decode-avs.js');
 const { decodeEVC } = require('./decode-evc.js');
 const { decodeHEVC } = require('./decode-hevc.js');
+const { decodeMPEG2video, decodeMPEG2audio, decodeMPEG1video, decodeMPEG1audio, decodeMPEG4video } = require('./decode-mpeg.js');
 const { decodeMPEGH } = require('./decode-mpegH.js');
 const { decodeSTPP } = require('./decode-text.js');
 const { decodeVP9 } = require('./decode-vp9.js');
@@ -19,6 +20,7 @@ module.exports = {
   decodeAVS3,
   decodeEVC,
   decodeHEVC,
+  decodeMPEG2video, decodeMPEG2audio, decodeMPEG1video, decodeMPEG1audio, decodeMPEG4video,
   decodeMPEGH,
   decodeSTPP,
   decodeVP9,

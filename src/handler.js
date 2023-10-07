@@ -6,8 +6,10 @@ import { registerAVS3 } from './decode-avs.js';
 import { registerEVC } from './decode-evc.js';
 import { registerHEVC } from './decode-hevc.js';
 import { registerMisc } from './decode-misc.js';
+import { registerMPEG } from './decode-mpeg.js';
 import { registerMPEGH } from './decode-mpegH.js';
 import { registerText } from './decode-text.js';
+import { registerVC1 } from './decode-vc1.js';
 import { registerVP9 } from './decode-vp9.js';
 import { registerVVC } from './decode-vvc.js';
 
@@ -54,8 +56,10 @@ const registerFactories = [
   registerText,
   registerVP9,
   registerVVC,
+  registerMPEG,
+  registerVC1,
 ];
 
-registerFactories.forEach(function(fact) {
+registerFactories.forEach(function (fact) {
   fact(addHandler);
 });

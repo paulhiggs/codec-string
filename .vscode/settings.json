@@ -3,4 +3,5 @@
 	"editor.detectIndentation": false,
 	"editor.renderWhitespace": "all",
 	"editor.insertSpaces": false,
+	"files.eol": "\n",
 }
