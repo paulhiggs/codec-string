@@ -28,8 +28,9 @@
 
 /*jshint esversion: 6 */
 
-import { BREAK, err, warn } from './markup.js';
+import { BREAK, err, warn, bold } from './markup.js';
 import { hexDigits } from './hexDigits.js';
+import DVBclassification from './dvb-mapping.js';
 
 const avs3 = {
 	profileMain8: 0x20,
@@ -159,6 +160,8 @@ const avs3allowed = [
 
 export function decodeAVS3(val) {
 	const parts = val.split('.');
+	const coding_params = { type: 'video', codec: parts[0] };
+
 	if (parts.length != 3) return err('AVS3 codec requires 3 parts') + BREAK;
 
 	let argErrs = '';
@@ -190,9 +193,13 @@ export function decodeAVS3(val) {
 			prof = 'High 10-bit profile';
 			break;
 		default:
+			coding_params.profile = 'invalid';
 			res += err(`invalid profile_id (${parts[1]}) specified`);
 	}
-	if (prof) res += prof;
+	if (prof) {
+		res += prof;
+		coding_params.profile = prof;
+	}
 	res += BREAK;
 
 	let lev = null;
@@ -324,9 +331,13 @@ export function decodeAVS3(val) {
 			lev = '10.6.120';
 			break;
 		default:
+			coding_params.level = 'invalid';
 			res += err(`invalid level_id (${parts[2]}) specified`);
 	}
-	if (lev) res += `Level ${lev}`;
+	if (lev) {
+		res += `Level ${lev}`;
+		coding_params.level = lev;
+	}
 	res += BREAK;
 
 	if (res && lev) {
@@ -340,6 +351,8 @@ export function decodeAVS3(val) {
 				) + BREAK;
 	}
 
+	const dvb = DVBclassification(coding_params);
+	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
 	return res + BREAK;
 }
 

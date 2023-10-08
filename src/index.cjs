@@ -17,6 +17,7 @@ const { decodeSTPP } = require('./decode-text.js');
 const { decodeVP9 } = require('./decode-vp9.js');
 const { decodeVVC } = require('./decode-vvc.js');
 const { decode } = require('./decode.js');
+const { DVBclassification } = require('./dvb-mapping.js');
 
 module.exports = {
 	decodeAAC,
@@ -36,4 +37,5 @@ module.exports = {
 	decodeVP9,
 	decodeVVC,
 	decode,
+	DVBclassification,
 };
