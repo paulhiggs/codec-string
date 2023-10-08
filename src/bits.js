@@ -29,62 +29,61 @@
 import { BREAK } from './markup.js';
 
 export class BitList {
-  constructor() {
-    this.bytes = [];
-  }
+	constructor() {
+		this.bytes = [];
+	}
 
-  push(b) {
-    this.bytes.push(b & 0xff);
-  }
+	push(b) {
+		this.bytes.push(b & 0xff);
+	}
 
-  bitset(bitNo) {
-    if (bitNo <= 0 || bitNo > this.bytes.length * 8) return false;
-    const idx = this.bytes.length - Math.floor((bitNo - 1) / 8) - 1;
-    let bit = bitNo % 8;
-    if (bit == 0) bit = 8;
+	bitset(bitNo) {
+		if (bitNo <= 0 || bitNo > this.bytes.length * 8) return false;
+		const idx = this.bytes.length - Math.floor((bitNo - 1) / 8) - 1;
+		let bit = bitNo % 8;
+		if (bit == 0) bit = 8;
 
-    return this.bytes[idx] & (1 << (bit - 1)) ? true : false;
-  }
+		return this.bytes[idx] & (1 << (bit - 1)) ? true : false;
+	}
 
-  bitsetB(bitNo) {
-    if (bitNo < 0 || bitNo > this.bytes.length * 8 - 1) return false;
-    const idx = Math.floor(bitNo / 8);
-    const bit = 1 << (7 - (bitNo % 8));
+	bitsetB(bitNo) {
+		if (bitNo < 0 || bitNo > this.bytes.length * 8 - 1) return false;
+		const idx = Math.floor(bitNo / 8);
+		const bit = 1 << (7 - (bitNo % 8));
 
-    return this.bytes[idx] & bit ? true : false;
-  }
+		return this.bytes[idx] & bit ? true : false;
+	}
 
-  valueB(bitNo, length) {
-    let tot = 0;
-    for (let i = 0; i < length; i++) {
-      tot = tot << 1;
-      tot += this.bitsetB(bitNo + i) ? 1 : 0;
-    }
-    return tot;
-  }
+	valueB(bitNo, length) {
+		let tot = 0;
+		for (let i = 0; i < length; i++) {
+			tot = tot << 1;
+			tot += this.bitsetB(bitNo + i) ? 1 : 0;
+		}
+		return tot;
+	}
 
-  pointers(bitNo) {
-    const idx = this.bytes.length - Math.floor((bitNo - 1) / 8) - 1;
-    let bit = bitNo % 8;
-    if (bit == 0) bit = 8;
-    return `<i>${bitNo}=${idx}:${bit}</i>${BREAK}`;
-  }
+	pointers(bitNo) {
+		const idx = this.bytes.length - Math.floor((bitNo - 1) / 8) - 1;
+		let bit = bitNo % 8;
+		if (bit == 0) bit = 8;
+		return `<i>${bitNo}=${idx}:${bit}</i>${BREAK}`;
+	}
 
-  toString() {
-    let i = 0,
-      res = "";
-    while (i < this.bytes.length) {
-      const comp = this.bytes[i++].toString(16);
-      res += (comp.length == 1 ? "0" : "") + comp;
-    }
-    return res;
-  }
+	toString() {
+		let i = 0,
+			res = '';
+		while (i < this.bytes.length) {
+			const comp = this.bytes[i++].toString(16);
+			res += (comp.length == 1 ? '0' : '') + comp;
+		}
+		return res;
+	}
 }
 
 export function bitSet32(val, bit) {
-  // bit  3         2         1
-  //     10987654321098765432109876543210
-  if (bit < 0 || bit > 31) return false;
-  return val & Math.pow(2, bit);
+	// bit  3         2         1
+	//     10987654321098765432109876543210
+	if (bit < 0 || bit > 31) return false;
+	return val & Math.pow(2, bit);
 }
-

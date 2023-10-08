@@ -20,7 +20,8 @@
     "rules": {
         "indent": [
             "warn",
-            2
+            "tab",
+            { "SwitchCase": 1 }
         ],
         "linebreak-style": [
             "error",
@@ -33,7 +34,8 @@
         "quotes": "off",
         "no-lonely-if": "warn",
         "no-tabs": [
-            "error"
+            "error",
+						{ "allowIndentationTabs": true }
         ],
         "prefer-const": "error",
         "semi": [

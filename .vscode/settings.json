@@ -4,4 +4,8 @@
 	"editor.renderWhitespace": "all",
 	"editor.insertSpaces": false,
 	"files.eol": "\n",
+
+	"prettier.singleQuote": true,
+	"prettier.useTabs": true,
+	"prettier.tabWidth": 2
 }

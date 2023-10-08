@@ -27,7 +27,7 @@
  */
 
 export function registerVC1(addHandler) {
-  addHandler("wmv3", "VC-1");
-  addHandler("wmva", "VC-1");
-  addHandler("wvc1", "VC-1");
+	addHandler('wmv3', 'VC-1');
+	addHandler('wmva', 'VC-1');
+	addHandler('wvc1', 'VC-1');
 }

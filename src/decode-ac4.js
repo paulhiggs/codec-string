@@ -36,50 +36,50 @@ import { BREAK, err, warn } from './markup.js';
 import { hexDigits } from './hexDigits.js';
 
 export function decodeAC4(val) {
-  const parts = val.split(".");
-  let res = "";
+	const parts = val.split('.');
+	let res = '';
 
-  if (parts.length != 4) return err("invalid format") + BREAK;
+	if (parts.length != 4) return err('invalid format') + BREAK;
 
-  if (!hexDigits(parts[1]) || !hexDigits(parts[2]) || !hexDigits(parts[3]))
-    return err("parameters contain non-hex digits") + BREAK;
+	if (!hexDigits(parts[1]) || !hexDigits(parts[2]) || !hexDigits(parts[3]))
+		return err('parameters contain non-hex digits') + BREAK;
 
-  res += `bitstream_version: ${parseInt(
-    parts[1],
-    16
-  )}${BREAK}presentation_version: ${parseInt(parts[2], 16)}${BREAK}`;
+	res += `bitstream_version: ${parseInt(
+		parts[1],
+		16
+	)}${BREAK}presentation_version: ${parseInt(parts[2], 16)}${BREAK}`;
 
-  res += "maximum channels: ";
-  switch (parseInt(parts[3], 16)) {
-  case 0:
-    res += "2";
-    break;
-  case 1:
-    res += "6";
-    break;
-  case 2:
-    res += "9";
-    break;
-  case 3:
-    res += "11";
-    break;
-  case 4:
-    res += "13";
-    break;
-  case 5:
-  case 6:
-    res += warn("Reserved");
-    break;
-  case 7:
-    res += "Unrestricted";
-    break;
-  default:
-    res += err(`invalid value (${parseInt(parts[3], 16)})`);
-  }
-  res += BREAK;
-  return res;
+	res += 'maximum channels: ';
+	switch (parseInt(parts[3], 16)) {
+		case 0:
+			res += '2';
+			break;
+		case 1:
+			res += '6';
+			break;
+		case 2:
+			res += '9';
+			break;
+		case 3:
+			res += '11';
+			break;
+		case 4:
+			res += '13';
+			break;
+		case 5:
+		case 6:
+			res += warn('Reserved');
+			break;
+		case 7:
+			res += 'Unrestricted';
+			break;
+		default:
+			res += err(`invalid value (${parseInt(parts[3], 16)})`);
+	}
+	res += BREAK;
+	return res;
 }
 
 export function registerAC4(addHandler) {
-  addHandler("ac-4", "Digital Audio Compression (AC-4)", decodeAC4);
+	addHandler('ac-4', 'Digital Audio Compression (AC-4)', decodeAC4);
 }

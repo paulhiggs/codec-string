@@ -26,39 +26,38 @@
  *
  */
 
-export const BREAK = "<br>";
+export const BREAK = '<br>';
 
 export function err(str) {
-  return `<span style="color:red">${str}</span>`;
+	return `<span style="color:red">${str}</span>`;
 }
 
 export function warn(str) {
-  return `<span style="color:orange">${str}</span>`;
+	return `<span style="color:orange">${str}</span>`;
 }
 
 export function dflt(str) {
-  return `<span style="font-style:italic">${str}</span>`;
+	return `<span style="font-style:italic">${str}</span>`;
 }
 
 export function em(str) {
-  return `<em>${str}</em>`;
+	return `<em>${str}</em>`;
 }
 
 export function bold(str) {
-  return `<span style="font-weight:bold">${str}</span>`;
+	return `<span style="font-weight:bold">${str}</span>`;
 }
 
 export function title(str) {
-  return `<span style="font-style:italic">${str}</span>`;
+	return `<span style="font-style:italic">${str}</span>`;
 }
 
 export function unprocessed(str) {
-  return `<span style="color:orange">${str}</span>`;
+	return `<span style="color:orange">${str}</span>`;
 }
 
 export function cell(str, colspan = 1, rowspan = 1) {
-  return `<td${colspan != 1 ? ` colspan="${colspan}"` : ""}${
-    rowspan != 1 ? ` rowspan="${rowspan}"` : ""
-  }>${str}</td>`;
+	return `<td${colspan != 1 ? ` colspan="${colspan}"` : ''}${
+		rowspan != 1 ? ` rowspan="${rowspan}"` : ''
+	}>${str}</td>`;
 }
-

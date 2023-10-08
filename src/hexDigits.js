@@ -27,7 +27,6 @@
  */
 
 export function hexDigits(str) {
-  const res = str.match(/[\da-fA-F]+/);
-  return res ? res == str : false;
+	const res = str.match(/[\da-fA-F]+/);
+	return res ? res == str : false;
 }
-

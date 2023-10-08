@@ -16,50 +16,50 @@ import { registerVVC } from './decode-vvc.js';
 const handlers = [];
 
 export function findHandler(codec) {
-  return handlers.find((h) => h.cccc == codec.toLowerCase());
+	return handlers.find((h) => h.cccc == codec.toLowerCase());
 }
 
 function addHandler(FourCC, Label, Handler) {
-  if (Handler === undefined) {
-    Handler = noHandler;
-  }
+	if (Handler === undefined) {
+		Handler = noHandler;
+	}
 
-  if (typeof FourCC == "string" || FourCC instanceof String)
-    if (!handlers.find((handler) => handler.cccc == FourCC.toLowerCase()))
-      handlers.push({
-        cccc: FourCC.toLowerCase(),
-        label: Label,
-        func: Handler,
-      });
+	if (typeof FourCC == 'string' || FourCC instanceof String)
+		if (!handlers.find((handler) => handler.cccc == FourCC.toLowerCase()))
+			handlers.push({
+				cccc: FourCC.toLowerCase(),
+				label: Label,
+				func: Handler,
+			});
 
-  if (Array.isArray(FourCC))
-    FourCC.forEach((cc) => {
-      if (!handlers.find((handler) => handler.cccc == cc.toLowerCase()))
-        handlers.push({ cccc: cc.toLowerCase(), label: Label, func: Handler });
-    });
+	if (Array.isArray(FourCC))
+		FourCC.forEach((cc) => {
+			if (!handlers.find((handler) => handler.cccc == cc.toLowerCase()))
+				handlers.push({ cccc: cc.toLowerCase(), label: Label, func: Handler });
+		});
 }
 
 function noHandler() {
-  return "";
+	return '';
 }
 
 const registerFactories = [
-  registerAAC,
-  registerAC4,
-  registerAV1,
-  registerAVC,
-  registerAVS3,
-  registerEVC,
-  registerHEVC,
-  registerMisc,
-  registerMPEGH,
-  registerText,
-  registerVP9,
-  registerVVC,
-  registerMPEG,
-  registerVC1,
+	registerAAC,
+	registerAC4,
+	registerAV1,
+	registerAVC,
+	registerAVS3,
+	registerEVC,
+	registerHEVC,
+	registerMisc,
+	registerMPEGH,
+	registerText,
+	registerVP9,
+	registerVVC,
+	registerMPEG,
+	registerVC1,
 ];
 
 registerFactories.forEach(function (fact) {
-  fact(addHandler);
+	fact(addHandler);
 });
