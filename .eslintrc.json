@@ -6,6 +6,10 @@
     "extends": [
         "eslint:recommended"
     ],
+		"globals": {
+			"require": true,
+			"module": true
+		},
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module"
