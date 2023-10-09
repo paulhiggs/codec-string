@@ -285,6 +285,17 @@ const VideoTerms = [
 	{ term: '5.1.23', codec: 'avs3', profile: 'High 10*', level: '10.4.120' },
 
 	{ term: '6', codec: 'vvc1' },
+	{ term: '6.1', codec: 'vvc1', profile: 'Main 10', tier: 'Main*' },
+	{ term: '6.1.1', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '3.0' },
+	{ term: '6.1.2', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '3.1' },
+	{ term: '6.1.3', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '4.0' },
+	{ term: '6.1.4', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '4.1' },
+	{ term: '6.1.5', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '5.0' },
+	{ term: '6.1.6', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '5.1' },
+	{ term: '6.1.7', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '5.2' },
+	{ term: '6.1.8', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '6.0' },
+	{ term: '6.1.9', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '6.1' },
+	{ term: '6.1.10', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '6.2' },
 ];
 
 function tableLookup(entry) {
@@ -317,7 +328,7 @@ function match(cs, terms, params) {
 	return found ? `${cs}:${found.term}` : '';
 }
 
-export default function DVBclassification(params) {
+export function DVBclassification(params) {
 	if (!params?.type) return '';
 
 	let res = '';

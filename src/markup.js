@@ -57,7 +57,31 @@ export function unprocessed(str) {
 }
 
 export function cell(str, colspan = 1, rowspan = 1) {
-	return `<td${colspan != 1 ? ` colspan="${colspan}"` : ''}${
-		rowspan != 1 ? ` rowspan="${rowspan}"` : ''
-	}>${str}</td>`;
+	return `<td${colspan != 1 ? ` colspan="${colspan}"` : ''}${rowspan != 1 ? ` rowspan="${rowspan}"` : ''}>${str}</td>`;
 }
+
+/**
+ * return the type of the argument passed
+ * @param {any} arg the argument whose type we are interested in
+ * @param {string} requiredType  the desired tyoe
+ * @returns {boolean or string} the type of the argument or a boolean if the type matches the requiredType
+ */
+function datatypeIs(arg, requiredType = null) {
+	if (!arg)
+		// ensure null is not identified as an object
+		return undefined;
+	if (Array.isArray(arg)) return requiredType ? requiredType == 'array' : 'array';
+	const typ = typeof arg;
+	return requiredType ? requiredType == typ : typ;
+}
+
+/**
+ * convert characters in the string to HTML entities
+ *
+ * @param {string} str String that should be displayed in HTML
+ * @returns {string} A string with ENTITY representations of < and >
+ */
+export var HTMLsafe = (str) =>
+	datatypeIs(str, 'string')
+		? str.replace(/[&<>"'-]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '-': '&#8209;' }[m]))
+		: str;

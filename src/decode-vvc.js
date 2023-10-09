@@ -33,51 +33,64 @@
 // VVC - ISO/IEC 23090-3  - w19470
 
 import { BitList } from './bits.js';
-import { BREAK, err, em } from './markup.js';
+import { BREAK, err, em, bold, HTMLsafe } from './markup.js';
+import { DVBclassification } from './dvb-mapping.js';
 
 export function decodeVVC(val) {
-	const VVCregex =
-		/^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-zA-Z2-7]+)?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/;
+	const VVCregex = /^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-zA-Z2-7]+)?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/;
 	const VVCformat =
-		'<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}';
+		'sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}';
 
 	function printProfile(profile) {
 		const general_profile_idc = parseInt(profile);
-		let res = '';
+		let res = '',
+			prof = '';
 
 		switch (general_profile_idc) {
 			case 1:
-				res += 'Main 10';
+				prof = 'Main 10';
+				res += prof;
 				break;
 			case 65:
-				res += 'Main 10 Still Picture';
+				prof = 'Main 10 Still Picture';
+				res += prof;
 				break;
 			case 33:
-				res += 'Main 10 4:4:4';
+				prof = 'Main 10 4:4:4';
+				res += prof;
 				break;
 			case 97:
-				res += 'Main 10 4:4:4 Still Picture';
+				prof = 'Main 10 4:4:4 Still Picture';
+				res += prof;
 				break;
 			case 17:
-				res += 'Multilayer Main 10';
+				prof = 'Multilayer Main 10';
+				res += prof;
 				break;
 			case 49:
-				res += 'Multilayer Main 10 4:4:4';
+				prof = 'Multilayer Main 10 4:4:4';
+				res += prof;
+				break;
+			default:
+				res += err(`unknown Profile (${profile})`);
 				break;
 		}
-		return res + BREAK;
+		return { html: res + BREAK, profile: prof };
 	}
 
 	function printTier(tier, level) {
 		const op_level_idc = parseInt(level);
-		let res = '';
+		let res = '',
+			t = '';
 
 		switch (tier) {
 			case 'L':
-				res += 'Main Tier (L)';
+				t = 'Main Tier (L)';
+				res += t;
 				break;
 			case 'H':
-				res += 'High Tier (H)';
+				t = 'High Tier (H)';
+				res += t;
 				break;
 			default:
 				res += err(`unknown Tier (${tier})`);
@@ -130,7 +143,7 @@ export function decodeVVC(val) {
 				res += err(`unknown Level (${op_level_idc})`);
 		}
 		if (lev) res += `Level ${lev}`;
-		return (res += BREAK);
+		return { html: res + BREAK, tier: t, level: lev };
 	}
 
 	const VVC_general_constraints = [
@@ -235,17 +248,11 @@ export function decodeVVC(val) {
 		VVC_general_constraints.forEach((constraint) => {
 			if (constraint.existance) {
 				if (constraintFlags.bitsetB(constraint.bit)) gotFlags = true;
-				res += `${constraint.name}=${constraintFlags.bitsetB(
-					constraint.bit
-				)}${BREAK}`;
+				res += `${constraint.name}=${constraintFlags.bitsetB(constraint.bit)}${BREAK}`;
 			} else if (gotFlags) {
 				if (constraint.length) {
-					res += `${constraint.name}=${constraintFlags.valueB(
-						constraint.bit,
-						constraint.length
-					)}${BREAK}`;
-				} else if (constraintFlags.bitsetB(constraint.bit))
-					res += constraint.name + BREAK;
+					res += `${constraint.name}=${constraintFlags.valueB(constraint.bit, constraint.length)}${BREAK}`;
+				} else if (constraintFlags.bitsetB(constraint.bit)) res += constraint.name + BREAK;
 			}
 		});
 		return res;
@@ -270,30 +277,33 @@ export function decodeVVC(val) {
 	function printTemporalLayers(indexes) {
 		let res = '';
 		const layerIndexes = indexes.split('+');
-		if (layerIndexes[0])
-			res += `Output Layer Set index (${em('OlsIdx')})=${
-				layerIndexes[0]
-			}${BREAK}`;
-		if (layerIndexes[1])
-			res += `Maximum Temporal Id (${em('MaxTid')})=${layerIndexes[1]}${BREAK}`;
+		if (layerIndexes[0]) res += `Output Layer Set index (${em('OlsIdx')})=${layerIndexes[0]}${BREAK}`;
+		if (layerIndexes[1]) res += `Maximum Temporal Id (${em('MaxTid')})=${layerIndexes[1]}${BREAK}`;
 		return res;
 	}
 
-	if (!VVCregex.test(val))
-		return err('Regex mismatch!') + BREAK + err(VVCformat) + BREAK;
+	if (!VVCregex.test(val)) return err('Regex mismatch!') + BREAK + err(HTMLsafe(VVCformat)) + BREAK;
 
-	const x = val.match(VVCregex);
+	const parts = val.match(VVCregex),
+		coding_params = { type: 'video' };
 	let res = '';
-	x.forEach((part) => {
+	if (parts.length > 1) coding_params.codec = parts[1];
+	parts.forEach((part) => {
 		if (part && part.substring(0, 1) == '.') {
 			const cmd = part.substring(1, 2);
 			if (cmd >= '0' && cmd <= '9') {
-				res += printProfile(part.substring(1));
-			} else
+				const prof = printProfile(part.substring(1));
+				res += prof.html;
+				coding_params.profile = prof.profile;
+			} else {
+				let tier_and_level = {};
 				switch (cmd) {
 					case 'L':
 					case 'H':
-						res += printTier(cmd, part.substring(2));
+						tier_and_level = printTier(cmd, part.substring(2));
+						res += tier_and_level.html;
+						coding_params.tier = tier_and_level.tier;
+						coding_params.level = tier_and_level.level;
 						break;
 					case 'C':
 						res += printConstraints(part.substring(2));
@@ -305,10 +315,14 @@ export function decodeVVC(val) {
 						res += printTemporalLayers(part.substring(2));
 						break;
 				}
+			}
 		}
 	});
 
-	return res;
+	const dvb = DVBclassification(coding_params);
+	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
+
+	return res + BREAK;
 }
 
 export function registerVVC(addHandler) {

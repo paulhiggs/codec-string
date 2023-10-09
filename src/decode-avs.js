@@ -30,7 +30,7 @@
 
 import { BREAK, err, warn, bold } from './markup.js';
 import { hexDigits } from './hexDigits.js';
-import DVBclassification from './dvb-mapping.js';
+import { DVBclassification } from './dvb-mapping.js';
 
 const avs3 = {
 	profileMain8: 0x20,
@@ -165,12 +165,8 @@ export function decodeAVS3(val) {
 	if (parts.length != 3) return err('AVS3 codec requires 3 parts') + BREAK;
 
 	let argErrs = '';
-	if (!hexDigits(parts[1]))
-		argErrs +=
-			err(`profile_id not expressed in hexadecimal (${parts[1]})`) + BREAK;
-	if (!hexDigits(parts[2]))
-		argErrs +=
-			err(`level_id not expressed in hexadecimal (${parts[2]})`) + BREAK;
+	if (!hexDigits(parts[1])) argErrs += err(`profile_id not expressed in hexadecimal (${parts[1]})`) + BREAK;
+	if (!hexDigits(parts[2])) argErrs += err(`level_id not expressed in hexadecimal (${parts[2]})`) + BREAK;
 
 	if (argErrs.length) return argErrs;
 
@@ -341,18 +337,14 @@ export function decodeAVS3(val) {
 	res += BREAK;
 
 	if (res && lev) {
-		const foundProfile = avs3allowed.find((entry) =>
-			entry.profiles.includes(profile_id)
-		);
+		const foundProfile = avs3allowed.find((entry) => entry.profiles.includes(profile_id));
 		if (foundProfile && !foundProfile.levels.includes(level_id))
-			res +=
-				warn(
-					`specified profile (${parts[1]}) does not support the specified level (${parts[2]})`
-				) + BREAK;
+			res += warn(`specified profile (${parts[1]}) does not support the specified level (${parts[2]})`) + BREAK;
 	}
 
 	const dvb = DVBclassification(coding_params);
 	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
+
 	return res + BREAK;
 }
 
