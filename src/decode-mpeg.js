@@ -45,11 +45,10 @@
 // https://mp4ra.org/#/object_types
 
 import { BREAK, err, warn } from './markup.js';
-import { hexDigits } from './hexDigits.js';
+import { hexDigits } from './utils.js';
 
 const MP4OTI = (val) => {
-	if ((val >= 0xc0 && val <= 0xe0) || (val >= 0xe2 && val <= 0xfe))
-		return 'user private';
+	if ((val >= 0xc0 && val <= 0xe0) || (val >= 0xe2 && val <= 0xfe)) return 'user private';
 	switch (val) {
 		case 0:
 			return 'Forbidden';
@@ -177,18 +176,15 @@ const AudioLayer = (layer) => {
 export function decodeMPEG2video(val) {
 	const parts = val.split('.');
 	if (parts.length != 2) return err('invalid format') + BREAK;
-	if (!hexDigits(parts[1]))
-		return err('parameters contains non-hex digits') + BREAK;
+	if (!hexDigits(parts[1])) return err('parameters contains non-hex digits') + BREAK;
 	return 'ObjectTypeIndication=' + MP4OTI(parseInt(parts[1], 16)) + BREAK;
 }
 
 // ISO/IEC 13818-7
 export function decodeMPEG2audio(val) {
 	const parts = val.split('.');
-	if (parts.length < 2 || parts.length > 3)
-		return err('invalid format') + BREAK;
-	if (!hexDigits(parts[1]))
-		return err('parameters contains non-hex digits') + BREAK;
+	if (parts.length < 2 || parts.length > 3) return err('invalid format') + BREAK;
+	if (!hexDigits(parts[1])) return err('parameters contains non-hex digits') + BREAK;
 
 	const oti = parseInt(parts[1], 16);
 	let res = 'ObjectTypeIndication=' + MP4OTI(oti) + BREAK;
@@ -200,22 +196,18 @@ export function decodeMPEG2audio(val) {
 export function decodeMPEG1video(val) {
 	const parts = val.split('.');
 	if (parts.length != 2) return err('invalid format') + BREAK;
-	if (!hexDigits(parts[1]))
-		return err('parameters contains non-hex digits') + BREAK;
+	if (!hexDigits(parts[1])) return err('parameters contains non-hex digits') + BREAK;
 	return 'ObjectTypeIndication=' + MP4OTI(parseInt(parts[1], 16)) + BREAK;
 }
 
 export function decodeMPEG1audio(val) {
 	const parts = val.split('.');
-	if (parts.length < 2 || parts.length > 3)
-		return err('invalid format') + BREAK;
-	if (!hexDigits(parts[1]))
-		return err('parameters contains non-hex digits') + BREAK;
+	if (parts.length < 2 || parts.length > 3) return err('invalid format') + BREAK;
+	if (!hexDigits(parts[1])) return err('parameters contains non-hex digits') + BREAK;
 
 	const oti = parseInt(parts[1], 16);
 	let res = 'ObjectTypeIndication=' + MP4OTI(oti) + BREAK;
-	if (oti == 0x6b)
-		res += 'Layer=' + AudioLayer(1, parseInt(parts[2], 16)) + BREAK;
+	if (oti == 0x6b) res += 'Layer=' + AudioLayer(1, parseInt(parts[2], 16)) + BREAK;
 	return res;
 }
 

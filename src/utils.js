@@ -1,7 +1,7 @@
 /**
  * @copyright: Copyright (c) 2021-2023
  * @author: Paul Higgs
- * @file: decode.js
+ * @file: utils.js
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,7 +26,28 @@
  *
  */
 
+/**
+ * checks that the argument contains only hexadecimal characters
+
+ * @param {string} str  the value to be checked
+ * @returns {boolean} true if the string only contains hexadecimal characters, otherwse false
+ */
 export function hexDigits(str) {
 	const res = str.match(/[\da-fA-F]+/);
 	return res ? res == str : false;
+}
+
+/**
+ * return the type of the argument passed
+ * @param {any} arg the argument whose type we are interested in
+ * @param {string} requiredType  the desired tyoe
+ * @returns {boolean or string} the type of the argument or a boolean if the type matches the requiredType
+ */
+export function datatypeIs(arg, requiredType = null) {
+	if (!arg)
+		// ensure null is not identified as an object
+		return undefined;
+	if (Array.isArray(arg)) return requiredType ? requiredType == 'array' : 'array';
+	const typ = typeof arg;
+	return requiredType ? requiredType == typ : typ;
 }

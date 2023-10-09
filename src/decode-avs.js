@@ -27,7 +27,7 @@
  */
 
 import { BREAK, err, warn, bold } from './markup.js';
-import { hexDigits } from './hexDigits.js';
+import { hexDigits } from './utils.js';
 import { DVBclassification } from './dvb-mapping.js';
 
 const avs3 = {

@@ -32,7 +32,7 @@
  **/
 
 import { BREAK, err, bold } from './markup.js';
-import { hexDigits } from './hexDigits.js';
+import { hexDigits } from './utils.js';
 import { sscanf } from './sscanf-func.js';
 import { DVBclassification } from './dvb-mapping.js';
 

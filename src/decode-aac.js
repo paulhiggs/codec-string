@@ -50,7 +50,7 @@
   */
 
 import { BREAK, err } from './markup.js';
-import { hexDigits } from './hexDigits.js';
+import { hexDigits } from './utils.js';
 
 export function decodeAAC(val) {
 	const parts = val.split('.');

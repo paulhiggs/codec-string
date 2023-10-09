@@ -13,6 +13,8 @@ import { registerVC1 } from './decode-vc1.js';
 import { registerVP9 } from './decode-vp9.js';
 import { registerVVC } from './decode-vvc.js';
 
+import { datatypeIs } from './utils.js';
+
 const handlers = [];
 
 export function findHandler(codec) {
@@ -24,7 +26,7 @@ function addHandler(FourCC, Label, Handler) {
 		Handler = noHandler;
 	}
 
-	if (typeof FourCC == 'string' || FourCC instanceof String)
+	if (datatypeIs(FourCC, 'string'))
 		if (!handlers.find((handler) => handler.cccc == FourCC.toLowerCase()))
 			handlers.push({
 				cccc: FourCC.toLowerCase(),
@@ -32,10 +34,9 @@ function addHandler(FourCC, Label, Handler) {
 				func: Handler,
 			});
 
-	if (Array.isArray(FourCC))
+	if (datatypeIs(FourCC, 'array'))
 		FourCC.forEach((cc) => {
-			if (!handlers.find((handler) => handler.cccc == cc.toLowerCase()))
-				handlers.push({ cccc: cc.toLowerCase(), label: Label, func: Handler });
+			if (!handlers.find((handler) => handler.cccc == cc.toLowerCase())) handlers.push({ cccc: cc.toLowerCase(), label: Label, func: Handler });
 		});
 }
 

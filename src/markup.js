@@ -1,7 +1,7 @@
 /**
  * @copyright: Copyright (c) 2021-2023
  * @author: Paul Higgs
- * @file: decode.js
+ * @file: markup.js
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,54 +26,26 @@
  *
  */
 
+import { datatypeIs } from './utils.js';
+
 export const BREAK = '<br>';
 
-export function err(str) {
-	return `<span style="color:red">${str}</span>`;
-}
+export var err = (str) => `<span style="color:red">${str}</span>`;
 
-export function warn(str) {
-	return `<span style="color:orange">${str}</span>`;
-}
+export var warn = (str) => `<span style="color:orange">${str}</span>`;
 
-export function dflt(str) {
-	return `<span style="font-style:italic">${str}</span>`;
-}
+export var dflt = (str) => `<span style="font-style:italic">${str}</span>`;
 
-export function em(str) {
-	return `<em>${str}</em>`;
-}
+export var em = (str) => `<em>${str}</em>`;
 
-export function bold(str) {
-	return `<span style="font-weight:bold">${str}</span>`;
-}
+export var bold = (str) => `<span style="font-weight:bold">${str}</span>`;
 
-export function title(str) {
-	return `<span style="font-style:italic">${str}</span>`;
-}
+export var title = (str) => `<span style="font-style:italic">${str}</span>`;
 
-export function unprocessed(str) {
-	return `<span style="color:orange">${str}</span>`;
-}
+export var unprocessed = (str) => `<span style="color:orange">${str}</span>`;
 
-export function cell(str, colspan = 1, rowspan = 1) {
-	return `<td${colspan != 1 ? ` colspan="${colspan}"` : ''}${rowspan != 1 ? ` rowspan="${rowspan}"` : ''}>${str}</td>`;
-}
-
-/**
- * return the type of the argument passed
- * @param {any} arg the argument whose type we are interested in
- * @param {string} requiredType  the desired tyoe
- * @returns {boolean or string} the type of the argument or a boolean if the type matches the requiredType
- */
-function datatypeIs(arg, requiredType = null) {
-	if (!arg)
-		// ensure null is not identified as an object
-		return undefined;
-	if (Array.isArray(arg)) return requiredType ? requiredType == 'array' : 'array';
-	const typ = typeof arg;
-	return requiredType ? requiredType == typ : typ;
-}
+export var cell = (str, colspan = 1, rowspan = 1) =>
+	`<td${colspan != 1 ? ` colspan="${colspan}"` : ''}${rowspan != 1 ? ` rowspan="${rowspan}"` : ''}>${str}</td>`;
 
 /**
  * convert characters in the string to HTML entities

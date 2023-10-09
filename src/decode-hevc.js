@@ -27,9 +27,10 @@
  */
 
 import { BitList, bitSet32 } from './bits.js';
-import { hexDigits } from './hexDigits.js';
+import { hexDigits } from './utils.js';
 import { sscanf } from './sscanf-func.js';
-import { BREAK, err } from './markup.js';
+import { BREAK, err, bold } from './markup.js';
+import { DVBclassification } from './dvb-mapping.js';
 
 export function decodeHEVC(val) {
 	// regex from DVB TM-STREAM0087: /(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fa-F\d]{1,8}\.[LH]\d{1,3}/
@@ -38,14 +39,14 @@ export function decodeHEVC(val) {
 	// const HEVCregex = /^(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){1,6}$/;
 
 	function HEVCprofile(general_profile_idc, cap, gopocf) {
-		if (general_profile_idc == 1 || bitSet32(cap, 0)) return 'Main (1)';
-		if (general_profile_idc == 2 || bitSet32(cap, 1)) return `Main 10 ${gopocf ? 'Still Picture ' : ''}(2)`;
-		if (general_profile_idc == 3 || bitSet32(cap, 2)) return 'Main Still Picture (3)';
-		if (general_profile_idc == 4 || bitSet32(cap, 3)) return 'Range Extensions (4)';
-		if (general_profile_idc == 5 || bitSet32(cap, 4)) return 'High Throughput (5)';
-		if (general_profile_idc == 9 || bitSet32(cap, 8)) return 'Screen Content Coding (9)';
-		if (general_profile_idc == 11 || bitSet32(cap, 10)) return 'High Throughput Screen Content Coding (11)';
-		return err('unknown');
+		if (general_profile_idc == 1 || bitSet32(cap, 0)) return { str: 'Main (1)', profile: 'Main' };
+		if (general_profile_idc == 2 || bitSet32(cap, 1)) return { str: `Main 10 ${gopocf ? 'Still Picture ' : ''}(2)`, profile: 'Main 10' };
+		if (general_profile_idc == 3 || bitSet32(cap, 2)) return { str: 'Main Still Picture (3)', profile: 'Main Still' };
+		if (general_profile_idc == 4 || bitSet32(cap, 3)) return { str: 'Range Extensions (4)' };
+		if (general_profile_idc == 5 || bitSet32(cap, 4)) return { str: 'High Throughput (5)', profile: 'High Throughput' };
+		if (general_profile_idc == 9 || bitSet32(cap, 8)) return { str: 'Screen Content Coding (9)', profile: 'Screen Content' };
+		if (general_profile_idc == 11 || bitSet32(cap, 10)) return { str: 'High Throughput Screen Content Coding (11)', profile: 'High Throughput Screen Content' };
+		return { str: err('unknown') };
 	}
 
 	function showbit(v) {
@@ -56,6 +57,7 @@ export function decodeHEVC(val) {
 
 	if (parts.length < 5) return err('HEVC codec requires at least 5 parts') + BREAK;
 
+	const coding_params = { type: 'video', codec: parts[0] };
 	let argErr = '',
 		res = '';
 
@@ -191,15 +193,19 @@ export function decodeHEVC(val) {
 	}
 
 	res += `general_profile_space=${general_profile_space == -1 ? err(general_profile_space) : general_profile_space}${BREAK}`;
-	res += `general_profile_idc=${HEVCprofile(general_profile_idc, general_profile_compatibility_flag, general_one_picture_only_constraint_flag)}${BREAK}`;
+	const profile = HEVCprofile(general_profile_idc, general_profile_compatibility_flag, general_one_picture_only_constraint_flag);
+	if (Object.prototype.hasOwnProperty.call(profile, 'profile')) coding_params.profile = profile.profile;
+	res += `general_profile_idc=${profile.str}${BREAK}`;
 
 	const tier = sscanf(parts[3], '%c%d');
 	switch (tier[0].toUpperCase()) {
 		case 'L':
 			res += 'Main Tier (L)';
+			coding_params.tier = 'Main';
 			break;
 		case 'H':
 			res += 'High Tier (H)';
+			coding_params.tier = 'High';
 			break;
 		default:
 			res += err(`unknown Tier (${tier[0]})`);
@@ -250,10 +256,16 @@ export function decodeHEVC(val) {
 		default:
 			res += err(`unknown Level (${tier[1]})`);
 	}
-	if (lev) res += `Level ${lev}`;
-	res += BREAK;
+	if (lev) {
+		res += `Level ${lev}${BREAK}`;
+		coding_params.level = lev;
+	}
+	res += constraints + BREAK;
 
-	return res + constraints;
+	const dvb = DVBclassification(coding_params);
+	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
+
+	return res + BREAK;
 }
 
 export function registerHEVC(addHandler) {

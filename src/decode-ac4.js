@@ -31,7 +31,7 @@
  **/
 
 import { BREAK, err, warn } from './markup.js';
-import { hexDigits } from './hexDigits.js';
+import { hexDigits } from './utils.js';
 
 export function decodeAC4(val) {
 	const parts = val.split('.');
