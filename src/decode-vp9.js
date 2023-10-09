@@ -66,13 +66,13 @@ mutually inclusive (all or none) fields. If not specified then the processing de
 in the table below as defaults when deciding if the device is able to decode and potentially render the video.
 */
 
-import { BREAK, cell, err, warn } from './markup.js';
+import { BREAK, cell, err, warn, HTMLsafe } from './markup.js';
 
 export function decodeVP9(val) {
 	const VP9regex = /^(vp09)(\.\d\d){3}(\.\d{0,2}){0,5}$/;
 	const VP9format =
 		'<sample entry 4CC>.<profile>.<level>.<bitDepth>.<chromaSubsampling>.<colourPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>';
-	if (!VP9regex.test(val)) return err('Regex failure') + BREAK + err(VP9format) + BREAK;
+	if (!VP9regex.test(val)) return err('Regex failure') + BREAK + err(HTMLsafe(VP9format)) + BREAK;
 
 	const PROFILE_0 = 0,
 		PROFILE_1 = 1,
