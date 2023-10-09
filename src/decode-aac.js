@@ -26,8 +26,6 @@
  *
  */
 
-/*jshint esversion: 6 */
-
 /* RFC6381 - https://tools.ietf.org/html/rfc6381
    When the first element of a value is 'mp4a' (indicating some kind of
    MPEG-4 audio), or 'mp4v' (indicating some kind of MPEG-4 part-2
@@ -101,9 +99,7 @@ export function decodeAAC(val) {
 					{ i: 36, s: 'MPEG-4 ALS' },
 				];
 				const found = vals.find((elem) => aacMode == elem.i);
-				res += found
-					? `${found.s} (${found.i})`
-					: err(`invalid AAC OTI (${aacMode})`);
+				res += found ? `${found.s} (${found.i})` : err(`invalid AAC OTI (${aacMode})`);
 				res += BREAK;
 			}
 			break;

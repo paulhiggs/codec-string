@@ -26,8 +26,6 @@
  *
  */
 
-/*jshint esversion: 6 */
-
 export function registerMisc(addHandler) {
 	addHandler('ec-3', 'Enhanced AC-3'); // Dolby Digital+, E-AC-3
 	addHandler('dtsc', 'DTS Core'); // ETSI TS 102 114 annex H

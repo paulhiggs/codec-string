@@ -31,7 +31,6 @@ import { hexDigits } from './hexDigits.js';
 import { sscanf } from './sscanf-func.js';
 import { BREAK, err } from './markup.js';
 
-/*jshint esversion: 6 */
 export function decodeHEVC(val) {
 	// regex from DVB TM-STREAM0087: /(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fa-F\d]{1,8}\.[LH]\d{1,3}/
 	// but needs to include the 6 btyes from the decoder constraint flags
@@ -40,18 +39,12 @@ export function decodeHEVC(val) {
 
 	function HEVCprofile(general_profile_idc, cap, gopocf) {
 		if (general_profile_idc == 1 || bitSet32(cap, 0)) return 'Main (1)';
-		if (general_profile_idc == 2 || bitSet32(cap, 1))
-			return `Main 10 ${gopocf ? 'Still Picture ' : ''}(2)`;
-		if (general_profile_idc == 3 || bitSet32(cap, 2))
-			return 'Main Still Picture (3)';
-		if (general_profile_idc == 4 || bitSet32(cap, 3))
-			return 'Range Extensions (4)';
-		if (general_profile_idc == 5 || bitSet32(cap, 4))
-			return 'High Throughput (5)';
-		if (general_profile_idc == 9 || bitSet32(cap, 8))
-			return 'Screen Content Coding (9)';
-		if (general_profile_idc == 11 || bitSet32(cap, 10))
-			return 'High Throughput Screen Content Coding (11)';
+		if (general_profile_idc == 2 || bitSet32(cap, 1)) return `Main 10 ${gopocf ? 'Still Picture ' : ''}(2)`;
+		if (general_profile_idc == 3 || bitSet32(cap, 2)) return 'Main Still Picture (3)';
+		if (general_profile_idc == 4 || bitSet32(cap, 3)) return 'Range Extensions (4)';
+		if (general_profile_idc == 5 || bitSet32(cap, 4)) return 'High Throughput (5)';
+		if (general_profile_idc == 9 || bitSet32(cap, 8)) return 'Screen Content Coding (9)';
+		if (general_profile_idc == 11 || bitSet32(cap, 10)) return 'High Throughput Screen Content Coding (11)';
 		return err('unknown');
 	}
 
@@ -61,17 +54,12 @@ export function decodeHEVC(val) {
 
 	const parts = val.split('.');
 
-	if (parts.length < 5)
-		return err('HEVC codec requires at least 5 parts') + BREAK;
+	if (parts.length < 5) return err('HEVC codec requires at least 5 parts') + BREAK;
 
 	let argErr = '',
 		res = '';
 
-	if (!hexDigits(parts[2]))
-		argErr +=
-			err(
-				`general_profile_compatibility_flag not expressed in hexadecimal (${parts[2]})`
-			) + BREAK;
+	if (!hexDigits(parts[2])) argErr += err(`general_profile_compatibility_flag not expressed in hexadecimal (${parts[2]})`) + BREAK;
 
 	const general_profile_compatibility_flag = parseInt(parts[2], 16);
 	let general_profile_idc = -1,
@@ -105,10 +93,7 @@ export function decodeHEVC(val) {
 	while (i < 10) {
 		let bFlags = 0;
 		if (parts[i]) {
-			if (!hexDigits(parts[i]))
-				argErr +=
-					err(`constraint flags not specified in hexadecimal (${parts[i]})`) +
-					BREAK;
+			if (!hexDigits(parts[i])) argErr += err(`constraint flags not specified in hexadecimal (${parts[i]})`) + BREAK;
 			else bFlags = parseInt(parts[i].toLowerCase(), 16);
 		}
 		constraintFlags.push(bFlags);
@@ -122,21 +107,14 @@ export function decodeHEVC(val) {
 	const general_progressive_source_flag = constraintFlags.bitset(48),
 		general_interlaced_source_flag = constraintFlags.bitset(47);
 
-	if (general_progressive_source_flag && !general_interlaced_source_flag)
-		constraints += 'scan=progressive';
-	else if (!general_progressive_source_flag && general_interlaced_source_flag)
-		constraints += 'scan=interlaced';
-	else if (general_progressive_source_flag && general_interlaced_source_flag)
-		constraints += 'scan=source_scan_type in SEI';
+	if (general_progressive_source_flag && !general_interlaced_source_flag) constraints += 'scan=progressive';
+	else if (!general_progressive_source_flag && general_interlaced_source_flag) constraints += 'scan=interlaced';
+	else if (general_progressive_source_flag && general_interlaced_source_flag) constraints += 'scan=source_scan_type in SEI';
 	else constraints += err('scan=unknown or unspecified');
 	constraints += BREAK;
 
-	constraints += `general_non_packed_constraint_flag=${showbit(
-		constraintFlags.bitset(46)
-	)}${BREAK}`;
-	constraints += `general_frame_only_constraint_flag=${showbit(
-		constraintFlags.bitset(45)
-	)}${BREAK}`;
+	constraints += `general_non_packed_constraint_flag=${showbit(constraintFlags.bitset(46))}${BREAK}`;
+	constraints += `general_frame_only_constraint_flag=${showbit(constraintFlags.bitset(45))}${BREAK}`;
 
 	if (
 		general_profile_idc == 4 ||
@@ -156,34 +134,16 @@ export function decodeHEVC(val) {
 		general_profile_idc == 11 ||
 		bitSet32(general_profile_compatibility_flag, 10)
 	) {
-		constraints += `general_max_12bit_constraint_flag=${showbit(
-			constraintFlags.bitset(44)
-		)}${BREAK}`;
-		constraints += `general_max_10bit_constraint_flag=${showbit(
-			constraintFlags.bitset(43)
-		)}${BREAK}`;
-		constraints += `general_max_8bit_constraint_flag=${showbit(
-			constraintFlags.bitset(42)
-		)}${BREAK}`;
-		constraints += `general_max_422chroma_constraint_flag=${showbit(
-			constraintFlags.bitset(41)
-		)}${BREAK}`;
-		constraints += `general_max_420chroma_constraint_flag=${showbit(
-			constraintFlags.bitset(40)
-		)}${BREAK}`;
-		constraints += `general_max_monochrome_constraint_flag=${showbit(
-			constraintFlags.bitset(39)
-		)}${BREAK}`;
-		constraints += `general_intra_constraint_flag=${showbit(
-			constraintFlags.bitset(38)
-		)}${BREAK}`;
-		constraints += `general_one_picture_only_constraint_flag="${showbit(
-			constraintFlags.bitset(37)
-		)}${BREAK}`;
+		constraints += `general_max_12bit_constraint_flag=${showbit(constraintFlags.bitset(44))}${BREAK}`;
+		constraints += `general_max_10bit_constraint_flag=${showbit(constraintFlags.bitset(43))}${BREAK}`;
+		constraints += `general_max_8bit_constraint_flag=${showbit(constraintFlags.bitset(42))}${BREAK}`;
+		constraints += `general_max_422chroma_constraint_flag=${showbit(constraintFlags.bitset(41))}${BREAK}`;
+		constraints += `general_max_420chroma_constraint_flag=${showbit(constraintFlags.bitset(40))}${BREAK}`;
+		constraints += `general_max_monochrome_constraint_flag=${showbit(constraintFlags.bitset(39))}${BREAK}`;
+		constraints += `general_intra_constraint_flag=${showbit(constraintFlags.bitset(38))}${BREAK}`;
+		constraints += `general_one_picture_only_constraint_flag="${showbit(constraintFlags.bitset(37))}${BREAK}`;
 		general_one_picture_only_constraint_flag = constraintFlags.bitset(37);
-		constraints += `general_lower_bit_rate_constraint_flag=${showbit(
-			constraintFlags.bitset(36)
-		)}${BREAK}`;
+		constraints += `general_lower_bit_rate_constraint_flag=${showbit(constraintFlags.bitset(36))}${BREAK}`;
 
 		if (
 			general_profile_idc == 5 ||
@@ -195,21 +155,14 @@ export function decodeHEVC(val) {
 			general_profile_idc == 11 ||
 			bitSet32(general_profile_compatibility_flag, 10)
 		) {
-			constraints += `general_max_12bit_constraint_flag=${showbit(
-				constraintFlags.bitset(35)
-			)}${BREAK}`;
+			constraints += `general_max_12bit_constraint_flag=${showbit(constraintFlags.bitset(35))}${BREAK}`;
 			// general_reserved_zero_33bits
 		} else {
 			// general_reserved_zero_34bits
 		}
-	} else if (
-		general_profile_idc == 2 ||
-		bitSet32(general_profile_compatibility_flag, 1)
-	) {
+	} else if (general_profile_idc == 2 || bitSet32(general_profile_compatibility_flag, 1)) {
 		// general_reserved_zero_7bits
-		constraints += `general_one_picture_only_constraint_flag=${showbit(
-			constraintFlags.bitset(37)
-		)}${BREAK}`;
+		constraints += `general_one_picture_only_constraint_flag=${showbit(constraintFlags.bitset(37))}${BREAK}`;
 		general_one_picture_only_constraint_flag = constraintFlags.bitset(37);
 		//general_reserved_zero_35bits
 	} else {
@@ -232,23 +185,13 @@ export function decodeHEVC(val) {
 		general_profile_idc == 11 ||
 		bitSet32(general_profile_compatibility_flag, 10)
 	) {
-		constraints += `general_inbld_flag=${showbit(
-			constraintFlags.bitset(1)
-		)}${BREAK}`;
+		constraints += `general_inbld_flag=${showbit(constraintFlags.bitset(1))}${BREAK}`;
 	} else {
 		// general_reserved_zero_bit
 	}
 
-	res += `general_profile_space=${
-		general_profile_space == -1
-			? err(general_profile_space)
-			: general_profile_space
-	}${BREAK}`;
-	res += `general_profile_idc=${HEVCprofile(
-		general_profile_idc,
-		general_profile_compatibility_flag,
-		general_one_picture_only_constraint_flag
-	)}${BREAK}`;
+	res += `general_profile_space=${general_profile_space == -1 ? err(general_profile_space) : general_profile_space}${BREAK}`;
+	res += `general_profile_idc=${HEVCprofile(general_profile_idc, general_profile_compatibility_flag, general_one_picture_only_constraint_flag)}${BREAK}`;
 
 	const tier = sscanf(parts[3], '%c%d');
 	switch (tier[0].toUpperCase()) {

@@ -26,8 +26,6 @@
  *
  */
 
-/*jshint esversion: 6 */
-
 import { BREAK, err, warn, bold } from './markup.js';
 import { hexDigits } from './hexDigits.js';
 import { DVBclassification } from './dvb-mapping.js';

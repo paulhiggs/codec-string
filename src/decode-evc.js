@@ -26,7 +26,6 @@
  *
  */
 
-/*jshint esversion: 6 */
 // see annex E.9 of  ISO/IEC 14496-15:2019 Amd.2 "Carriage of VVC and EVC in ISOBMFF" (w19454)
 // and ISO/IEC 23091-2 (MDS19669_WG05_N00011)
 
@@ -67,26 +66,17 @@ function ISOIEC23091_2_ColourPrimaries(value) {
 				'Society of Motion Picture and Television Engineers ST 170 (2004)',
 			];
 		case 7:
-			return [
-				'Society of Motion Picture and Television Engineers ST 240 (1999)',
-			];
+			return ['Society of Motion Picture and Television Engineers ST 240 (1999)'];
 		case 8:
 			return ['Generic film (colour filters using Illuminant C)'];
 		case 9:
 			return ['Rec. ITU-R BT.2020-2', 'Rec. ITU-R BT.2100-2'];
 		case 10:
-			return [
-				'Society of Motion Picture and Television Engineers ST 428-1 (2019)',
-				'(CIE 1931 XYZ as in ISO 11664 1)',
-			];
+			return ['Society of Motion Picture and Television Engineers ST 428-1 (2019)', '(CIE 1931 XYZ as in ISO 11664 1)'];
 		case 11:
-			return [
-				'Society of Motion Picture and Television Engineers RP 431-2 (2011)',
-			];
+			return ['Society of Motion Picture and Television Engineers RP 431-2 (2011)'];
 		case 12:
-			return [
-				'Society of Motion Picture and Television  Engineers EG 432-1 (2010)',
-			];
+			return ['Society of Motion Picture and Television  Engineers EG 432-1 (2010)'];
 		case 22:
 			return ['No corresponding industry specification identified'];
 	}
@@ -97,15 +87,9 @@ function ISOIEC23091_2_TransferCharacteristics(value) {
 	if (value > 255) return [err(`invalid value (${value})`)];
 	switch (value) {
 		case 1:
-			return [
-				'Rec. ITU-R BT.709-6',
-				'Rec. ITU-R BT.1361-0 conventional colour gamut system (historical)',
-			];
+			return ['Rec. ITU-R BT.709-6', 'Rec. ITU-R BT.1361-0 conventional colour gamut system (historical)'];
 		case 2:
-			return [
-				title('Unspecified'),
-				'Image characteristics are unknown or are determined by the application.',
-			];
+			return [title('Unspecified'), 'Image characteristics are unknown or are determined by the application.'];
 		case 4:
 			return [
 				title('Assumed display gamma 2.2'),
@@ -115,10 +99,7 @@ function ISOIEC23091_2_TransferCharacteristics(value) {
 				'Rec. ITU-R BT.1700-0 625 PAL and 625 SECAM',
 			];
 		case 5:
-			return [
-				title('Assumed display gamma 2.8'),
-				'Rec. ITU-R BT.470-6 System B, G (historical)',
-			];
+			return [title('Assumed display gamma 2.8'), 'Rec. ITU-R BT.470-6 System B, G (historical)'];
 		case 6:
 			return [
 				'Rec. ITU-R BT.601-7 525 or 625',
@@ -127,26 +108,19 @@ function ISOIEC23091_2_TransferCharacteristics(value) {
 				'Society of Motion Picture and Television Engineers ST 170 (2004)',
 			];
 		case 7:
-			return [
-				'Society of Motion Picture and Television Engineers ST 240 (1999)',
-			];
+			return ['Society of Motion Picture and Television Engineers ST 240 (1999)'];
 		case 8:
 			return ['Linear transfer characteristics'];
 		case 9:
 			return ['Logarithmic transfer characteristic (100:1 range)'];
 		case 10:
-			return [
-				'Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)',
-			];
+			return ['Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)'];
 		case 11:
 			return ['IEC 61966-2-4'];
 		case 12:
 			return ['Rec. ITU-R BT.1361-0 extended colour gamut system (historical)'];
 		case 13:
-			return [
-				'IEC 61966-2-1 sRGB or(with MatrixCoefficients equal to 0)',
-				'IEC 61966-2-1 sYCC (with MatrixCoefficients equal to 5)',
-			];
+			return ['IEC 61966-2-1 sRGB or(with MatrixCoefficients equal to 0)', 'IEC 61966-2-1 sYCC (with MatrixCoefficients equal to 5)'];
 		case 14:
 			return ['Rec. ITU-R BT.2020-2'];
 		case 15:
@@ -157,14 +131,9 @@ function ISOIEC23091_2_TransferCharacteristics(value) {
 				'Rec. ITU-R BT.2100-2 perceptual quantization (PQ) system',
 			];
 		case 17:
-			return [
-				'Society of Motion Picture and Television Engineers ST 428-1 (2019)',
-			];
+			return ['Society of Motion Picture and Television Engineers ST 428-1 (2019)'];
 		case 18:
-			return [
-				'Association of Radio Industries and Businesses (ARIB) STD-B67 (2018)',
-				'Rec. ITU-R BT.2100-2 hybrid log-gamma (HLG) system',
-			];
+			return ['Association of Radio Industries and Businesses (ARIB) STD-B67 (2018)', 'Rec. ITU-R BT.2100-2 hybrid log-gamma (HLG) system'];
 	}
 	return [warn('Reserved -- For future use by ITU-T | ISO/IEC')];
 }
@@ -188,14 +157,9 @@ function ISOIEC23091_2_MatrixCoefficients(value) {
 				'Society of Motion Picture and Television Engineers RP 177 (1993) Annex B',
 			];
 		case 2:
-			return [
-				title('Unspecified'),
-				'Image characteristics are unknown or are determined by the application',
-			];
+			return [title('Unspecified'), 'Image characteristics are unknown or are determined by the application'];
 		case 4:
-			return [
-				'United States Federal Communications Commission Title 47 Code of Federal Regulations (2003) 73.682 (a) (20)',
-			];
+			return ['United States Federal Communications Commission Title 47 Code of Federal Regulations (2003) 73.682 (a) (20)'];
 		case 5:
 			return [
 				'Rec. ITU-R BT.470-6 System B, G (historical)',
@@ -213,22 +177,15 @@ function ISOIEC23091_2_MatrixCoefficients(value) {
 				'Society of Motion Picture and Television Engineers ST 170 (2004)',
 			];
 		case 7:
-			return [
-				'Society of Motion Picture and Television Engineers ST 240 (1999)',
-			];
+			return ['Society of Motion Picture and Television Engineers ST 240 (1999)'];
 		case 8:
 			return [title('YCgCo')];
 		case 9:
-			return [
-				'Rec. ITU-R BT.2020-2 (non-constant luminance)',
-				"Rec. ITU-R BT.2100-2 Y'CbCr",
-			];
+			return ['Rec. ITU-R BT.2020-2 (non-constant luminance)', "Rec. ITU-R BT.2100-2 Y'CbCr"];
 		case 10:
 			return ['Rec. ITU-R BT.2020-2 (constant luminance)'];
 		case 11:
-			return [
-				'Society of Motion Picture and Television Engineers ST 2085 (2015)',
-			];
+			return ['Society of Motion Picture and Television Engineers ST 2085 (2015)'];
 		case 12:
 			return ['Chromaticity-derived non-constant luminance system'];
 		case 13:
@@ -243,9 +200,7 @@ function ISOIEC23091_2_PackedContentInterpretationType(value) {
 	if (value > 15) return [err(`invalid value (${value})`)];
 	switch (value) {
 		case 0:
-			return [
-				'Unspecified relationship between the frame packed constituent frames',
-			];
+			return ['Unspecified relationship between the frame packed constituent frames'];
 		case 1:
 			return [
 				'Indicates that the two constituent frames form the left and right views of a stereo view scene, with frame 0 being associated with the left view and frame 1 being associated with the right view',
@@ -326,12 +281,7 @@ export function decodeEVC(val) {
 		MAIN_PROFILE = 1,
 		BASELINE_STILL_PROFILE = 2,
 		MAIN_STILL_PROFILE = 3;
-	const ProfileNames = [
-		'Baseline profile',
-		'Main profile',
-		'Baseline Still Picture profile',
-		'Main Still Picture profile',
-	];
+	const ProfileNames = ['Baseline profile', 'Main profile', 'Baseline Still Picture profile', 'Main Still Picture profile'];
 
 	function showbit(v) {
 		return v ? '1' : '0';
@@ -340,9 +290,7 @@ export function decodeEVC(val) {
 	function printBitDepth(args) {
 		const luma = Math.floor(args.value / 10),
 			chroma = args.value % 10;
-		return (
-			cell(args.value) + cell(`luma=${luma + 8}bit, chroma=${chroma + 8}bit`)
-		);
+		return cell(args.value) + cell(`luma=${luma + 8}bit, chroma=${chroma + 8}bit`);
 	}
 
 	function printChroma(args) {
@@ -443,14 +391,7 @@ export function decodeEVC(val) {
 		if (!args.value) return cell('no frame packing is used', 2);
 		const qsf = Math.floor(args.value / 10),
 			vfpt = args.value % 10;
-		return (
-			cell(args.value) +
-			cell(
-				`QuincunxSamplingFlag=${qsf}, VideoFramePackingType=${ISOIEC23091_2_VideoFramePackingType(
-					vfpt
-				)}`
-			)
-		);
+		return cell(args.value) + cell(`QuincunxSamplingFlag=${qsf}, VideoFramePackingType=${ISOIEC23091_2_VideoFramePackingType(vfpt)}`);
 	}
 
 	function printPackedContentInterpretationType(args) {
@@ -469,8 +410,7 @@ export function decodeEVC(val) {
 	}
 
 	function evaluate(tool, highBit, lowBit, profile_idc) {
-		if (profile_idc == BASELINE_PROFILE && highBit | lowBit)
-			return err(` --> must be 0 for ${ProfileNames[BASELINE_PROFILE]}`);
+		if (profile_idc == BASELINE_PROFILE && highBit | lowBit) return err(` --> must be 0 for ${ProfileNames[BASELINE_PROFILE]}`);
 		return '';
 	}
 
@@ -479,15 +419,8 @@ export function decodeEVC(val) {
 		toolset.forEach((t) => {
 			res +=
 				t.tool +
-				` [h:${showbit(bitSet32(toolset_idc_h, t.bit))} l:${showbit(
-					bitSet32(toolset_idc_l, t.bit)
-				)}]` +
-				evaluate(
-					t.tool,
-					bitSet32(toolset_idc_h, t.bit),
-					bitSet32(toolset_idc_l, t.bit),
-					profile_idc
-				) +
+				` [h:${showbit(bitSet32(toolset_idc_h, t.bit))} l:${showbit(bitSet32(toolset_idc_l, t.bit))}]` +
+				evaluate(t.tool, bitSet32(toolset_idc_h, t.bit), bitSet32(toolset_idc_l, t.bit), profile_idc) +
 				BREAK;
 		});
 		return res;
@@ -509,19 +442,12 @@ export function decodeEVC(val) {
 			cell(h.default ? '(default)' : '') +
 			'</tr>';
 
-		res +=
-			'<tr>' +
-			cell(h.key) +
-			cell(l.label) +
-			cell(printHex3(l.value)) +
-			cell(l.default ? '(default)' : '') +
-			'</tr>';
+		res += '<tr>' + cell(h.key) + cell(l.label) + cell(printHex3(l.value)) + cell(l.default ? '(default)' : '') + '</tr>';
 		return res;
 	}
 
 	function SetKeyValue(values, key, value, expression, hexadecimal = false) {
-		if (!expression.test(value))
-			return `${err(`invalid value for key=${key}`)}${BREAK}`;
+		if (!expression.test(value)) return `${err(`invalid value for key=${key}`)}${BREAK}`;
 
 		const t = values.find((elem) => elem.key == key);
 		if (t) {
@@ -726,12 +652,7 @@ export function decodeEVC(val) {
 			}
 			case KEY_INTERPRETATION: {
 				const PackedContentInterpretationTypeRegex = /^\d$/;
-				res += SetKeyValue(
-					values,
-					key,
-					value,
-					PackedContentInterpretationTypeRegex
-				);
+				res += SetKeyValue(values, key, value, PackedContentInterpretationTypeRegex);
 				break;
 			}
 			case KEY_SAR: {
@@ -748,13 +669,7 @@ export function decodeEVC(val) {
 	res += '<table>';
 	values.forEach((k) => {
 		if (!k.deferredPrint)
-			res +=
-				'<tr>' +
-				cell(k.key) +
-				cell(k.label) +
-				(k.printFn ? k.printFn(k) : cell(k.value, 2)) +
-				cell(k.default ? '(default)' : '') +
-				'</tr>';
+			res += '<tr>' + cell(k.key) + cell(k.label) + (k.printFn ? k.printFn(k) : cell(k.value, 2)) + cell(k.default ? '(default)' : '') + '</tr>';
 	});
 	res += printToolset(values);
 	res += '</table>';

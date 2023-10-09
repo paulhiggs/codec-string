@@ -26,10 +26,8 @@
  *
  */
 
-/*jshint esversion: 6 */
 /**
  * ETSI TS 103-190-2 annex E.13 - https://www.etsi.org/deliver/etsi_ts/103100_103199/10319002/01.02.01_60/ts_10319002v010201p.pdf
-
  **/
 
 import { BREAK, err, warn } from './markup.js';
@@ -41,13 +39,9 @@ export function decodeAC4(val) {
 
 	if (parts.length != 4) return err('invalid format') + BREAK;
 
-	if (!hexDigits(parts[1]) || !hexDigits(parts[2]) || !hexDigits(parts[3]))
-		return err('parameters contain non-hex digits') + BREAK;
+	if (!hexDigits(parts[1]) || !hexDigits(parts[2]) || !hexDigits(parts[3])) return err('parameters contain non-hex digits') + BREAK;
 
-	res += `bitstream_version: ${parseInt(
-		parts[1],
-		16
-	)}${BREAK}presentation_version: ${parseInt(parts[2], 16)}${BREAK}`;
+	res += `bitstream_version: ${parseInt(parts[1], 16)}${BREAK}presentation_version: ${parseInt(parts[2], 16)}${BREAK}`;
 
 	res += 'maximum channels: ';
 	switch (parseInt(parts[3], 16)) {

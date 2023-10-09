@@ -28,7 +28,6 @@
 import { BREAK, dflt, err, warn } from './markup.js';
 import { sscanf } from './sscanf-func.js';
 
-/*jshint esversion: 6 */
 export function decodeAV1(val) {
 	// defined in https://aomediacodec.github.io/av1-isobmff/#codecsparam
 	/* 
@@ -187,8 +186,7 @@ export function decodeAV1(val) {
 
 	res += BREAK;
 	if (parts.length > 5)
-		if (parts[5].length != 3)
-			res += err(`incorrect subsampling length ${parts[5]}`);
+		if (parts[5].length != 3) res += err(`incorrect subsampling length ${parts[5]}`);
 		else {
 			switch (parts[5][0]) {
 				case '0':
@@ -222,11 +220,7 @@ export function decodeAV1(val) {
 				default:
 					res += err(`invalid value for subsampling_y (${parts[5][2]})`);
 			}
-			if (parts[5][0] != '1' || parts[5][1] != '1')
-				if (parts[5][2] != '0')
-					res += err(
-						'third digit must be 0 when first or second digit are not set to 1'
-					);
+			if (parts[5][0] != '1' || parts[5][1] != '1') if (parts[5][2] != '0') res += err('third digit must be 0 when first or second digit are not set to 1');
 		}
 	else res += dflt('110 4:2:0');
 
@@ -252,8 +246,7 @@ export function decodeAV1(val) {
 				res += 'CP_SMPTE_240 - SMPTE 240';
 				break;
 			case 8:
-				res +=
-					'CP_GENERIC_FILM - Generic film (color filters using illuminant C)';
+				res += 'CP_GENERIC_FILM - Generic film (color filters using illuminant C)';
 				break;
 			case 9:
 				res += 'CP_BT_2020 - BT.2020, BT.2100';

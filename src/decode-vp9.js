@@ -26,7 +26,6 @@
  *
  */
 
-/*jshint esversion: 6 */
 /*
 https://tools.axinom.com/capabilities/media
 
@@ -73,8 +72,7 @@ export function decodeVP9(val) {
 	const VP9regex = /^(vp09)(\.\d\d){3}(\.\d{0,2}){0,5}$/;
 	const VP9format =
 		'<sample entry 4CC>.<profile>.<level>.<bitDepth>.<chromaSubsampling>.<colourPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>';
-	if (!VP9regex.test(val))
-		return err('Regex failure') + BREAK + err(VP9format) + BREAK;
+	if (!VP9regex.test(val)) return err('Regex failure') + BREAK + err(VP9format) + BREAK;
 
 	const PROFILE_0 = 0,
 		PROFILE_1 = 1,
@@ -149,8 +147,7 @@ export function decodeVP9(val) {
 	}
 
 	function printProfile(args) {
-		if (args.value < PROFILE_0 || args.value > PROFILE_3)
-			return cell(err(`invalid profile (${args.value})`), 2);
+		if (args.value < PROFILE_0 || args.value > PROFILE_3) return cell(err(`invalid profile (${args.value})`), 2);
 		return cell(args.value) + cell(`Profile ${args.value}`);
 	}
 	function printLevel(args) {
@@ -207,16 +204,11 @@ export function decodeVP9(val) {
 		const bitDepth = args.value;
 		const profile = ProfileValue(fields);
 		let res = '';
-		if (bitDepth != 8 && bitDepth != 10 && bitDepth != 12)
-			return cell(err(`invalid Colour Bit Depth (${args.value})`), 2);
+		if (bitDepth != 8 && bitDepth != 10 && bitDepth != 12) return cell(err(`invalid Colour Bit Depth (${args.value})`), 2);
 
 		res += cell(args.value);
-		if (bitDepth == BITS8 && (profile == PROFILE_2 || profile == PROFILE_3))
-			res += cell(warn('8 bit only possible with Profile 0 or 1'));
-		else if (
-			(bitDepth == BITS10 || bitDepth == BITS12) &&
-			(profile == PROFILE_0 || profile == PROFILE_1)
-		)
+		if (bitDepth == BITS8 && (profile == PROFILE_2 || profile == PROFILE_3)) res += cell(warn('8 bit only possible with Profile 0 or 1'));
+		else if ((bitDepth == BITS10 || bitDepth == BITS12) && (profile == PROFILE_0 || profile == PROFILE_1))
 			res += cell(warn(bitDepth + ' bit only possible with Profle 2 or 3'));
 		else res += cell('');
 		return res;
@@ -244,24 +236,14 @@ export function decodeVP9(val) {
 			const profile = ProfileValue(fields);
 			const matrix = MatrixCoefficientsValue(fields);
 			let ev = null;
-			if (
-				(profile == PROFILE_0 || profile == PROFILE_2) &&
-				(chroma == CHROMA440 || chroma == CHROMA444 || chroma == CHROMA422)
-			)
+			if ((profile == PROFILE_0 || profile == PROFILE_2) && (chroma == CHROMA440 || chroma == CHROMA444 || chroma == CHROMA422))
 				ev = 'Profile 0 and 2 must be 4:2:0';
-			else if (
-				(profile == PROFILE_1 || profile == PROFILE_3) &&
-				(chroma == CHROMA420_vert || chroma == CHROMA420_luma)
-			)
+			else if ((profile == PROFILE_1 || profile == PROFILE_3) && (chroma == CHROMA420_vert || chroma == CHROMA420_luma))
 				ev = '4:2:0 chroma sampling is not permitted with Profile 1 and 3';
-			else if (matrix == 0 && chroma != CHROMA444)
-				ev = '4:4:4 chroma sampling is required matricCoefficients=0 (RGB)';
-			res +=
-				cell(chroma) + cell(sample + (ev ? ' ' + warn(`note! ${ev}`) : ''));
-		} else if (chroma >= 4 && chroma <= 7)
-			res += cell(chroma) + cell(warn('Reserved'));
-		else
-			res += cell(err(`invalid value for chroma subsampling (${chroma})`), 2);
+			else if (matrix == 0 && chroma != CHROMA444) ev = '4:4:4 chroma sampling is required matricCoefficients=0 (RGB)';
+			res += cell(chroma) + cell(sample + (ev ? ' ' + warn(`note! ${ev}`) : ''));
+		} else if (chroma >= 4 && chroma <= 7) res += cell(chroma) + cell(warn('Reserved'));
+		else res += cell(err(`invalid value for chroma subsampling (${chroma})`), 2);
 		return res;
 	}
 
@@ -279,10 +261,7 @@ export function decodeVP9(val) {
 				break;
 
 			default:
-				res += cell(
-					err(`invalid value for colour primaries (${primaries})`),
-					2
-				);
+				res += cell(err(`invalid value for colour primaries (${primaries})`), 2);
 		}
 		if (desc) res += cell(primaries) + cell(desc);
 		return res;
@@ -301,10 +280,7 @@ export function decodeVP9(val) {
 				desc = 'ST 2084 EOTF';
 				break;
 			default:
-				res += cell(
-					err(`invalid value for transfer characteristics (${transferC})`),
-					2
-				);
+				res += cell(err(`invalid value for transfer characteristics (${transferC})`), 2);
 		}
 		if (desc) res += cell(transferC) + cell(desc);
 		return res;
@@ -367,12 +343,7 @@ export function decodeVP9(val) {
 	res += '<table>';
 
 	fields.forEach((field) => {
-		res +=
-			'<tr>' +
-			cell(field.name) +
-			(field.printFn ? field.printFn(field) : cell(field.value, 2)) +
-			cell(field.default ? '(default)' : '') +
-			'</tr>';
+		res += '<tr>' + cell(field.name) + (field.printFn ? field.printFn(field) : cell(field.value, 2)) + cell(field.default ? '(default)' : '') + '</tr>';
 	});
 	res += '</table>';
 	return res;

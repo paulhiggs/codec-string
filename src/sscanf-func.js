@@ -1,4 +1,3 @@
-/*jshint esversion: 6 */
 // see https://locutus.io/php/strings/sscanf/
 
 export function sscanf(str, format) {
@@ -56,11 +55,7 @@ export function sscanf(str, format) {
 			var match = regex.exec(check);
 			// @todo: Make this more readable
 			var key = digit !== undefined ? digit : retArr.length;
-			var testNull = (retArr[key] = match
-				? cb
-					? cb.apply(null, match)
-					: match[0]
-				: null);
+			var testNull = (retArr[key] = match ? (cb ? cb.apply(null, match) : match[0]) : null);
 			if (testNull === null) {
 				throw new Error('No match in string');
 			}
@@ -100,9 +95,7 @@ export function sscanf(str, format) {
 
 			var tmpDigit = digit;
 			if (tmpDigit && preConvs[1] === undefined) {
-				throw new Error(
-					'All groups in sscanf() must be expressed as numeric if any have already been used'
-				);
+				throw new Error('All groups in sscanf() must be expressed as numeric if any have already been used');
 			}
 			digit = preConvs[1] ? parseInt(preConvs[1], 10) - 1 : undefined;
 
@@ -203,17 +196,13 @@ export function sscanf(str, format) {
 						// Although sscanf doesn't support locales,
 						// this is used instead of '%F'; seems to be same as %e
 						// These don't discriminate here as both allow exponential float of either case
-						j = _addNext(
-							j,
-							/([+-])?(?:0*)(\d*\.?\d*(?:[eE]?\d+)?)/,
-							function (num, sign, dec) {
-								if (dec === '.') {
-									return null;
-								}
-								// Ignores initial zeroes, unlike %i and parseFloat()
-								return parseFloat((sign || '') + dec);
+						j = _addNext(j, /([+-])?(?:0*)(\d*\.?\d*(?:[eE]?\d+)?)/, function (num, sign, dec) {
+							if (dec === '.') {
+								return null;
 							}
-						);
+							// Ignores initial zeroes, unlike %i and parseFloat()
+							return parseFloat((sign || '') + dec);
+						});
 						break;
 					case 'u':
 						// unsigned decimal integer
@@ -232,13 +221,9 @@ export function sscanf(str, format) {
 						break;
 					case 'o':
 						// Octal integer // @todo: add overflows as above?
-						j = _addNext(
-							j,
-							/([+-])?(?:0([0-7]+))/,
-							function (num /*, sign, oct*/) {
-								return parseInt(num, 8);
-							}
-						);
+						j = _addNext(j, /([+-])?(?:0([0-7]+))/, function (num /*, sign, oct*/) {
+							return parseInt(num, 8);
+						});
 						break;
 					case 's':
 						// Greedy match
@@ -249,23 +234,15 @@ export function sscanf(str, format) {
 						// Same as 'x'?
 						// @todo: add overflows as above?
 						// Initial 0x not necessary here
-						j = _addNext(
-							j,
-							/([+-])?(?:(?:0x)?([\da-fA-F]+))/,
-							function (num /* , sign, hex */) {
-								return parseInt(num, 16);
-							}
-						);
+						j = _addNext(j, /([+-])?(?:(?:0x)?([\da-fA-F]+))/, function (num /* , sign, hex */) {
+							return parseInt(num, 16);
+						});
 						break;
 					case '':
 						// If no character left in expression
-						throw new Error(
-							'Missing character after percent mark in sscanf() format argument'
-						);
+						throw new Error('Missing character after percent mark in sscanf() format argument');
 					default:
-						throw new Error(
-							'Unrecognized character after percent mark in sscanf() format argument'
-						);
+						throw new Error('Unrecognized character after percent mark in sscanf() format argument');
 				}
 			} catch (e) {
 				if (e === 'No match in string') {

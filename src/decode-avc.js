@@ -26,7 +26,6 @@
  *
  */
 
-/*jshint esversion: 6 */
 /**
  * https://blog.pearce.org.nz/2013/11/what-does-h264avc1-codecs-parameters.html
  * https://en.wikipedia.org/wiki/Advanced_Video_Coding

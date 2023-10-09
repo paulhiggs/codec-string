@@ -26,7 +26,6 @@
  *
  */
 
-/*jshint esversion: 6 */
 // see ISO/IEC 23000-19:2019 Amd.2 "CMAF Media Profiles for MPEG-H 3D Audio, EVC, VVC and other technologies"
 // MDS19970_WG03_N00137
 

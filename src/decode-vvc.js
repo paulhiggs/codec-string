@@ -26,7 +26,6 @@
  *
  */
 
-/*jshint esversion: 6 */
 // see annex E.6 through E.8 of  ISO/IEC 14496-15:2019 Amd.2 "Carriage of VVC and EVC in ISOBMFF"
 // w19454
 
