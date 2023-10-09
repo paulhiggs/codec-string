@@ -28,52 +28,108 @@
 
 /**
  * ETSI TS 103-190-2 annex E.13 - https://www.etsi.org/deliver/etsi_ts/103100_103199/10319002/01.02.01_60/ts_10319002v010201p.pdf
+ *
+ * https://media.developer.dolby.com/AC4/AC4_DASH_for_BROADCAST_SPEC/index.html#help_files/topics/c_mpd_codec.html
+ *
  **/
 
-import { BREAK, err, warn } from './markup.js';
+import { BREAK, err, warn, bold } from './markup.js';
 import { hexDigits } from './utils.js';
+import { DVBclassification } from './dvb-mapping.js';
+
+// eslint-disable-next-line no-unused-vars
+export function decodeEAC3(val) {
+	if (val.toLowerCase() != 'ec-3') return err('no additional parameters for Enhanced AC-3');
+	let res = '';
+	const dvb = DVBclassification({ type: 'audio', codec: 'AC3', mode: 'E-AC3' });
+	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
+	return res;
+}
 
 export function decodeAC4(val) {
 	const parts = val.split('.');
-	let res = '';
 
 	if (parts.length != 4) return err('invalid format') + BREAK;
-
 	if (!hexDigits(parts[1]) || !hexDigits(parts[2]) || !hexDigits(parts[3])) return err('parameters contain non-hex digits') + BREAK;
 
-	res += `bitstream_version: ${parseInt(parts[1], 16)}${BREAK}presentation_version: ${parseInt(parts[2], 16)}${BREAK}`;
+	let res = '';
+	const coding_params = { type: 'audio', codec: parts[0] },
+		bs_version = parseInt(parts[1], 16),
+		pres_version = parseInt(parts[2], 16),
+		mdcompat = parseInt(parts[3], 16);
 
-	res += 'maximum channels: ';
-	switch (parseInt(parts[3], 16)) {
+	res += `bitstream_version: ${bs_version}${BREAK}presentation_version: ${pres_version}${BREAK}`;
+
+	switch (pres_version) {
 		case 0:
-			res += '2';
+			// clause 4.3.3.3.8 of ETSI TS 103 190-1 v1.3.1
+			res += 'maximum channels: ';
+			switch (mdcompat) {
+				case 0:
+					res += '2';
+					break;
+				case 1:
+					res += '6';
+					break;
+				case 2:
+					res += '9';
+					break;
+				case 3:
+					res += '11';
+					break;
+				case 4:
+					res += '13';
+					break;
+				case 5:
+				case 6:
+					res += warn('Reserved');
+					break;
+				case 7:
+					res += 'Unrestricted';
+					break;
+				default:
+					res += err(`invalid value (${mdcompat})`);
+			}
 			break;
 		case 1:
-			res += '6';
+			// table 77 of ETSI TS 103 190-2 v1.2.1
+			res += 'maximum tracks: ';
+			switch (mdcompat) {
+				case 0:
+					res += '2';
+					break;
+				case 1:
+					res += '6';
+					break;
+				case 2:
+					res += '9';
+					break;
+				case 3:
+					res += '11';
+					break;
+				case 4:
+				case 5:
+				case 6:
+					res += warn('Reserved');
+					break;
+				case 7:
+					res += 'Unrestricted';
+					break;
+				default:
+					res += err(`invalid value (${mdcompat})`);
+			}
 			break;
-		case 2:
-			res += '9';
-			break;
-		case 3:
-			res += '11';
-			break;
-		case 4:
-			res += '13';
-			break;
-		case 5:
-		case 6:
-			res += warn('Reserved');
-			break;
-		case 7:
-			res += 'Unrestricted';
-			break;
-		default:
-			res += err(`invalid value (${parseInt(parts[3], 16)})`);
 	}
 	res += BREAK;
+
+	const dvb = DVBclassification(coding_params);
+	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
+
 	return res;
 }
 
 export function registerAC4(addHandler) {
+	// ETSI TS 103 285 table 8
+	addHandler('ec-3', 'Enhanced AC-3', decodeEAC3);
 	addHandler('ac-4', 'Digital Audio Compression (AC-4)', decodeAC4);
 }

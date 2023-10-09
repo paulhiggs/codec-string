@@ -320,6 +320,49 @@ const VideoTerms = [
 	{ term: '6.1.10', codec: 'vvc1', profile: 'Main 10', tier: 'Main*', level: '6.2' },
 ];
 
+const AudioCodecCS = 'urn:dvb:metadata:cs:AudioCodecCS:2022';
+const AudioTerms = [
+	{ term: '1', codec: 'mp4a' },
+	{ term: '1.1', codec: 'mp4a', profile: 'Advanced' },
+	{ term: '1.1.1', codec: 'mp4a', profile: 'Advanced', level: '1' },
+	{ term: '1.1.2', codec: 'mp4a', profile: 'Advanced', level: '2' },
+	{ term: '1.1.3', codec: 'mp4a', profile: 'Advanced', level: '4' },
+	{ term: '1.1.4', codec: 'mp4a', profile: 'Advanced', level: '5' },
+	{ term: '1.2', codec: 'mp4a', profile: 'High Efficiency Advanced' },
+	{ term: '1.2.2', codec: 'mp4a', profile: 'High Efficiency Advanced', level: '2' },
+	{ term: '1.2.3', codec: 'mp4a', profile: 'High Efficiency Advanced', level: '3' },
+	{ term: '1.2.4', codec: 'mp4a', profile: 'High Efficiency Advanced', level: '4' },
+	{ term: '1.2.5', codec: 'mp4a', profile: 'High Efficiency Advanced', level: '5' },
+	{ term: '1.3', codec: 'mp4a', profile: 'High Efficiency Advanced v2' },
+	{ term: '1.3.2', codec: 'mp4a', profile: 'High Efficiency Advanced v2', level: '2' },
+	{ term: '1.3.3', codec: 'mp4a', profile: 'High Efficiency Advanced v2', level: '3' },
+	{ term: '1.3.4', codec: 'mp4a', profile: 'High Efficiency Advanced v2', level: '4' },
+	{ term: '1.3.5', codec: 'mp4a', profile: 'High Efficiency Advanced v2', level: '5' },
+
+	{ term: '3', codec: 'AC3' },
+	{ term: '3.1', codec: 'AC3', mode: 'E-AC3' },
+
+	{ term: '4', codec: 'mp4a' },
+	{ term: '4.1', codec: 'mp4a', profile: 'Advanced' },
+	{ term: '4.1.1', codec: 'mp4a', profile: 'Advanced', level: '1' },
+
+	{ term: '5', codec: 'DTS' },
+	{ term: '5.1', codec: 'DTS', level: 'HD' },
+	{ term: '5.1.1', codec: 'DTS', level: 'HD', mode: 'dtsc' },
+	{ term: '5.1.2', codec: 'DTS', level: 'HD', mode: 'dtse' },
+	{ term: '5.1.3', codec: 'DTS', level: 'HD', mode: 'dtsh' },
+	{ term: '5.1.4', codec: 'DTS', level: 'HD', mode: 'dtsl' },
+	{ term: '5.2', codec: 'DTS', level: 'UHD' },
+	{ term: '5.2.1', codec: 'DTS', level: 'UHD', mode: 'dtsx' },
+	{ term: '5.2.2', codec: 'DTS', level: 'UHD', mode: 'dtsy' },
+
+	{ term: '6', codec: 'mhm1' },
+	{ term: '6.1', codec: 'mhm1', mode: 'LC' },
+	{ term: '6.1.1', codec: 'mhm1', mode: 'LC', level: '1' },
+	{ term: '6.1.2', codec: 'mhm1', mode: 'LC', level: '2' },
+	{ term: '6.1.3', codec: 'mhm1', mode: 'LC', level: '3' },
+];
+
 function tableLookup(entry) {
 	const ek = Object.keys(entry),
 		tk = Object.keys(this);
@@ -358,7 +401,11 @@ export function DVBclassification(params) {
 		case 'video':
 			res = match(VideoCodecCS, VideoTerms, params);
 			break;
+		case 'audio':
+			res = match(AudioCodecCS, AudioTerms, params);
+			break;
 	}
+
 	return res;
 }
 
