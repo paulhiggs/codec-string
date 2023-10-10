@@ -39,10 +39,10 @@ export function decodeDTS(val) {
 
 export function registerDTS(addHandler) {
 	// ETSI TS 103 285 table 10
-	addHandler('dtsc', 'DTS-HD Core', decodeDTS);
-	addHandler('dtsh', 'DTS-HD (with legacy core)', decodeDTS);
-	addHandler('dtse', 'DTS-HD Low Bit Rate', decodeDTS);
-	addHandler('dtsl', 'DTS-HD (lossless, without legacy core)', decodeDTS);
-	addHandler('dtsx', 'DTS UHD (Profile 2)', decodeDTS);
-	addHandler('dtsy', 'DTS UHD (Profile 3)', decodeDTS);
+	addHandler('dtsc', 'DTS-HD Core', decodeDTS); // ETSI TS 102 114 annex H
+	addHandler('dtsh', 'DTS-HD (with legacy core)', decodeDTS); // ETSI TS 102 114 annex H
+	addHandler('dtse', 'DTS-HD Low Bit Rate', decodeDTS); // ETSI TS 102 114 annex H
+	addHandler('dtsl', 'DTS-HD (lossless, without legacy core)', decodeDTS); // ETSI TS 102 114 annex H
+	addHandler('dtsx', 'DTS UHD (Profile 2)', decodeDTS); // ETSI TS 103 491 annex E
+	addHandler('dtsy', 'DTS UHD (Profile 3)', decodeDTS); // ETSI TS 103 491 annex E
 }

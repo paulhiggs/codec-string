@@ -25,13 +25,5 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
-export function registerMisc(addHandler) {
-	addHandler('ec-3', 'Enhanced AC-3'); // Dolby Digital+, E-AC-3
-	addHandler('dtsc', 'DTS Core'); // ETSI TS 102 114 annex H
-	addHandler('dtsh', 'DTS-HD audio'); // ETSI TS 102 114 annex H
-	addHandler('dtsl', 'DTS-HD Lossless'); // ETSI TS 102 114 annex H
-	addHandler('dtse', 'DTS-HD Low Bit Rare'); // ETSI TS 102 114 annex H
-	addHandler('dtsx', 'DTS-UHD Profile 2'); // ETSI TS 103 491 annex E
-	addHandler('dtsy', 'DTS-UHD Profile 3'); // ETSI TS 103 491 annex E
-}
+// eslint-disable-next-line no-unused-vars
+export function registerMisc(addHandler) {}
