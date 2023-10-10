@@ -364,42 +364,32 @@ const ProfileLevelIndication = (pli) => {
 };
 
 const MPEGvideoOTI = (oti, pli = null) => {
-	let res = '';
 	switch (oti) {
-		case 0x20:
-			res += 'Visual ISO/IEC 14496-2';
+		case 0x20: {
+			let res = 'Visual ISO/IEC 14496-2';
 			if (pli) res += BREAK + ProfileLevelIndication(pli);
-			break;
+			return res;
+		}
 		case 0x21:
-			res += 'Visual ITU-T Recommendation H.264 | ISO/IEC 14496-10';
-			break;
+			return 'Visual ITU-T Recommendation H.264 | ISO/IEC 14496-10';
 		case 0x22:
-			res += 'Parameter Sets for ITU-T Recommendation H.264 | ISO/IEC 14496-10';
-			break;
+			return 'Parameter Sets for ITU-T Recommendation H.264 | ISO/IEC 14496-10';
 		case 0x23:
-			res += 'Visual ISO/IEC 23008-2 | ITU-T Recommendation H.265';
-			break;
+			return 'Visual ISO/IEC 23008-2 | ITU-T Recommendation H.265';
 		case 0x60:
-			res += 'Visual ISO/IEC 13818-2 Simple Profile';
-			break;
+			return 'Visual ISO/IEC 13818-2 Simple Profile';
 		case 0x61:
-			res += 'Visual ISO/IEC 13818-2 Main Profile';
-			break;
+			return 'Visual ISO/IEC 13818-2 Main Profile';
 		case 0x62:
-			res += 'Visual ISO/IEC 13818-2 SNR Profile';
-			break;
+			return 'Visual ISO/IEC 13818-2 SNR Profile';
 		case 0x63:
-			res += 'Visual ISO/IEC 13818-2 Spatial Profile';
-			break;
+			return 'Visual ISO/IEC 13818-2 Spatial Profile';
 		case 0x64:
-			res += 'Visual ISO/IEC 13818-2 High Profile';
-			break;
+			return 'Visual ISO/IEC 13818-2 High Profile';
 		case 0x65:
-			res += 'Visual ISO/IEC 13818-2 422 Profile';
-			break;
+			return 'Visual ISO/IEC 13818-2 422 Profile';
 	}
-
-	return res;
+	return err(`invalid value for Object Type Identifier (${oti})`);
 };
 
 export function decodeMPEG4video(val) {
@@ -412,10 +402,9 @@ export function decodeMPEG4video(val) {
 }
 
 const MPEGaudioOTI = (oti, aacMode = null) => {
-	let res = '';
 	switch (oti) {
-		case 0x40:
-			res += 'MPEG-4 AAC (40)';
+		case 0x40: {
+			let res = 'MPEG-4 AAC (40)';
 			if (aacMode) {
 				const vals = [
 					{ i: 1, s: 'Main' },
@@ -453,26 +442,20 @@ const MPEGaudioOTI = (oti, aacMode = null) => {
 				const found = vals.find((elem) => aacMode == elem.i);
 				res += BREAK + (found ? `${found.s} (${found.i})` : err(`invalid AAC OTI (${aacMode})`));
 			}
-			break;
+			return res;
+		}
 		case 0x66:
-			res += 'MPEG-2 AAC Main Profile (66)';
-			break;
+			return 'MPEG-2 AAC Main Profile (66)';
 		case 0x67:
-			res += 'MPEG-2 AAC Low Complexity Profile (67)';
-			break;
+			return 'MPEG-2 AAC Low Complexity Profile (67)';
 		case 0x68:
-			res += 'MPEG-2 AAC Scalable Sampling Rate Profile (68)';
-			break;
+			return 'MPEG-2 AAC Scalable Sampling Rate Profile (68)';
 		case 0x69:
-			res += 'MPEG-2 Audio Part 3 (69)';
-			break;
+			return 'MPEG-2 Audio Part 3 (69)';
 		case 0x6b:
-			res += 'MPEG-1 Part 3 (6B)';
-			break;
-		default:
-			res += err(`invalid MP4 OTI (${oti})`);
+			return 'MPEG-1 Part 3 (6B)';
 	}
-	return res;
+	return err(`invalid MP4 Audio Object Type Iindicator (${oti})`);
 };
 
 export function decodeMPEG4audio(val) {
