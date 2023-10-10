@@ -1,4 +1,3 @@
-export { decodeAAC } from './decode-aac.js';
 export { decodeAC4 } from './decode-ac4.js';
 export { decodeAV1 } from './decode-av1.js';
 export { decodeAVC } from './decode-avc.js';
@@ -6,7 +5,7 @@ export { decodeAVS3 } from './decode-avs.js';
 export { decodeDTS } from './decode-dts.js';
 export { decodeEVC } from './decode-evc.js';
 export { decodeHEVC } from './decode-hevc.js';
-export { decodeMPEG2video, decodeMPEG2audio, decodeMPEG1video, decodeMPEG1audio, decodeMPEG4video } from './decode-mpeg.js';
+export { decodeMPEG2video, decodeMPEG2audio, decodeMPEG1video, decodeMPEG1audio, decodeMPEG4video, decodeMPEG4audio } from './decode-mpeg.js';
 export { decodeMPEGH } from './decode-mpegH.js';
 export { decodeSTPP } from './decode-text.js';
 export { decodeVP9 } from './decode-vp9.js';

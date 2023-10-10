@@ -1,4 +1,3 @@
-import { registerAAC } from './decode-aac.js';
 import { registerAC4 } from './decode-ac4.js';
 import { registerAV1 } from './decode-av1.js';
 import { registerAVC } from './decode-avc.js';
@@ -46,7 +45,6 @@ function noHandler() {
 }
 
 const registerFactories = [
-	registerAAC,
 	registerAC4,
 	registerAV1,
 	registerAVC,
