@@ -93,7 +93,7 @@ export function decodeVP9(val) {
 			name: 'profile',
 			value: -1,
 			default: true,
-			printfn: printProfile,
+			printFn: printProfile,
 		},
 		{ index: 2, name: 'level', value: -1, default: true, printFn: printLevel },
 		{
