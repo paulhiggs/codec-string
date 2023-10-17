@@ -42,7 +42,7 @@ export function decodeMPEGH(val) {
 	const level = parseInt(parts[1], 16),
 		coding_params = { type: 'audio', codec: parts[0] };
 
-	switch (level[0]) {
+	switch (level) {
 		case 0x0b:
 			res += 'LC Profile Level 1';
 			coding_params.mode = 'LC';
@@ -74,7 +74,7 @@ export function decodeMPEGH(val) {
 			coding_params.level = '3';
 			break;
 		default:
-			return err('invalid level') + BREAK;
+			return err(`invalid level (${parts[1]})`) + BREAK;
 	}
 	if (parts[0] == 'mhm2') res += ', multi-steam';
 	res += BREAK;
