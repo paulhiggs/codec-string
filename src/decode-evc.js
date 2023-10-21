@@ -358,7 +358,7 @@ export function decodeEVC(val) {
 				res = 'Level 5.1';
 				break;
 			case 52:
-				res = 'Level 5.1';
+				res = 'Level 5.2';
 				break;
 			case 60:
 				res = 'Level 6';
@@ -442,7 +442,7 @@ export function decodeEVC(val) {
 			cell(h.default ? '(default)' : '') +
 			'</tr>';
 
-		res += '<tr>' + cell(h.key) + cell(l.label) + cell(printHex3(l.value)) + cell(l.default ? '(default)' : '') + '</tr>';
+		res += '<tr>' + cell(l.key) + cell(l.label) + cell(printHex3(l.value)) + cell(l.default ? '(default)' : '') + '</tr>';
 		return res;
 	}
 
