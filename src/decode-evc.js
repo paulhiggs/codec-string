@@ -297,7 +297,7 @@ export function decodeEVC(val) {
 		const J = Math.floor(args.value / 100),
 			a = Math.floor((args.value - J * 100) / 10),
 			b = args.value % 10;
-		return cell(args.value) + cell(`{$J}:${a}:${b}`);
+		return cell(args.value) + cell(`${J}:${a}:${b}`);
 	}
 
 	function describe(value, infoFunction) {
