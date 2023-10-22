@@ -394,9 +394,9 @@ function match(cs, terms, params) {
 }
 
 export function DVBclassification(params) {
-	if (!params?.type) return '';
-
 	let res = '';
+	if (!params?.type) return res;
+
 	switch (params.type) {
 		case 'video':
 			res = match(VideoCodecCS, VideoTerms, params);

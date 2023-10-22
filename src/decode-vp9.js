@@ -66,13 +66,14 @@ mutually inclusive (all or none) fields. If not specified then the processing de
 in the table below as defaults when deciding if the device is able to decode and potentially render the video.
 */
 
-import { BREAK, cell, err, warn, HTMLsafe } from './markup.js';
+import { error } from './decode.js';
+import { err, BREAK, HTMLsafe, cell, bold, warn, dflt } from './markup.js';
 
 export function decodeVP9(val) {
 	const VP9regex = /^(vp09)(\.\d\d){3}(\.\d{0,2}){0,5}$/;
 	const VP9format =
 		'<sample entry 4CC>.<profile>.<level>.<bitDepth>.<chromaSubsampling>.<colourPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>';
-	if (!VP9regex.test(val)) return err('Regex failure') + BREAK + err(HTMLsafe(VP9format)) + BREAK;
+	if (!VP9regex.test(val)) return [error('Regex failure'), error(VP9format)];
 
 	const PROFILE_0 = 0,
 		PROFILE_1 = 1,
@@ -93,50 +94,50 @@ export function decodeVP9(val) {
 			name: 'profile',
 			value: -1,
 			default: true,
-			printFn: printProfile,
+			parseFn: parseProfile,
 		},
-		{ index: 2, name: 'level', value: -1, default: true, printFn: printLevel },
+		{ index: 2, name: 'level', value: -1, default: true, parseFn: parseLevel },
 		{
 			index: 3,
 			name: 'bitDepth',
 			value: -1,
 			default: true,
-			printFn: printColourBits,
+			parseFn: parseColourBits,
 		},
 		{
 			index: 4,
 			name: 'chromaSubsampling',
 			value: CHROMA420_luma,
 			default: true,
-			printFn: printChroma,
+			parseFn: parseChroma,
 		},
 		{
 			index: 5,
 			name: 'colourPrimaries',
 			value: 1,
 			default: true,
-			printFn: printColourPrimaries,
+			parseFn: parseColourPrimaries,
 		},
 		{
 			index: 6,
 			name: 'transferCharacteristics',
 			value: 1,
 			default: true,
-			printFn: printTransferCharacteristics,
+			parseFn: parseTransferCharacteristics,
 		},
 		{
 			index: 7,
 			name: 'matrixCoefficients',
 			value: 1,
 			default: true,
-			printFn: printMartixCoefficients,
+			parseFn: parseMartixCoefficients,
 		},
 		{
 			index: 8,
 			name: 'videoFullRangeFlag',
 			value: 0,
 			default: true,
-			printFn: printVideoFullRangeFlag,
+			parseFn: parseVideoFullRangeFlag,
 		},
 	];
 	function ProfileValue(f) {
@@ -146,13 +147,12 @@ export function decodeVP9(val) {
 		return f.find((elem) => elem.index == 7).value;
 	}
 
-	function printProfile(args) {
-		if (args.value < PROFILE_0 || args.value > PROFILE_3) return cell(err(`invalid profile (${args.value})`), 2);
-		return cell(args.value) + cell(`Profile ${args.value}`);
+	function parseProfile(args) {
+		if (args.value < PROFILE_0 || args.value > PROFILE_3) return error(`invalid profile (${args.value})`);
+		return { value: args.value, description: `Profile ${args.value}` };
 	}
-	function printLevel(args) {
-		let lev = null,
-			res = '';
+	function parseLevel(args) {
+		let lev = null;
 		switch (args.value) {
 			case 10:
 				lev = '1';
@@ -193,31 +193,25 @@ export function decodeVP9(val) {
 			case 62:
 				lev = '6.2';
 				break;
-			default:
-				res += cell(err(`unknown Level (${args.value})`), 2);
 		}
-		if (lev) res += cell(args.value) + cell(`Level ${lev}`);
-		return res;
+		return lev ? { value: args.value, description: `Level ${lev}` } : error(`unknown Level (${args.value})`);
 	}
 
-	function printColourBits(args) {
+	function parseColourBits(args) {
 		const bitDepth = args.value;
-		const profile = ProfileValue(fields);
-		let res = '';
-		if (bitDepth != 8 && bitDepth != 10 && bitDepth != 12) return cell(err(`invalid Colour Bit Depth (${args.value})`), 2);
+		if (bitDepth != 8 && bitDepth != 10 && bitDepth != 12) return error(`invalid Colour Bit Depth (${args.value})`);
 
-		res += cell(args.value);
-		if (bitDepth == BITS8 && (profile == PROFILE_2 || profile == PROFILE_3)) res += cell(warn('8 bit only possible with Profile 0 or 1'));
+		const res = { value: args.value },
+			profile = ProfileValue(fields);
+		if (bitDepth == BITS8 && (profile == PROFILE_2 || profile == PROFILE_3)) res.warning = '8 bit only possible with Profile 0 or 1';
 		else if ((bitDepth == BITS10 || bitDepth == BITS12) && (profile == PROFILE_0 || profile == PROFILE_1))
-			res += cell(warn(bitDepth + ' bit only possible with Profle 2 or 3'));
-		else res += cell('');
+			res.warning = `${bitDepth} bit only possible with Profle 2 or 3`;
 		return res;
 	}
 
-	function printChroma(args) {
+	function parseChroma(args) {
 		const chroma = args.value;
-		let sample = null,
-			res = '';
+		let sample = null;
 		switch (chroma) {
 			case CHROMA420_vert:
 				sample = '4:2:0 vertical';
@@ -232,123 +226,139 @@ export function decodeVP9(val) {
 				sample = '4:4:4';
 				break;
 		}
+		const res = { value: chroma };
 		if (sample) {
 			const profile = ProfileValue(fields);
 			const matrix = MatrixCoefficientsValue(fields);
+
+			res.description = sample;
 			let ev = null;
 			if ((profile == PROFILE_0 || profile == PROFILE_2) && (chroma == CHROMA440 || chroma == CHROMA444 || chroma == CHROMA422))
 				ev = 'Profile 0 and 2 must be 4:2:0';
 			else if ((profile == PROFILE_1 || profile == PROFILE_3) && (chroma == CHROMA420_vert || chroma == CHROMA420_luma))
 				ev = '4:2:0 chroma sampling is not permitted with Profile 1 and 3';
 			else if (matrix == 0 && chroma != CHROMA444) ev = '4:4:4 chroma sampling is required matricCoefficients=0 (RGB)';
-			res += cell(chroma) + cell(sample + (ev ? ' ' + warn(`note! ${ev}`) : ''));
-		} else if (chroma >= 4 && chroma <= 7) res += cell(chroma) + cell(warn('Reserved'));
-		else res += cell(err(`invalid value for chroma subsampling (${chroma})`), 2);
+
+			if (ev) res.warning = `note! ${ev}`;
+		} else if (chroma >= 4 && chroma <= 7) return { value: chroma, warning: 'Reserved' };
+		else return error(`invalid value for chroma subsampling (${chroma})`);
+
 		return res;
 	}
 
-	function printColourPrimaries(args) {
+	function parseColourPrimaries(args) {
 		// colourPrimaries is an integer that is defined by the "Colour primaries" section of ISO/IEC 23001-8:2016.
 		const primaries = args.value;
-		let res = '',
-			desc = null;
+		const res = { value: primaries };
 		switch (primaries) {
 			case 1:
-				desc = 'ITU-R BT.709';
+				res.description = 'ITU-R BT.709';
 				break;
 			case 9:
-				desc = 'ITU-R BT.2020 primaries';
+				res.description = 'ITU-R BT.2020 primaries';
 				break;
-
 			default:
-				res += cell(err(`invalid value for colour primaries (${primaries})`), 2);
+				return error(`invalid value for colour primaries (${primaries})`);
 		}
-		if (desc) res += cell(primaries) + cell(desc);
 		return res;
 	}
 
-	function printTransferCharacteristics(args) {
+	function parseTransferCharacteristics(args) {
 		// transferCharacteristics is an integer that is defined by the "Transfer characteristics" section of ISO/IEC 23001-8:2016.
 		const transferC = args.value;
-		let res = '',
-			desc = null;
+		const res = { value: transferC };
 		switch (transferC) {
 			case 1:
-				desc = 'ITU-R BT.709';
+				res.description = 'ITU-R BT.709';
 				break;
 			case 16:
-				desc = 'ST 2084 EOTF';
+				res.description = 'ST 2084 EOTF';
 				break;
 			default:
-				res += cell(err(`invalid value for transfer characteristics (${transferC})`), 2);
+				return error(`invalid value for transfer characteristics (${transferC})`);
 		}
-		if (desc) res += cell(transferC) + cell(desc);
 		return res;
 	}
 
-	function printMartixCoefficients(args) {
+	function parseMartixCoefficients(args) {
 		// matrixCoefficients is an integer that is defined by the "Matrix coefficients" section of ISO/IEC 23001-8:2016.
 		const matrix = args.value;
-		let res = '',
-			desc = null;
+		const res = { value: matrix };
 		switch (matrix) {
 			case 0:
-				desc = 'RGB';
+				res.description = 'RGB';
 				break;
 			case 1:
-				desc = 'ITU-R BT.709';
+				res.description = 'ITU-R BT.709';
 				break;
 			case 9:
-				desc = 'ITU-R BT.2020 non-constant luminance color matrix';
+				res.description = 'ITU-R BT.2020 non-constant luminance color matrix';
 				break;
 			default:
-				res += cell(err(`invalid value formatrix coefficients (${matrix})`), 2);
+				return error(`invalid value formatrix coefficients (${matrix})`);
 		}
-		if (desc) res += cell(matrix) + cell(desc);
 		return res;
 	}
 
-	function printVideoFullRangeFlag(args) {
+	function parseVideoFullRangeFlag(args) {
 		//  0=legal range, 1=full-range chroma/luma encoding
 		const flag = args.value;
-		let res = '',
-			desc = null;
+		const res = { value: flag };
 		switch (flag) {
 			case 0:
-				desc = 'legal range';
+				res.description = 'legal range';
 				break;
 			case 1:
-				desc = 'full-range chroma/luma encoding';
+				res.description = 'full-range chroma/luma encoding';
 				break;
 			default:
-				res += cell(err(`invalid value full range flag(${flag})`), 2);
+				return error(`invalid value full range flag(${flag})`);
 		}
-		if (desc) res += cell(flag) + cell(desc);
 		return res;
 	}
 
-	const parts = val.split('.');
-	let res = '';
+	const parts = val.split('.'),
+		res = [];
 	for (let i = 1; i < parts.length; i++)
 		if (parts[i] != '') {
-			/* jslint -W083 */
 			const t = fields.find((elem) => elem.index == i);
-			/* jslint +W083 */
 			if (t) {
 				t.value = parseInt(parts[i]);
 				t.default = false;
 			}
 		}
 
-	res += '<table>';
-
 	fields.forEach((field) => {
-		res += '<tr>' + cell(field.name) + (field.printFn ? field.printFn(field) : cell(field.value, 2)) + cell(field.default ? '(default)' : '') + '</tr>';
+		res.push({ name: field.name, value: field.parseFn ? field.parseFn(field) : field.value, is_default: field.default });
+	});
+	return res;
+}
+
+function vp9HTML(label, parsed) {
+	if (this?.error) return err(this.error) + BREAK;
+	let res = '';
+	if (label) res += bold(HTMLsafe(label)) + BREAK;
+
+	res += '<table>';
+	parsed?.forEach((line) => {
+		res += '<tr>' + cell(line?.name ? line.name : '');
+		if (line?.error) res += cell(err(HTMLsafe(line.error)));
+
+		if (line?.value) {
+			if (line.value?.error) res += cell(err(line.value.error));
+			else if (Object.prototype.hasOwnProperty.call(line.value, 'value')) {
+				res += cell(`${line.value.value} ${line.value?.description ? ` ${line.value.description}` : ''}`);
+				res += cell(line.value?.warning ? warn(line.value.warning) : '');
+			} else res += cell(JSON.stringify(line.value));
+		}
+
+		if (line?.is_default) res += cell(dflt('(default)'));
+		res += '</tr>';
 	});
 	res += '</table>';
 	return res;
 }
 
 export function registerVP9(addHandler) {
-	addHandler('vp09', 'VP9', decodeVP9);
+	addHandler('vp09', 'VP9', decodeVP9, vp9HTML);
 }

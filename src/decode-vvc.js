@@ -32,70 +32,64 @@
 // VVC - ISO/IEC 23090-3  - w19470
 
 import { BitList } from './bits.js';
-import { BREAK, err, em, bold, HTMLsafe } from './markup.js';
+import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
+import { simpleHTML } from './formatters.js';
 
 export function decodeVVC(val) {
 	const VVCregex = /^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-zA-Z2-7]+)?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/;
 	const VVCformat =
-		'sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}';
+		'<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}';
 
 	function printProfile(profile) {
 		const general_profile_idc = parseInt(profile);
-		let res = '',
-			prof = '';
+		let res = null,
+			prof = null;
 
 		switch (general_profile_idc) {
 			case 1:
 				prof = 'Main 10';
-				res += prof;
 				break;
 			case 65:
 				prof = 'Main 10 Still Picture';
-				res += prof;
 				break;
 			case 33:
 				prof = 'Main 10 4:4:4';
-				res += prof;
 				break;
 			case 97:
 				prof = 'Main 10 4:4:4 Still Picture';
-				res += prof;
 				break;
 			case 17:
 				prof = 'Multilayer Main 10';
-				res += prof;
 				break;
 			case 49:
 				prof = 'Multilayer Main 10 4:4:4';
-				res += prof;
 				break;
 			default:
-				res += err(`unknown Profile (${profile})`);
+				res = error(`unknown Profile (${profile})`);
 				break;
 		}
-		return { html: res + BREAK, profile: prof };
+		return { output: res ? res : normal(prof), profile: prof ? prof : '' };
 	}
 
 	function printTier(tier, level) {
-		const op_level_idc = parseInt(level);
-		let res = '',
-			t = '';
+		const res = [],
+			op_level_idc = parseInt(level);
+		let t = null;
 
 		switch (tier) {
 			case 'L':
 				t = 'Main Tier (L)';
-				res += t;
 				break;
 			case 'H':
 				t = 'High Tier (H)';
-				res += t;
 				break;
 			default:
-				res += err(`unknown Tier (${tier})`);
+				res.push(error(`unknown Tier (${tier})`));
 				break;
 		}
-		res += BREAK;
+		if (t) res.push(normal(t));
+
 		let lev = null;
 		switch (op_level_idc) {
 			// table 135 in VVC
@@ -139,10 +133,10 @@ export function decodeVVC(val) {
 				lev = '6.2';
 				break;
 			default:
-				res += err(`unknown Level (${op_level_idc})`);
+				res.push(error(`unknown Level (${op_level_idc})`));
 		}
-		if (lev) res += `Level ${lev}`;
-		return { html: res + BREAK, tier: t, level: lev };
+		if (lev) res.push(normal(`Level ${lev}`));
+		return { output: res, tier: t, level: lev };
 	}
 
 	const VVC_general_constraints = [
@@ -230,13 +224,12 @@ export function decodeVVC(val) {
 	];
 
 	function printConstraints(general_constraint_info) {
-		let res = '';
-
 		// general_constraint_info is base32, so convert it to hex
 		let byteset = parseInt(general_constraint_info, 32).toString(16);
 		while (byteset.length % 2) byteset += '0';
 
-		const constraintFlags = new BitList();
+		const res = [],
+			constraintFlags = new BitList();
 		let i = 0;
 		while (i < byteset.length) {
 			constraintFlags.push(parseInt(byteset.substring(i, i + 2), 16));
@@ -247,19 +240,19 @@ export function decodeVVC(val) {
 		VVC_general_constraints.forEach((constraint) => {
 			if (constraint.existance) {
 				if (constraintFlags.bitsetB(constraint.bit)) gotFlags = true;
-				res += `${constraint.name}=${constraintFlags.bitsetB(constraint.bit)}${BREAK}`;
+				res.push(normal(`${constraint.name}=${constraintFlags.bitsetB(constraint.bit)}`));
 			} else if (gotFlags) {
 				if (constraint.length) {
-					res += `${constraint.name}=${constraintFlags.valueB(constraint.bit, constraint.length)}${BREAK}`;
-				} else if (constraintFlags.bitsetB(constraint.bit)) res += constraint.name + BREAK;
+					res.push(normal(`${constraint.name}=${constraintFlags.valueB(constraint.bit, constraint.length)}`));
+				} else if (constraintFlags.bitsetB(constraint.bit)) res.push(normal(constraint.name));
 			}
 		});
 		return res;
 	}
 
 	function printSubProfile(general_sub_profile_idc) {
-		let res = '';
-		const subProfiles = general_sub_profile_idc.split('+');
+		const res = [],
+			subProfiles = general_sub_profile_idc.split('+');
 
 		// VVC says
 		//general_sub_profile_idc[ i ] specifies the i-th interoperability indicator registered as specified by Rec. ITU-T T.35,
@@ -268,50 +261,52 @@ export function decodeVVC(val) {
 
 		for (let i = 0; i < subProfiles.length; i++) {
 			const p = parseInt(subProfiles[i], 16);
-			res += `Sub profile (${i + 1})=${p}${BREAK}`;
+			res.push(normal(`Sub profile (${i + 1})=${p}`));
 		}
 		return res;
 	}
 
 	function printTemporalLayers(indexes) {
-		let res = '';
-		const layerIndexes = indexes.split('+');
-		if (layerIndexes[0]) res += `Output Layer Set index (${em('OlsIdx')})=${layerIndexes[0]}${BREAK}`;
-		if (layerIndexes[1]) res += `Maximum Temporal Id (${em('MaxTid')})=${layerIndexes[1]}${BREAK}`;
+		const res = [],
+			layerIndexes = indexes.split('+');
+		if (layerIndexes[0]) res.push(normal(`Output Layer Set index ('OlsIdx')=${layerIndexes[0]}`));
+		if (layerIndexes[1]) res.push(normal(`Maximum Temporal Id ('MaxTid')=${layerIndexes[1]}`));
 		return res;
 	}
 
-	if (!VVCregex.test(val)) return err('Regex mismatch!') + BREAK + err(HTMLsafe(VVCformat)) + BREAK;
+	if (!VVCregex.test(val)) return [error('Regex mismatch!'), error(VVCformat)];
 
-	const parts = val.match(VVCregex),
+	const res = [],
+		parts = val.match(VVCregex),
 		coding_params = { type: 'video' };
-	let res = '';
+
 	if (parts.length > 1) coding_params.codec = parts[1];
 	parts.forEach((part) => {
 		if (part && part.substring(0, 1) == '.') {
 			const cmd = part.substring(1, 2);
 			if (cmd >= '0' && cmd <= '9') {
 				const prof = printProfile(part.substring(1));
-				res += prof.html;
+				res.push(prof.output);
 				coding_params.profile = prof.profile;
 			} else {
-				let tier_and_level = {};
 				switch (cmd) {
 					case 'L':
 					case 'H':
-						tier_and_level = printTier(cmd, part.substring(2));
-						res += tier_and_level.html;
-						coding_params.tier = tier_and_level.tier;
-						coding_params.level = tier_and_level.level;
+						{
+							const tier_and_level = printTier(cmd, part.substring(2));
+							res.push(...tier_and_level.output);
+							coding_params.tier = tier_and_level.tier;
+							coding_params.level = tier_and_level.level;
+						}
 						break;
 					case 'C':
-						res += printConstraints(part.substring(2));
+						res.push(...printConstraints(part.substring(2)));
 						break;
 					case 'S':
-						res += printSubProfile(part.substring(2));
+						res.push(...printSubProfile(part.substring(2)));
 						break;
 					case 'O':
-						res += printTemporalLayers(part.substring(2));
+						res.push(...printTemporalLayers(part.substring(2)));
 						break;
 				}
 			}
@@ -319,13 +314,16 @@ export function decodeVVC(val) {
 	});
 
 	const dvb = DVBclassification(coding_params);
-	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
+	if (dvb.length != 0) res.push({ dvb_term: dvb });
 
-	return res + BREAK;
+	return res;
 }
 
+function outputHTML(label, messages) {
+	return simpleHTML(label, messages);
+}
 export function registerVVC(addHandler) {
-	addHandler(['vvc1', 'vvi1'], 'MPEG Versatile Video Coding', decodeVVC);
+	addHandler(['vvc1', 'vvi1'], 'MPEG Versatile Video Coding', decodeVVC, outputHTML);
 	addHandler('vvcN', 'VVC non-VCL track');
 	addHandler('vvs1', 'VVC subpicture track');
 }

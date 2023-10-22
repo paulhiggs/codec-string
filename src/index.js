@@ -13,3 +13,4 @@ export { decodeVVC } from './decode-vvc.js';
 export { decode } from './decode.js';
 export { DVBclassification } from './dvb-mapping.js';
 export { findHandler } from './handler.js';
+export { simpleHTML, tabularHTML } from './formatters.js';

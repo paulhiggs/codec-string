@@ -29,6 +29,7 @@
 import { datatypeIs } from './utils.js';
 
 export const BREAK = '<br>';
+export const LINE = '<hr>';
 
 export var err = (str) => `<span style="color:red">${str}</span>`;
 
@@ -39,6 +40,7 @@ export var dflt = (str) => `<span style="font-style:italic">${str}</span>`;
 export var em = (str) => `<em>${str}</em>`;
 
 export var bold = (str) => `<span style="font-weight:bold">${str}</span>`;
+export var italic = (str) => `<span style="color:italic">${str}</span>`;
 
 export var title = (str) => `<span style="font-style:italic">${str}</span>`;
 

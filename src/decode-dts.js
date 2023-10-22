@@ -26,23 +26,28 @@
  *
  */
 
-import { BREAK, bold, err } from './markup.js';
+import { error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
+import { simpleHTML } from './formatters.js';
 
 export function decodeDTS(val) {
-	if (val.length != 4) return err('no codec argments should be provided for DTS Audio');
-	let res = '';
-	const dvb = DVBclassification({ type: 'audio', codec: 'DTS', level: ['dtsx', 'dtsy'].includes(val.toLowerCase()) ? 'UHD' : 'HD', mode: val.toLowerCase() });
-	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
+	if (val.length != 4) return [error('no codec argments should be provided for DTS Audio')];
+	const res = [],
+		dvb = DVBclassification({ type: 'audio', codec: 'DTS', level: ['dtsx', 'dtsy'].includes(val.toLowerCase()) ? 'UHD' : 'HD', mode: val.toLowerCase() });
+	if (dvb.length != 0) res.push({ dvb_term: dvb });
 	return res;
+}
+
+function outputHTML(label, messages) {
+	return simpleHTML(label, messages);
 }
 
 export function registerDTS(addHandler) {
 	// ETSI TS 103 285 table 10
-	addHandler('dtsc', 'DTS-HD Core', decodeDTS); // ETSI TS 102 114 annex H
-	addHandler('dtsh', 'DTS-HD (with legacy core)', decodeDTS); // ETSI TS 102 114 annex H
-	addHandler('dtse', 'DTS-HD Low Bit Rate', decodeDTS); // ETSI TS 102 114 annex H
-	addHandler('dtsl', 'DTS-HD (lossless, without legacy core)', decodeDTS); // ETSI TS 102 114 annex H
-	addHandler('dtsx', 'DTS UHD (Profile 2)', decodeDTS); // ETSI TS 103 491 annex E
-	addHandler('dtsy', 'DTS UHD (Profile 3)', decodeDTS); // ETSI TS 103 491 annex E
+	addHandler('dtsc', 'DTS-HD Core', decodeDTS, outputHTML); // ETSI TS 102 114 annex H
+	addHandler('dtsh', 'DTS-HD (with legacy core)', decodeDTS, outputHTML); // ETSI TS 102 114 annex H
+	addHandler('dtse', 'DTS-HD Low Bit Rate', decodeDTS, outputHTML); // ETSI TS 102 114 annex H
+	addHandler('dtsl', 'DTS-HD (lossless, without legacy core)', decodeDTS, outputHTML); // ETSI TS 102 114 annex H
+	addHandler('dtsx', 'DTS UHD (Profile 2)', decodeDTS, outputHTML); // ETSI TS 103 491 annex E
+	addHandler('dtsy', 'DTS UHD (Profile 3)', decodeDTS, outputHTML); // ETSI TS 103 491 annex E
 }
