@@ -29,7 +29,8 @@
 // see ISO/IEC 23000-19:2019 Amd.2 "CMAF Media Profiles for MPEG-H 3D Audio, EVC, VVC and other technologies"
 // MDS19970_WG03_N00137
 
-import { decode, error } from './decode.js';
+import { hexDigits } from './utils.js';
+import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
 
@@ -38,13 +39,14 @@ export function decodeMPEGH(val) {
 	const parts = val.split('.');
 
 	if (parts.length != 2) return [error('MPEG-H audio requires a profile-level-id')];
+	if (!hexDigits(parts[1])) return [error(`profile_id not expressed in hexadecimal (${parts[1]})`)];
 
 	const res = [],
 		level = parseInt(parts[1], 16),
 		coding_params = { type: 'audio', codec: parts[0] };
 
 	let profile = '';
-	switch (level[0]) {
+	switch (level) {
 		case 0x0b:
 			profile = 'LC Profile Level 1';
 			coding_params.mode = 'LC';
@@ -76,10 +78,10 @@ export function decodeMPEGH(val) {
 			coding_params.level = '3';
 			break;
 		default:
-			return [error('invalid level')];
+			return [error(`invalid level (${parts[1]})`)];
 	}
 	if (parts[0] == 'mhm2') profile += ', multi-steam';
-	if (profile.length) res.push(decode(profile));
+	if (profile.length) res.push(normal(profile));
 
 	const dvb = DVBclassification(coding_params);
 	if (dvb.length != 0) res.push({ dvb_term: dvb });

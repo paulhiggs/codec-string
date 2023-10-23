@@ -27,7 +27,7 @@
  */
 
 import { hexDigits } from './utils.js';
-import { decode, warning, error } from './decode.js';
+import { normal, warning, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
 
@@ -275,7 +275,7 @@ export function decodeAVS3(val) {
 	const prof = AVS3ProfileStr(profile_id),
 		lev = AVS3LevelStr(level_id);
 	if (prof) {
-		res.push(decode(prof));
+		res.push(normal(prof));
 		coding_params.profile = prof;
 	} else {
 		res.push(error(`invalid profile_id (${parts[1]}) specified`));
@@ -284,7 +284,7 @@ export function decodeAVS3(val) {
 
 	if (level_id == 0x00) res.push(warning('level is forbidden'));
 	else if (lev) {
-		res.push(decode(`Level ${lev}`));
+		res.push(normal(`Level ${lev}`));
 		coding_params.level = lev;
 	} else {
 		res.push(error(`invalid level_id (${parts[2]}) specified`));

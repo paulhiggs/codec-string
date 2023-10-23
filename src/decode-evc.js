@@ -749,8 +749,7 @@ function evcHTML(label, messages) {
 						break;
 				}
 			}
-			if (msg.value != null) res += cell(msg.value) + cell(desc);
-			else res += cell(desc, 2);
+			res += msg.value != null ? cell(msg.value) + cell(desc) : cell(desc, 2);
 			res += cell(msg?.is_default ? dflt('default') : '');
 		} else if (msg?.toolset) {
 			const toolset = msg.toolset;
