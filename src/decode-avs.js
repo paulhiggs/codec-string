@@ -157,106 +157,64 @@ const avs3allowed = [
 	},
 ];
 
+const AVS3profiles = [
+	{ val: avs3.profileMain8, str: 'Main 8-bit profile' },
+	{ val: avs3.profileMain10, str: 'Main 10-bit profile' },
+	{ val: avs3.profileHigh8, str: 'High 8-bit profile' },
+	{ val: avs3.profileHigh10, str: 'High 10-bit profile' },
+];
+
 const AVS3ProfileStr = (prof) => {
-	switch (prof) {
-		case avs3.profileMain8:
-			return 'Main 8-bit profile';
-		case avs3.profileMain10:
-			return 'Main 10-bit profile';
-		case avs3.profileHigh8:
-			return 'High 8-bit profile';
-		case avs3.profileHigh10:
-			return 'High 10-bit profile';
-	}
-	return null;
+	const t = AVS3profiles.find((e) => (e.val = prof));
+	return t ? t.str : null;
 };
 
+const AVS3levels = [
+	{ val: avs3.level2_0_15, str: '2.0.15' },
+	{ val: avs3.level2_0_30, str: '2.0.30' },
+	{ val: avs3.level2_0_60, str: '2.0.60' },
+	{ val: avs3.level4_0_30, str: '4.0.30' },
+	{ val: avs3.level4_0_60, str: '4.0.60' },
+	{ val: avs3.level6_0_30, str: '6.0.30' },
+	{ val: avs3.level6_2_30, str: '6.2.30' },
+	{ val: avs3.level6_4_30, str: '6.4.30' },
+	{ val: avs3.level6_6_30, str: '6.6.30' },
+	{ val: avs3.level6_0_60, str: '6.0.60' },
+	{ val: avs3.level6_2_60, str: '6.2.60' },
+	{ val: avs3.level6_4_60, str: '6.4.60' },
+	{ val: avs3.level6_6_60, str: '6.6.60' },
+	{ val: avs3.level6_0_120, str: '6.0.120' },
+	{ val: avs3.level6_2_120, str: '6.2.120' },
+	{ val: avs3.level6_4_120, str: '6.4.120' },
+	{ val: avs3.level6_6_120, str: '6.6.120' },
+	{ val: avs3.level8_0_30, str: '8.0.30' },
+	{ val: avs3.level8_2_30, str: '8.2.30' },
+	{ val: avs3.level8_4_30, str: '8.4.30' },
+	{ val: avs3.level8_6_30, str: '8.6.30' },
+	{ val: avs3.level8_0_60, str: '8.0.60' },
+	{ val: avs3.level8_2_60, str: '8.2.60' },
+	{ val: avs3.level8_4_60, str: '8.4.60' },
+	{ val: avs3.level8_6_60, str: '8.6.60' },
+	{ val: avs3.level8_0_120, str: '8.0.120' },
+	{ val: avs3.level8_2_120, str: '8.2.120' },
+	{ val: avs3.level8_4_120, str: '8.4.120' },
+	{ val: avs3.level8_6_120, str: '8.6.120' },
+	{ val: avs3.level8_0_30, str: '10.0.30' },
+	{ val: avs3.level10_2_30, str: '10.2.30' },
+	{ val: avs3.level10_4_30, str: '10.4.30' },
+	{ val: avs3.level10_6_30, str: '10.6.30' },
+	{ val: avs3.level10_0_60, str: '10.0.60' },
+	{ val: avs3.level10_2_60, str: '10.2.60' },
+	{ val: avs3.level10_4_60, str: '10.4.60' },
+	{ val: avs3.level10_6_60, str: '10.6.60' },
+	{ val: avs3.level10_0_120, str: '10.0.120' },
+	{ val: avs3.level10_2_120, str: '10.2.120' },
+	{ val: avs3.level10_4_120, str: '10.4.120' },
+	{ val: avs3.level10_6_120, str: '10.6.120' },
+];
 const AVS3LevelStr = (lev) => {
-	switch (lev) {
-		case avs3.level2_0_15:
-			return '2.0.15';
-		case avs3.level2_0_30:
-			return '2.0.30';
-		case avs3.level2_0_60:
-			return '2.0.60';
-		case avs3.level4_0_30:
-			return '4.0.30';
-		case avs3.level4_0_60:
-			return '4.0.60';
-		case avs3.level6_0_30:
-			return '6.0.30';
-		case avs3.level6_2_30:
-			return '6.2.30';
-		case avs3.level6_4_30:
-			return '6.4.30';
-		case avs3.level6_6_30:
-			return '6.6.30';
-		case avs3.level6_0_60:
-			return '6.0.60';
-		case avs3.level6_2_60:
-			return '6.2.60';
-		case avs3.level6_4_60:
-			return '6.4.60';
-		case avs3.level6_6_60:
-			return '6.6.60';
-		case avs3.level6_0_120:
-			return '6.0.120';
-		case avs3.level6_2_120:
-			return '6.2.120';
-		case avs3.level6_4_120:
-			return '6.4.120';
-		case avs3.level6_6_120:
-			return '6.6.120';
-		case avs3.level8_0_30:
-			return '8.0.30';
-		case avs3.level8_2_30:
-			return '8.2.30';
-		case avs3.level8_4_30:
-			return '8.4.30';
-		case avs3.level8_6_30:
-			return '8.6.30';
-		case avs3.level8_0_60:
-			return '8.0.60';
-		case avs3.level8_2_60:
-			return '8.2.60';
-		case avs3.level8_4_60:
-			return '8.4.60';
-		case avs3.level8_6_60:
-			return '8.6.60';
-		case avs3.level8_0_120:
-			return '8.0.120';
-		case avs3.level8_2_120:
-			return '8.2.120';
-		case avs3.level8_4_120:
-			return '8.4.120';
-		case avs3.level8_6_120:
-			return '8.6.120';
-		case avs3.level10_0_30:
-			return '10.0.30';
-		case avs3.level10_2_30:
-			return '10.2.30';
-		case avs3.level10_4_30:
-			return '10.4.30';
-		case avs3.level10_6_30:
-			return '10.6.30';
-		case avs3.level10_0_60:
-			return '10.0.60';
-		case avs3.level10_2_60:
-			return '10.2.60';
-		case avs3.level10_4_60:
-			return '10.4.60';
-		case avs3.level10_6_60:
-			return '10.6.60';
-		case avs3.level10_0_120:
-			return '10.0.120';
-		case avs3.level10_2_120:
-			return '10.2.120';
-		case avs3.level10_4_120:
-			return '10.4.120';
-		case avs3.level10_6_120:
-			return '10.6.120';
-	}
-	return null;
+	const t = AVS3levels.find((e) => (e.val = lev));
+	return t ? t.str : null;
 };
 
 export function decodeAVS3(val) {
