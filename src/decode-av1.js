@@ -25,6 +25,8 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+const DEBUGGING = false;
+
 import { sscanf } from './sscanf-func.js';
 import { normal, error, warning } from './decode.js';
 import { simpleHTML } from './formatters.js';
@@ -404,7 +406,7 @@ export function decodeAV1(val) {
 }
 
 function outputHTML(label, messages) {
-	return simpleHTML(label, messages);
+	return simpleHTML(label, messages, DEBUGGING);
 }
 
 export function registerAV1(addHandler) {

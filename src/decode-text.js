@@ -25,6 +25,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+const DEBUGGING = false;
 
 import { normal, error, warning } from './decode.js';
 import { simpleHTML } from './formatters.js';
@@ -160,7 +161,7 @@ export function decodeSTPP(val) {
 }
 
 function outputHTML(label, messages) {
-	return simpleHTML(label, messages);
+	return simpleHTML(label, messages, DEBUGGING);
 }
 export function registerText(addHandler) {
 	addHandler('stpp', 'XML timed-text subtitles', decodeSTPP, outputHTML);

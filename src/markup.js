@@ -46,6 +46,8 @@ export var title = (str) => `<span style="font-style:italic">${str}</span>`;
 
 export var unprocessed = (str) => `<span style="color:orange">${str}</span>`;
 
+export var code = (str) => `<pre>${str}</pre>`;
+
 export var cell = (str, colspan = 1, rowspan = 1) =>
 	`<td${colspan != 1 ? ` colspan="${colspan}"` : ''}${rowspan != 1 ? ` rowspan="${rowspan}"` : ''}>${str}</td>`;
 
@@ -57,5 +59,5 @@ export var cell = (str, colspan = 1, rowspan = 1) =>
  */
 export var HTMLsafe = (str) =>
 	datatypeIs(str, 'string')
-		? str.replace(/[&<>"'-]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '-': '&#8209;' }[m]))
+		? str.replace(/[&<>"'\n-]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '\n': BREAK, '-': '&#8209;' }[m]))
 		: str;

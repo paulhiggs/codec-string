@@ -30,6 +30,7 @@
  * https://blog.pearce.org.nz/2013/11/what-does-h264avc1-codecs-parameters.html
  * https://en.wikipedia.org/wiki/Advanced_Video_Coding
  **/
+const DEBUGGING = false;
 
 import { hexDigits } from './utils.js';
 import { sscanf } from './sscanf-func.js';
@@ -204,7 +205,7 @@ export function decodeAVC(val) {
 }
 
 function outputHTML(label, messages) {
-	return simpleHTML(label, messages);
+	return simpleHTML(label, messages, DEBUGGING);
 }
 
 export function registerAVC(addHandler) {

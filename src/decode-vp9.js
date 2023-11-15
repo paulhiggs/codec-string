@@ -66,8 +66,11 @@ mutually inclusive (all or none) fields. If not specified then the processing de
 in the table below as defaults when deciding if the device is able to decode and potentially render the video.
 */
 
+const DEBUGGING = true;
+
 import { error } from './decode.js';
 import { err, BREAK, HTMLsafe, cell, bold, warn, dflt } from './markup.js';
+import { dumpJSONHTML } from './formatters.js';
 
 export function decodeVP9(val) {
 	const VP9regex = /^(vp09)(\.\d\d){3}(\.\d{0,2}){0,5}$/;
@@ -356,6 +359,7 @@ function vp9HTML(label, parsed) {
 		res += '</tr>';
 	});
 	res += '</table>';
+	if (DEBUGGING) res += dumpJSONHTML(parsed);
 	return res;
 }
 

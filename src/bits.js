@@ -77,6 +77,12 @@ export class BitList {
 		}
 		return res;
 	}
+
+	toBitString() {
+		let res = '';
+		for (let bitNo = 0; bitNo < this.bytes.length * 8; bitNo++) res = (this.bitset(bitNo) ? '1' : '0') + res;
+		return res;
+	}
 }
 
 export function bitSet32(val, bit) {

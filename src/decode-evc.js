@@ -29,12 +29,12 @@
 // see annex E.9 of  ISO/IEC 14496-15:2019 Amd.2 "Carriage of VVC and EVC in ISOBMFF" (w19454)
 // and ISO/IEC 23091-2 (MDS19669_WG05_N00011)
 
-const debugging = false;
+const DEBUGGING = false;
 
 import { bitSet32 } from './bits.js';
 import { error, warning, title, normal } from './decode.js';
-import { jsonHTML } from './formatters.js';
-import { bold, BREAK, LINE, HTMLsafe, err, warn, cell, dflt } from './markup.js';
+import { bold, BREAK, HTMLsafe, err, warn, cell, dflt } from './markup.js';
+import { dumpJSONHTML } from './formatters.js';
 import { datatypeIs } from './utils.js';
 
 // see clause 8.1 of ISO/IEC 23091-2
@@ -767,7 +767,8 @@ function evcHTML(label, messages) {
 		res += '</tr>';
 	});
 	res += '</table>';
-	return `${res}${debugging ? `${LINE}${jsonHTML(label, messages)}` : ''}`;
+	if (DEBUGGING) res += dumpJSONHTML(messages);
+	return res;
 }
 
 export function registerEVC(addHandler) {

@@ -27,6 +27,7 @@
  */
 
 const VideoCodecCS = 'urn:dvb:metadata:cs:VideoCodecCS:2022';
+
 const VideoTerms = [
 	{ term: '1', codec: 'avc1' },
 

@@ -44,6 +44,8 @@
 // MP4 Registration Authority ObjectTypeIndication (OTI)
 // https://mp4ra.org/#/object_types
 
+const DEBUGGING = false;
+
 import { hexDigits } from './utils.js';
 import { normal, error, warning } from './decode.js';
 import { simpleHTML } from './formatters.js';
@@ -527,7 +529,7 @@ export function decodeMPEG4audio(val) {
 }
 
 function outputHTML(label, messages) {
-	return simpleHTML(label, messages);
+	return simpleHTML(label, messages, DEBUGGING);
 }
 
 export function registerMPEG(addHandler) {

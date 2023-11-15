@@ -25,6 +25,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+const DEBUGGING = false;
 
 import { BitList, bitSet32 } from './bits.js';
 import { error, normal } from './decode.js';
@@ -271,7 +272,7 @@ export function decodeHEVC(val) {
 }
 
 function outputHTML(label, messages) {
-	return simpleHTML(label, messages);
+	return simpleHTML(label, messages, DEBUGGING);
 }
 
 export function registerHEVC(addHandler) {

@@ -31,6 +31,8 @@
 
 // VVC - ISO/IEC 23090-3  - w19470
 
+const DEBUGGING = true;
+
 import { BitList } from './bits.js';
 import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
@@ -236,6 +238,9 @@ export function decodeVVC(val) {
 			i += 2;
 		}
 
+		res.push({ diagnostic: constraintFlags.toString() });
+		res.push({ diagnostic: constraintFlags.toBitString() });
+
 		let gotFlags = false;
 		VVC_general_constraints.forEach((constraint) => {
 			if (constraint.existance) {
@@ -320,7 +325,7 @@ export function decodeVVC(val) {
 }
 
 function outputHTML(label, messages) {
-	return simpleHTML(label, messages);
+	return simpleHTML(label, messages, DEBUGGING);
 }
 export function registerVVC(addHandler) {
 	addHandler(['vvc1', 'vvi1'], 'MPEG Versatile Video Coding', decodeVVC, outputHTML);

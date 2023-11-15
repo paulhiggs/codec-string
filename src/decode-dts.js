@@ -25,6 +25,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+const DEBUGGING = false;
 
 import { error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
@@ -39,7 +40,7 @@ export function decodeDTS(val) {
 }
 
 function outputHTML(label, messages) {
-	return simpleHTML(label, messages);
+	return simpleHTML(label, messages, DEBUGGING);
 }
 
 export function registerDTS(addHandler) {

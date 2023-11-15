@@ -28,7 +28,7 @@ const webpackSettings = ({ scriptLoading }) => ({
 		new CleanWebpackPlugin(),
 		new ESLintPlugin(),
 		new HtmlWebpackPlugin({
-			title: 'Codec string decoder',
+			title: 'Codec string decoder (parse+print mode)',
 			template: './src/index.ejs',
 			filename: 'index.html',
 			cache: false,

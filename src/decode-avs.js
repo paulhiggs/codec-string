@@ -25,6 +25,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+const DEBUGGING = false;
 
 import { hexDigits } from './utils.js';
 import { normal, warning, error } from './decode.js';
@@ -262,7 +263,7 @@ export function decodeAVS3(val) {
 }
 
 function outputHTML(label, messages) {
-	return simpleHTML(label, messages);
+	return simpleHTML(label, messages, DEBUGGING);
 }
 
 export function registerAVS3(addHandler) {

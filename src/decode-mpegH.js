@@ -29,6 +29,8 @@
 // see ISO/IEC 23000-19:2019 Amd.2 "CMAF Media Profiles for MPEG-H 3D Audio, EVC, VVC and other technologies"
 // MDS19970_WG03_N00137
 
+const DEBUGGING = false;
+
 import { hexDigits } from './utils.js';
 import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
@@ -89,7 +91,7 @@ export function decodeMPEGH(val) {
 	return res;
 }
 function outputHTML(label, messages) {
-	return simpleHTML(label, messages);
+	return simpleHTML(label, messages, DEBUGGING);
 }
 export function registerMPEGH(addHandler) {
 	addHandler(['mhm1', 'mhm2'], 'MPEG-H Audio', decodeMPEGH, outputHTML);

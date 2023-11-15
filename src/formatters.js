@@ -26,9 +26,9 @@
  *
  */
 
-import { err, BREAK, bold, warn, HTMLsafe, dflt, italic, cell } from './markup.js';
+import { err, BREAK, LINE, code, bold, warn, HTMLsafe, dflt, italic, cell } from './markup.js';
 
-export function simpleHTML(label, parsed) {
+export function simpleHTML(label, parsed, debugging = false) {
 	if (this?.error) return err(this.error) + BREAK;
 	let res = '';
 	if (label) res += bold(HTMLsafe(label)) + BREAK;
@@ -40,7 +40,7 @@ export function simpleHTML(label, parsed) {
 		else if (line?.default) res += dflt(HTMLsafe(`default value: ${line.default}`)) + BREAK;
 		else if (line?.informative) res += italic(HTMLsafe(line.informative)) + BREAK;
 	});
-	return res;
+	return res + (debugging ? dumpJSONHTML(parsed) : '');
 }
 
 export function tabularHTML(label, parsed) {
@@ -67,6 +67,8 @@ export function tabularHTML(label, parsed) {
 	res += '</table>';
 	return res;
 }
+
+export var dumpJSONHTML = (parsed, lineFirst = true) => (lineFirst ? LINE : '') + code(HTMLsafe(JSON.stringify(parsed, null, 2)));
 
 export function jsonHTML(label, parsed) {
 	let res = '';

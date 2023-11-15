@@ -32,6 +32,7 @@
  * https://media.developer.dolby.com/AC4/AC4_DASH_for_BROADCAST_SPEC/index.html#help_files/topics/c_mpd_codec.html
  *
  **/
+const DEBUGGING = true;
 
 import { hexDigits } from './utils.js';
 import { normal, error, warning } from './decode.js';
@@ -137,7 +138,7 @@ export function decodeAC4(val) {
 }
 
 function outputHTML(label, messages) {
-	return simpleHTML(label, messages);
+	return simpleHTML(label, messages, DEBUGGING);
 }
 
 export function registerAC4(addHandler) {
