@@ -46,8 +46,8 @@ export function decodeAVC(val) {
 		return val & Math.pow(2, 7 - constraint) ? true : false;
 	}
 
-	const coding_params = { type: 'video', codec: parts[0] };
 	const parts = val.split('.');
+	const coding_params = { type: 'video', codec: parts[0] };
 	let res = '';
 
 	if (parts.length != 2) return err('invalid format') + BREAK;
