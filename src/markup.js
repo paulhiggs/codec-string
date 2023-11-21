@@ -29,6 +29,7 @@
 import { datatypeIs } from './utils.js';
 
 export const BREAK = '<br>';
+export const LINE = '<hr>';
 
 export var err = (str) => `<span style="color:red">${str}</span>`;
 
@@ -39,10 +40,13 @@ export var dflt = (str) => `<span style="font-style:italic">${str}</span>`;
 export var em = (str) => `<em>${str}</em>`;
 
 export var bold = (str) => `<span style="font-weight:bold">${str}</span>`;
+export var italic = (str) => `<span style="color:italic">${str}</span>`;
 
 export var title = (str) => `<span style="font-style:italic">${str}</span>`;
 
 export var unprocessed = (str) => `<span style="color:orange">${str}</span>`;
+
+export var code = (str) => `<pre>${str}</pre>`;
 
 export var cell = (str, colspan = 1, rowspan = 1) =>
 	`<td${colspan != 1 ? ` colspan="${colspan}"` : ''}${rowspan != 1 ? ` rowspan="${rowspan}"` : ''}>${str}</td>`;
@@ -55,5 +59,5 @@ export var cell = (str, colspan = 1, rowspan = 1) =>
  */
 export var HTMLsafe = (str) =>
 	datatypeIs(str, 'string')
-		? str.replace(/[&<>"'-]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '-': '&#8209;' }[m]))
+		? str.replace(/[&<>"'\n-]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '\n': BREAK, '-': '&#8209;' }[m]))
 		: str;

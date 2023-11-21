@@ -30,11 +30,13 @@
  * https://blog.pearce.org.nz/2013/11/what-does-h264avc1-codecs-parameters.html
  * https://en.wikipedia.org/wiki/Advanced_Video_Coding
  **/
+const DEBUGGING = false;
 
-import { BREAK, err, bold } from './markup.js';
 import { hexDigits } from './utils.js';
 import { sscanf } from './sscanf-func.js';
+import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
+import { simpleHTML } from './formatters.js';
 
 export function decodeAVC(val) {
 	// regex from DVB TM-STREAM0087:  /avc[1-4]\.[a-fA-F\d]{6}/
@@ -47,19 +49,19 @@ export function decodeAVC(val) {
 	}
 
 	const parts = val.split('.');
-	const coding_params = { type: 'video', codec: parts[0] };
-	let res = '';
 
-	if (parts.length != 2) return err('invalid format') + BREAK;
+	if (parts.length != 2) return [error('invalid format')];
 
-	if (parts[1].length != 6) return err(`invalid parameters length (${parts[1].length}) - should be 6`) + BREAK;
+	if (parts[1].length != 6) return [error(`invalid parameters length (${parts[1].length}) - should be 6`)];
 
-	if (!hexDigits(parts[1])) return err('parameters contains non-hex digits') + BREAK;
+	if (!hexDigits(parts[1])) return [error('parameters contains non-hex digits')];
 
-	const prof = sscanf(parts[1], '%2x%2x%2x');
-	res += `profile_idc=${prof[0]} constraint_set=${prof[1]} level_idc=${prof[2]}${BREAK}`;
+	const prof = sscanf(parts[1], '%2x%2x%2x'),
+		coding_params = { type: 'video', codec: parts[0] },
+		res = [];
 
-	res += 'profile=';
+	res.push(normal(`profile_idc=${prof[0]} constraint_set=${prof[1]} level_idc=${prof[2]}`));
+
 	let profile = '';
 	switch (prof[0]) {
 		case 0x2c:
@@ -116,16 +118,17 @@ export function decodeAVC(val) {
 			profile = `High 4:4:4${AVCconstraint(prof[1], 3) ? ' Intra' : ' Predictive'}`;
 			break;
 		default:
-			profile = err('unknown');
+			coding_params.profile = 'unknown';
+			res.push(error(`unknown profile (${prof[0]})`));
 	}
-	res += `${profile} (${prof[0].toString(16)})${BREAK}`;
-	coding_params.profile = profile;
+	if (profile.length) {
+		res.push(normal(`profile=${profile} (${prof[0].toString(16)})`));
+		coding_params.profile = profile;
+	}
+	let consts = 'constraints=';
+	for (let i = 0; i <= 5; i++) consts += AVCconstraint(prof[1], i) ? i : '-';
+	res.push(normal(consts));
 
-	res += 'constraints=';
-	for (let i = 0; i <= 5; i++) res += AVCconstraint(prof[1], i) ? i : '-';
-	res += BREAK;
-
-	res += 'level=';
 	let level = '';
 	switch (prof[2]) {
 		case 0x0a:
@@ -186,19 +189,27 @@ export function decodeAVC(val) {
 			level = '6.2';
 			break;
 		default:
-			level = err('undefined');
+			coding_params.level = 'undefined';
+			res.push(error(`level=undefined (${prof[2]})`));
 	}
-	coding_params.level = level;
-	res += `${level} (${prof[2].toString(16)})${BREAK}`;
+
+	if (level.length) {
+		coding_params.level = level;
+		res.push(normal(`level=${level} (${prof[2].toString(16)})`));
+	}
 
 	const dvb = DVBclassification(coding_params);
-	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
+	if (dvb.length != 0) res.push({ dvb_term: dvb });
 
-	return res + BREAK;
+	return res;
+}
+
+function outputHTML(label, messages) {
+	return simpleHTML(label, messages, DEBUGGING);
 }
 
 export function registerAVC(addHandler) {
-	addHandler(['avc1', 'avc2', 'avc3', 'avc4'], 'AVC/H.264', decodeAVC);
-	addHandler(['mvc1', 'mvc2'], 'Multiview Coding', decodeAVC);
-	addHandler('svc1', 'Scalable Video Coding', decodeAVC);
+	addHandler(['avc1', 'avc2', 'avc3', 'avc4'], 'AVC/H.264', decodeAVC, outputHTML);
+	addHandler(['mvc1', 'mvc2'], 'Multiview Coding', decodeAVC, outputHTML);
+	addHandler('svc1', 'Scalable Video Coding', decodeAVC, outputHTML);
 }

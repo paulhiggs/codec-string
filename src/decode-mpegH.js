@@ -29,62 +29,70 @@
 // see ISO/IEC 23000-19:2019 Amd.2 "CMAF Media Profiles for MPEG-H 3D Audio, EVC, VVC and other technologies"
 // MDS19970_WG03_N00137
 
-import { BREAK, err, bold } from './markup.js';
+const DEBUGGING = false;
+
+import { hexDigits } from './utils.js';
+import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
+import { simpleHTML } from './formatters.js';
 
 export function decodeMPEGH(val) {
 	//const MHAregex = /^(mhm1|mhm2)\.0x[a-fA-F\d]{2}$/;
 	const parts = val.split('.');
 
-	if (parts.length != 2) return err('MPEG-H audio requires a profile-level-id') + BREAK;
+	if (parts.length != 2) return [error('MPEG-H audio requires a profile-level-id')];
+	if (!hexDigits(parts[1])) return [error(`profile_id not expressed in hexadecimal (${parts[1]})`)];
 
-	let res = '';
-	const level = parseInt(parts[1], 16),
+	const res = [],
+		level = parseInt(parts[1], 16),
 		coding_params = { type: 'audio', codec: parts[0] };
 
+	let profile = '';
 	switch (level) {
 		case 0x0b:
-			res += 'LC Profile Level 1';
+			profile = 'LC Profile Level 1';
 			coding_params.mode = 'LC';
 			coding_params.level = '1';
 			break;
 		case 0x0c:
-			res += 'LC Profile Level 2';
+			profile = 'LC Profile Level 2';
 			coding_params.mode = 'LC';
 			coding_params.level = '2';
 			break;
 		case 0x0d:
-			res += 'LC Profile Level 3';
+			profile = 'LC Profile Level 3';
 			coding_params.mode = 'LC';
 			coding_params.level = '3';
 			break;
 		case 0x10:
-			res += 'BL Profile Level 1';
+			profile = 'BL Profile Level 1';
 			coding_params.mode = 'BL';
 			coding_params.level = '1';
 			break;
 		case 0x11:
-			res += 'BL Profile Level 2';
+			profile = 'BL Profile Level 2';
 			coding_params.mode = 'BL';
 			coding_params.level = '2';
 			break;
 		case 0x12:
-			res += 'BL Profile Level 3';
+			profile = 'BL Profile Level 3';
 			coding_params.mode = 'BL';
 			coding_params.level = '3';
 			break;
 		default:
-			return err(`invalid level (${parts[1]})`) + BREAK;
+			return [error(`invalid level (${parts[1]})`)];
 	}
-	if (parts[0] == 'mhm2') res += ', multi-steam';
-	res += BREAK;
+	if (parts[0] == 'mhm2') profile += ', multi-steam';
+	if (profile.length) res.push(normal(profile));
 
 	const dvb = DVBclassification(coding_params);
-	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
+	if (dvb.length != 0) res.push({ dvb_term: dvb });
 
 	return res;
 }
-
+function outputHTML(label, messages) {
+	return simpleHTML(label, messages, DEBUGGING);
+}
 export function registerMPEGH(addHandler) {
-	addHandler(['mhm1', 'mhm2'], 'MPEG-H Audio', decodeMPEGH);
+	addHandler(['mhm1', 'mhm2'], 'MPEG-H Audio', decodeMPEGH, outputHTML);
 }

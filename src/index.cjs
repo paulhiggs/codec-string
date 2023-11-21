@@ -12,6 +12,7 @@ const { decodeVP9 } = require('./decode-vp9.js');
 const { decodeVVC } = require('./decode-vvc.js');
 const { decode } = require('./decode.js');
 const { DVBclassification } = require('./dvb-mapping.js');
+const { simpleHTML, tabularHTML } = require('./formatters.js');
 
 module.exports = {
 	decodeAC4,
@@ -33,4 +34,6 @@ module.exports = {
 	decodeVVC,
 	decode,
 	DVBclassification,
+	simpleHTML,
+	tabularHTML,
 };

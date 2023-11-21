@@ -4,7 +4,7 @@
 	function checkCodec() {
 		var val = document.getElementById('param').value;
 		var res = window.CodecString.decode(val);
-		document.getElementById('results').innerHTML = '<hr><h2>Results</h2><br>' + res;
+		document.getElementById('results').innerHTML = '<hr><h2>Results</h2><br>' + res.toHTML();
 	}
 
 	function addClickListener() {

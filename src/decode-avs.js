@@ -25,10 +25,12 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
+const DEBUGGING = false;
 
-import { BREAK, err, warn, bold } from './markup.js';
 import { hexDigits } from './utils.js';
+import { normal, warning, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
+import { simpleHTML } from './formatters.js';
 
 const avs3 = {
 	profileMain8: 0x20,
@@ -156,197 +158,115 @@ const avs3allowed = [
 	},
 ];
 
+const AVS3profiles = [
+	{ val: avs3.profileMain8, str: 'Main 8-bit profile' },
+	{ val: avs3.profileMain10, str: 'Main 10-bit profile' },
+	{ val: avs3.profileHigh8, str: 'High 8-bit profile' },
+	{ val: avs3.profileHigh10, str: 'High 10-bit profile' },
+];
+
+const AVS3ProfileStr = (prof) => {
+	const t = AVS3profiles.find((e) => (e.val = prof));
+	return t ? t.str : null;
+};
+
+const AVS3levels = [
+	{ val: avs3.level2_0_15, str: '2.0.15' },
+	{ val: avs3.level2_0_30, str: '2.0.30' },
+	{ val: avs3.level2_0_60, str: '2.0.60' },
+	{ val: avs3.level4_0_30, str: '4.0.30' },
+	{ val: avs3.level4_0_60, str: '4.0.60' },
+	{ val: avs3.level6_0_30, str: '6.0.30' },
+	{ val: avs3.level6_2_30, str: '6.2.30' },
+	{ val: avs3.level6_4_30, str: '6.4.30' },
+	{ val: avs3.level6_6_30, str: '6.6.30' },
+	{ val: avs3.level6_0_60, str: '6.0.60' },
+	{ val: avs3.level6_2_60, str: '6.2.60' },
+	{ val: avs3.level6_4_60, str: '6.4.60' },
+	{ val: avs3.level6_6_60, str: '6.6.60' },
+	{ val: avs3.level6_0_120, str: '6.0.120' },
+	{ val: avs3.level6_2_120, str: '6.2.120' },
+	{ val: avs3.level6_4_120, str: '6.4.120' },
+	{ val: avs3.level6_6_120, str: '6.6.120' },
+	{ val: avs3.level8_0_30, str: '8.0.30' },
+	{ val: avs3.level8_2_30, str: '8.2.30' },
+	{ val: avs3.level8_4_30, str: '8.4.30' },
+	{ val: avs3.level8_6_30, str: '8.6.30' },
+	{ val: avs3.level8_0_60, str: '8.0.60' },
+	{ val: avs3.level8_2_60, str: '8.2.60' },
+	{ val: avs3.level8_4_60, str: '8.4.60' },
+	{ val: avs3.level8_6_60, str: '8.6.60' },
+	{ val: avs3.level8_0_120, str: '8.0.120' },
+	{ val: avs3.level8_2_120, str: '8.2.120' },
+	{ val: avs3.level8_4_120, str: '8.4.120' },
+	{ val: avs3.level8_6_120, str: '8.6.120' },
+	{ val: avs3.level8_0_30, str: '10.0.30' },
+	{ val: avs3.level10_2_30, str: '10.2.30' },
+	{ val: avs3.level10_4_30, str: '10.4.30' },
+	{ val: avs3.level10_6_30, str: '10.6.30' },
+	{ val: avs3.level10_0_60, str: '10.0.60' },
+	{ val: avs3.level10_2_60, str: '10.2.60' },
+	{ val: avs3.level10_4_60, str: '10.4.60' },
+	{ val: avs3.level10_6_60, str: '10.6.60' },
+	{ val: avs3.level10_0_120, str: '10.0.120' },
+	{ val: avs3.level10_2_120, str: '10.2.120' },
+	{ val: avs3.level10_4_120, str: '10.4.120' },
+	{ val: avs3.level10_6_120, str: '10.6.120' },
+];
+const AVS3LevelStr = (lev) => {
+	const t = AVS3levels.find((e) => (e.val = lev));
+	return t ? t.str : null;
+};
+
 export function decodeAVS3(val) {
 	const parts = val.split('.');
-	const coding_params = { type: 'video', codec: parts[0] };
+	if (parts.length != 3) return [error('AVS3 codec requires 3 parts')];
 
-	if (parts.length != 3) return err('AVS3 codec requires 3 parts') + BREAK;
-
-	let argErrs = '';
-	if (!hexDigits(parts[1])) argErrs += err(`profile_id not expressed in hexadecimal (${parts[1]})`) + BREAK;
-	if (!hexDigits(parts[2])) argErrs += err(`level_id not expressed in hexadecimal (${parts[2]})`) + BREAK;
-
+	const argErrs = [];
+	if (!hexDigits(parts[1])) argErrs.push(error(`profile_id not expressed in hexadecimal (${parts[1]})`));
+	if (!hexDigits(parts[2])) argErrs.push(error(`level_id not expressed in hexadecimal (${parts[2]})`));
 	if (argErrs.length) return argErrs;
 
+	const coding_params = { type: 'video', codec: parts[0] };
+	const res = [];
 	const profile_id = parseInt(parts[1], 16),
 		level_id = parseInt(parts[2], 16);
-	let res = '';
-
-	let prof = null;
-	switch (profile_id) {
-		case avs3.profileMain8:
-			prof = 'Main 8-bit profile';
-			break;
-		case avs3.profileMain10:
-			prof = 'Main 10-bit profile';
-			break;
-		case avs3.profileHigh8:
-			prof = 'High 8-bit profile';
-			break;
-		case avs3.profileHigh10:
-			prof = 'High 10-bit profile';
-			break;
-		default:
-			coding_params.profile = 'invalid';
-			res += err(`invalid profile_id (${parts[1]}) specified`);
-	}
+	const prof = AVS3ProfileStr(profile_id),
+		lev = AVS3LevelStr(level_id);
 	if (prof) {
-		res += prof;
+		res.push(normal(prof));
 		coding_params.profile = prof;
+	} else {
+		res.push(error(`invalid profile_id (${parts[1]}) specified`));
+		coding_params.profile = 'invalid';
 	}
-	res += BREAK;
 
-	let lev = null;
-	switch (level_id) {
-		case 0x00:
-			res += warn('forbidden');
-			break;
-		case avs3.level2_0_15:
-			lev = '2.0.15';
-			break;
-		case avs3.level2_0_30:
-			lev = '2.0.30';
-			break;
-		case avs3.level2_0_60:
-			lev = '2.0.60';
-			break;
-		case avs3.level4_0_30:
-			lev = '4.0.30';
-			break;
-		case avs3.level4_0_60:
-			lev = '4.0.60';
-			break;
-		case avs3.level6_0_30:
-			lev = '6.0.30';
-			break;
-		case avs3.level6_2_30:
-			lev = '6.2.30';
-			break;
-		case avs3.level6_4_30:
-			lev = '6.4.30';
-			break;
-		case avs3.level6_6_30:
-			lev = '6.6.30';
-			break;
-		case avs3.level6_0_60:
-			lev = '6.0.60';
-			break;
-		case avs3.level6_2_60:
-			lev = '6.2.60';
-			break;
-		case avs3.level6_4_60:
-			lev = '6.4.60';
-			break;
-		case avs3.level6_6_60:
-			lev = '6.6.60';
-			break;
-		case avs3.level6_0_120:
-			lev = '6.0.120';
-			break;
-		case avs3.level6_2_120:
-			lev = '6.2.120';
-			break;
-		case avs3.level6_4_120:
-			lev = '6.4.120';
-			break;
-		case avs3.level6_6_120:
-			lev = '6.6.120';
-			break;
-		case avs3.level8_0_30:
-			lev = '8.0.30';
-			break;
-		case avs3.level8_2_30:
-			lev = '8.2.30';
-			break;
-		case avs3.level8_4_30:
-			lev = '8.4.30';
-			break;
-		case avs3.level8_6_30:
-			lev = '8.6.30';
-			break;
-		case avs3.level8_0_60:
-			lev = '8.0.60';
-			break;
-		case avs3.level8_2_60:
-			lev = '8.2.60';
-			break;
-		case avs3.level8_4_60:
-			lev = '8.4.60';
-			break;
-		case avs3.level8_6_60:
-			lev = '8.6.60';
-			break;
-		case avs3.level8_0_120:
-			lev = '8.0.120';
-			break;
-		case avs3.level8_2_120:
-			lev = '8.2.120';
-			break;
-		case avs3.level8_4_120:
-			lev = '8.4.120';
-			break;
-		case avs3.level8_6_120:
-			lev = '8.6.120';
-			break;
-		case avs3.level10_0_30:
-			lev = '10.0.30';
-			break;
-		case avs3.level10_2_30:
-			lev = '10.2.30';
-			break;
-		case avs3.level10_4_30:
-			lev = '10.4.30';
-			break;
-		case avs3.level10_6_30:
-			lev = '10.6.30';
-			break;
-		case avs3.level10_0_60:
-			lev = '10.0.60';
-			break;
-		case avs3.level10_2_60:
-			lev = '10.2.60';
-			break;
-		case avs3.level10_4_60:
-			lev = '10.4.60';
-			break;
-		case avs3.level10_6_60:
-			lev = '10.6.60';
-			break;
-		case avs3.level10_0_120:
-			lev = '10.0.120';
-			break;
-		case avs3.level10_2_120:
-			lev = '10.2.120';
-			break;
-		case avs3.level10_4_120:
-			lev = '10.4.120';
-			break;
-		case avs3.level10_6_120:
-			lev = '10.6.120';
-			break;
-		default:
-			coding_params.level = 'invalid';
-			res += err(`invalid level_id (${parts[2]}) specified`);
-	}
-	if (lev) {
-		res += `Level ${lev}`;
+	if (level_id == 0x00) res.push(warning('level is forbidden'));
+	else if (lev) {
+		res.push(normal(`Level ${lev}`));
 		coding_params.level = lev;
+	} else {
+		res.push(error(`invalid level_id (${parts[2]}) specified`));
+		coding_params.level = 'invalid';
 	}
-	res += BREAK;
 
 	if (res && lev) {
 		const foundProfile = avs3allowed.find((entry) => entry.profiles.includes(profile_id));
 		if (foundProfile && !foundProfile.levels.includes(level_id))
-			res += warn(`specified profile (${parts[1]}) does not support the specified level (${parts[2]})`) + BREAK;
+			res.push(warning(`specified profile (${parts[1]}) does not support the specified level (${parts[2]})`));
 	}
 
 	const dvb = DVBclassification(coding_params);
-	if (dvb.length != 0) res += BREAK + bold('DVB term: ') + dvb + BREAK;
+	if (dvb.length != 0) res.push({ dvb_term: dvb });
 
-	return res + BREAK;
+	return res;
+}
+
+function outputHTML(label, messages) {
+	return simpleHTML(label, messages, DEBUGGING);
 }
 
 export function registerAVS3(addHandler) {
-	addHandler(['avs3'], 'AVS3 Video', decodeAVS3);
-	addHandler(['lav3'], 'AVS3 Library Track', decodeAVS3);
+	addHandler(['avs3'], 'AVS3 Video', decodeAVS3, outputHTML);
+	addHandler(['lav3'], 'AVS3 Library Track', decodeAVS3, outputHTML);
 }

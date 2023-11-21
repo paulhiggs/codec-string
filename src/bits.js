@@ -26,8 +26,6 @@
  *
  */
 
-import { BREAK } from './markup.js';
-
 export class BitList {
 	constructor() {
 		this.bytes = [];
@@ -67,7 +65,7 @@ export class BitList {
 		const idx = this.bytes.length - Math.floor((bitNo - 1) / 8) - 1;
 		let bit = bitNo % 8;
 		if (bit == 0) bit = 8;
-		return `<i>${bitNo}=${idx}:${bit}</i>${BREAK}`;
+		return `${bitNo}=${idx}:${bit}`;
 	}
 
 	toString() {
@@ -77,6 +75,12 @@ export class BitList {
 			const comp = this.bytes[i++].toString(16);
 			res += (comp.length == 1 ? '0' : '') + comp;
 		}
+		return res;
+	}
+
+	toBitString() {
+		let res = '';
+		for (let bitNo = 0; bitNo < this.bytes.length * 8; bitNo++) res = (this.bitset(bitNo) ? '1' : '0') + res;
 		return res;
 	}
 }
