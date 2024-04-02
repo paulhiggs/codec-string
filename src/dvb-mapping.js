@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2024
+ * @copyright: Copyright (c) 2023-2024
  * @author: Paul Higgs
  * @file: dvb-mapping.js
  *
@@ -401,7 +401,7 @@ export function DVBclassification(params) {
 	switch (params.type) {
 		case 'video':
 			// hack to allow hvc1 and hev1 (DVB A168 clasue 5.2.1)
-			if (params?.codec == 'hvc1') params.codec = 'hevc';
+			if (params?.codec == 'hvc1') params.codec = 'hev1';
 			res = match(VideoCodecCS, VideoTerms, params);
 			break;
 		case 'audio':
