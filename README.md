@@ -77,5 +77,5 @@ console.log(window.CodecString.decode('avc1.64002A'));
 This software is distributed under the terms of the Simplified BSD License.
 See the file `LICENSE.txt` for details.
 
-*Copyright (c) 2021-2023, Paul Higgs*<br/>
+*Copyright (c) 2021-2024, Paul Higgs*<br/>
 *All rights reserved*

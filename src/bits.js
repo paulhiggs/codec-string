@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2021-2023
+ * @copyright: Copyright (c) 2021-2024
  * @author: Paul Higgs
  * @file: bits.js
  *
