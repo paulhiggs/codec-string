@@ -400,6 +400,8 @@ export function DVBclassification(params) {
 
 	switch (params.type) {
 		case 'video':
+			// hack to allow hvc1 and hev1 (DVB A168 clasue 5.2.1)
+			if (params?.codec == 'hvc1') params.codec = 'hevc';
 			res = match(VideoCodecCS, VideoTerms, params);
 			break;
 		case 'audio':
