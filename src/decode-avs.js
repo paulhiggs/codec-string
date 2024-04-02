@@ -262,6 +262,69 @@ export function decodeAVS3(val) {
 	return res;
 }
 
+export function decodeAVS3audio(val) {
+	const parts = val.split('.');
+	if (parts.length != 2) return [error('AVS3 audio codec requires 2 parts')];
+
+	const argErrs = [];
+	if (!hexDigits(parts[1])) argErrs.push(error(`audio_codec_id not expressed in hexadecimal (${parts[1]})`));
+	if (argErrs.length) return argErrs;
+
+	const coding_params = { type: 'audio', codec: parts[0] };
+	const res = [];
+	const audio_codec_id = parseInt(parts[1], 16);
+
+	switch (audio_codec_id) {
+		case 0:
+			res.push(normal('General Audio Coding'));
+			break;
+		case 1:
+			res.push(normal('Lossless Audio Coding'));
+			break;
+		case 2:
+			res.push(normal('Full Rate Audio Coding'));
+			break;
+		default:
+			res.push(error(`invalid audio_codec_id (${parts[1]}) specified`));
+			break;
+	}
+
+	const dvb = DVBclassification(coding_params);
+	if (dvb.length != 0) res.push({ dvb_term: dvb });
+
+	return res;
+}
+
+export function decodeAVS2audio(val) {
+	const parts = val.split('.');
+	if (parts.length != 2) return [error('AVS2 audio codec requires 2 parts')];
+
+	const argErrs = [];
+	if (!hexDigits(parts[1])) argErrs.push(error(`audio_codec_id not expressed in hexadecimal (${parts[1]})`));
+	if (argErrs.length) return argErrs;
+
+	const coding_params = { type: 'audio', codec: parts[0] };
+	const res = [];
+	const audio_codec_id = parseInt(parts[1], 16);
+
+	switch (audio_codec_id) {
+		case 0:
+			res.push(normal('General Audio Coding'));
+			break;
+		case 1:
+			res.push(normal('Lossless Audio Coding'));
+			break;
+		default:
+			res.push(error(`invalid audio_codec_id (${parts[1]}) specified`));
+			break;
+	}
+
+	const dvb = DVBclassification(coding_params);
+	if (dvb.length != 0) res.push({ dvb_term: dvb });
+
+	return res;
+}
+
 function outputHTML(label, messages) {
 	return simpleHTML(label, messages, DEBUGGING);
 }
@@ -269,4 +332,6 @@ function outputHTML(label, messages) {
 export function registerAVS3(addHandler) {
 	addHandler(['avs3'], 'AVS3 Video', decodeAVS3, outputHTML);
 	addHandler(['lav3'], 'AVS3 Library Track', decodeAVS3, outputHTML);
+	addHandler('av3a', 'AVS3 Audio', decodeAVS3audio, outputHTML);
+	addHandler('cavs', 'AVS2 Audio', decodeAVS2audio, outputHTML);
 }
