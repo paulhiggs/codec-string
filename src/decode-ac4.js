@@ -32,7 +32,7 @@
  * https://media.developer.dolby.com/AC4/AC4_DASH_for_BROADCAST_SPEC/index.html#help_files/topics/c_mpd_codec.html
  *
  **/
-const DEBUGGING = true;
+const DEBUGGING = false;
 
 import { hexDigits } from './utils.js';
 import { normal, error, warning } from './decode.js';
