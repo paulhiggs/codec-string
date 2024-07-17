@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [18.x]
 
     steps:
     - uses: actions/checkout@v4
@@ -22,9 +22,18 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build
+    - name: Provision NPM
       run: |
         npm install
+
+    - name: Create Webpacks
+      run: |
         npx webpack --config ./webpack-esm.cjs --mode production
         npx webpack --config ./webpack-cjs.cjs --mode production  --no-output-clean
         npx webpack --config ./webpack-script.cjs --mode production --no-output-clean
+
+    -name: Show Results
+      run: ls -l
+
+    - name: Provision
+      run: |
