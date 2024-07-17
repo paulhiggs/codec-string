@@ -34,6 +34,12 @@ jobs:
 
     - name: Show Results
       run: |
-        ls -l
+        ls -l .
+
+    - name: Provision
+      run: |
+        mkdir ./serve
+        cp ./dist/script/* ./serve
+  
 
 

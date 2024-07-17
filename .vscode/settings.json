@@ -2,7 +2,7 @@
 	"editor.tabSize": 2,
 	"editor.detectIndentation": false,
 	"editor.renderWhitespace": "all",
-	"editor.insertSpaces": false,
+	"editor.insertSpaces": true,
 	"files.eol": "\n",
 
 	"prettier.singleQuote": true,
