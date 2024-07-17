@@ -32,7 +32,7 @@ jobs:
         npx webpack --config ./webpack-cjs.cjs --mode production  --no-output-clean
         npx webpack --config ./webpack-script.cjs --mode production --no-output-clean
 
-    -name: Show Results
+    - name: Show Results
       run: |
         ls -l
 
