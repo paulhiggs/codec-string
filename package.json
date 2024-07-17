@@ -1,6 +1,6 @@
 {
   "name": "codec-string",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "decode the codec= string in a media mime type",
   "type": "module",
   "engines": {
@@ -39,5 +39,9 @@
   "devDependencies": {
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
-  }
+  },
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/paulhiggs/codec-string"
+	}
 }

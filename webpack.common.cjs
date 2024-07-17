@@ -3,6 +3,8 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const  package_json = require('./package.json');
+
 const webpackSettings = ({ scriptLoading }) => ({
 	entry: {
 		'codec-string': './src/index.js',
@@ -29,6 +31,12 @@ const webpackSettings = ({ scriptLoading }) => ({
 		new ESLintPlugin(),
 		new HtmlWebpackPlugin({
 			title: 'Codec string decoder (parse+print mode)',
+			author: 'Paul Higgs',
+			author_email: package_json.author,
+			repo: package_json.repository.url,
+			issues: `${package_json.repository.url}/issues`,
+			product: package_json.name,
+			version:  package_json.version,
 			template: './src/index.ejs',
 			filename: 'index.html',
 			cache: false,

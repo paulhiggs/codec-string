@@ -7,6 +7,12 @@
 
 <body>
 <h1><%= htmlWebpackPlugin.options.title %></h1>
+<p>
+	<%= htmlWebpackPlugin.options.product %> v<%= htmlWebpackPlugin.options.version %> by 
+	<a href="mailto:<%= htmlWebpackPlugin.options.author_email %>"><%= htmlWebpackPlugin.options.author %></a> (
+	<a href="<%= htmlWebpackPlugin.options.repo %>">repository</a>, 
+	<a href="<%= htmlWebpackPlugin.options.issues %>">issues</a>
+)</p>
 
 <p>Enter string: codecs="<input type="text" id="param"/>"
 <button type="button" id="check-codec">Decode</button>
