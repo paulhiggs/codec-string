@@ -31,7 +31,7 @@
 
 // VVC - ISO/IEC 23090-3  - w19470
 
-const DEBUGGING = true;
+const DEBUGGING = false;
 
 import { BitList } from './bits.js';
 import { normal, error } from './decode.js';

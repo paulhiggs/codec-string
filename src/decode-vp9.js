@@ -66,7 +66,7 @@ mutually inclusive (all or none) fields. If not specified then the processing de
 in the table below as defaults when deciding if the device is able to decode and potentially render the video.
 */
 
-const DEBUGGING = true;
+const DEBUGGING = false;
 
 import { error } from './decode.js';
 import { err, BREAK, HTMLsafe, cell, bold, warn, dflt } from './markup.js';
