@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,8 +24,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Provision NPM
-      run: |
-        npm install
+      run: npm install
 
     - name: Create Webpacks
       run: |
@@ -33,13 +33,7 @@ jobs:
         npx webpack --config ./webpack-script.cjs --mode production --no-output-clean
 
     - name: Show Results
-      run: |
-        ls -l .
+      run: ls -l .
 
-    - name: Provision
-      run: |
-        mkdir ./serve
-        cp ./dist/script/* ./serve
-  
 
 
