@@ -26,7 +26,7 @@
  *
  */
 
-// see annex E.9 of  ISO/IEC 14496-15:2019 Amd.2 "Carriage of VVC and EVC in ISOBMFF" (w19454)
+// see annex E.9 of  ISO/IEC 14496-15:2022  "Carriage of network abstraction layer (NAL) unit structured video in the ISO base media file format"
 // and ISO/IEC 23091-2 (MDS19669_WG05_N00011)
 
 const DEBUGGING = false;
@@ -466,19 +466,17 @@ export function decodeEVC(val) {
 		return null;
 	}
 
-	const parts = val.split('.');
-
 	const KEY_PROFILE = 'vprf',
 		KEY_LEVEL = 'vlev',
 		KEY_TOOLSET_HIGH = 'vtoh',
-		KEY_TOOLSET_LOW = 'vtol';
-	const KEY_BIT_DEPTH = 'vbit',
+		KEY_TOOLSET_LOW = 'vtol',
+		KEY_BIT_DEPTH = 'vbit',
 		KEY_CHROMA = 'vcss',
-		KEY_PRIMARIES = 'vcpr';
-	const KEY_XFER_CHAR = 'vtrc',
+		KEY_PRIMARIES = 'vcpr',
+		KEY_XFER_CHAR = 'vtrc',
 		KEY_MATRIX_COEFF = 'vmac',
-		KEY_FULL_RANGE = 'vfrf';
-	const KEY_FRAME_PACK = 'vfpq',
+		KEY_FULL_RANGE = 'vfrf',
+		KEY_FRAME_PACK = 'vfpq',
 		KEY_INTERPRETATION = 'vpci',
 		KEY_SAR = 'vsar';
 
@@ -594,7 +592,7 @@ export function decodeEVC(val) {
 		},
 	];
 
-	const res = [];
+	const res = [], parts = val.split('.');
 
 	for (let i = 1; i < parts.length; i++) {
 		const key = parts[i].substring(0, 4);
@@ -679,7 +677,7 @@ export function decodeEVC(val) {
 				break;
 			}
 			default:
-				res.push(error('invalid key specified (' + key + ')'));
+				res.push(warning('unrecognised key  (' + key + ')'));
 				break;
 		}
 	}
@@ -701,7 +699,7 @@ function evcHTML(label, messages) {
 	// const TABLE_STYLE = '<style>table {border-collapse: collapse;border: 1px solid black;} th, td {text-align: left; padding: 8px;} tr:nth-child(even) {background-color: #f2f2f2;}</style>';
 	const TABLE_STYLE =
 		'<style>table {border-collapse: collapse;border: none;} th, td {text-align: left; padding: 8px;} ' +
-		'tr {border-bottom: 1pt solid black;} tr:nth-child(even) {background-color: #f2f2f2;}</style > ';
+		'tr {border-bottom: 1pt solid black;} tr:nth-child(even) {background-color: #f2f2f2;}</style>';
 	function printHex3(value) {
 		let enc = value.toString(16);
 		while (enc.length < 6) enc = '0' + enc;
@@ -762,7 +760,9 @@ function evcHTML(label, messages) {
 				});
 			if (tools.length) res += cell(tools, 1, 2);
 			res += cell(toolset?.is_default ? dflt('default') : '');
-		} else if (msg?.error) res += cell(err(msg.error), 4);
+		} 
+		else if (msg?.error) res += cell(err(msg.error), 4);
+		else if (msg?.warning) res += cell(warn(msg.warning), 4);
 		else res += cell(err(`invalid element ${JSON.stringify(msg)}`), 4);
 		res += '</tr>';
 	});

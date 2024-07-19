@@ -26,8 +26,8 @@
  *
  */
 
-// see annex E.6 through E.8 of  ISO/IEC 14496-15:2019 Amd.2 "Carriage of VVC and EVC in ISOBMFF"
-// w19454
+// see annex E.6 through E.8 of  ISO/IEC 14496-15:2022 
+// 
 
 // VVC - ISO/IEC 23090-3  - w19470
 
@@ -37,11 +37,9 @@ import { BitList } from './bits.js';
 import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
+import { expressions } from './regular_expressions.js';
 
 export function decodeVVC(val) {
-	const VVCregex = /^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-zA-Z2-7]+)?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/;
-	const VVCformat =
-		'<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}';
 
 	function printProfile(profile) {
 		const general_profile_idc = parseInt(profile);
@@ -279,10 +277,10 @@ export function decodeVVC(val) {
 		return res;
 	}
 
-	if (!VVCregex.test(val)) return [error('Regex mismatch!'), error(VVCformat)];
+	if (!expressions.VVC.regex.test(val)) return [error('Regex mismatch!'), error(expressions.VVC.format)];
 
 	const res = [],
-		parts = val.match(VVCregex),
+		parts = val.match(expressions.VVC.regex),
 		coding_params = { type: 'video' };
 
 	if (parts.length > 1) coding_params.codec = parts[1];

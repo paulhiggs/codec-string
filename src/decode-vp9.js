@@ -71,12 +71,10 @@ const DEBUGGING = false;
 import { error } from './decode.js';
 import { err, BREAK, HTMLsafe, cell, bold, warn, dflt } from './markup.js';
 import { dumpJSONHTML } from './formatters.js';
+import { expressions } from './regular_expressions.js';
 
 export function decodeVP9(val) {
-	const VP9regex = /^(vp09)(\.\d\d){3}(\.\d{0,2}){0,5}$/;
-	const VP9format =
-		'<sample entry 4CC>.<profile>.<level>.<bitDepth>.<chromaSubsampling>.<colourPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>';
-	if (!VP9regex.test(val)) return [error('Regex failure'), error(VP9format)];
+	if (!expressions.VP9.regex.test(val)) return [error('Regex failure'), error(expressions.VP9.format)];
 
 	const PROFILE_0 = 0,
 		PROFILE_1 = 1,
@@ -89,7 +87,7 @@ export function decodeVP9(val) {
 		CHROMA420_luma = 1,
 		CHROMA422 = 2,
 		CHROMA444 = 3,
-		CHROMA440 = 100; /* unsure hot 4:4:0 is signalled */
+		CHROMA440 = 100; /* unsure how 4:4:0 is signalled */
 
 	const fields = [
 		{
@@ -154,6 +152,7 @@ export function decodeVP9(val) {
 		if (args.value < PROFILE_0 || args.value > PROFILE_3) return error(`invalid profile (${args.value})`);
 		return { value: args.value, description: `Profile ${args.value}` };
 	}
+
 	function parseLevel(args) {
 		let lev = null;
 		switch (args.value) {

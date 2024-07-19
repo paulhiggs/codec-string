@@ -5,6 +5,7 @@ import { registerAVS3 } from './decode-avs.js';
 import { registerDTS } from './decode-dts.js';
 import { registerEVC } from './decode-evc.js';
 import { registerHEVC } from './decode-hevc.js';
+import { registerLCEVC } from './decode-lcevc.js';
 import { registerMisc } from './decode-misc.js';
 import { registerMPEG } from './decode-mpeg.js';
 import { registerMPEGH } from './decode-mpegH.js';
@@ -48,6 +49,7 @@ const registerFactories = [
 	registerDTS,
 	registerEVC,
 	registerHEVC,
+	registerLCEVC,
 	registerMisc,
 	registerMPEG,
 	registerMPEGH,

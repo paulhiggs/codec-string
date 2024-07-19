@@ -31,6 +31,7 @@ import { hexDigits } from './utils.js';
 import { normal, warning, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
+import { expressions } from './regular_expressions.js';
 
 const avs3 = {
 	profileMain8: 0x20,
@@ -166,8 +167,8 @@ const AVS3profiles = [
 ];
 
 const AVS3ProfileStr = (prof) => {
-	const t = AVS3profiles.find((e) => (e.val = prof));
-	return t ? t.str : null;
+	const t = AVS3profiles.find((e) => (e.val == prof));
+	return t ? `${t.str} (${prof})` : null;
 };
 
 const AVS3levels = [
@@ -214,15 +215,20 @@ const AVS3levels = [
 	{ val: avs3.level10_6_120, str: '10.6.120' },
 ];
 const AVS3LevelStr = (lev) => {
-	const t = AVS3levels.find((e) => (e.val = lev));
-	return t ? t.str : null;
+	const t = AVS3levels.find((e) => (e.val == lev));
+	return t ? `${t.str} (${lev})` : null;
 };
 
 export function decodeAVS3(val) {
+	if (!expressions.AVS3video.regex.test(val))
+		return [error('Regex mismatch!'), error(expressions.AVS3video.format), error(expressions.AVS3video.description)];
+
 	const parts = val.split('.');
+	// the following check should not occur due to regular expression checking
 	if (parts.length != 3) return [error('AVS3 codec requires 3 parts')];
 
 	const argErrs = [];
+	// the following checks should not occur due to regular expression checking
 	if (!hexDigits(parts[1])) argErrs.push(error(`profile_id not expressed in hexadecimal (${parts[1]})`));
 	if (!hexDigits(parts[2])) argErrs.push(error(`level_id not expressed in hexadecimal (${parts[2]})`));
 	if (argErrs.length) return argErrs;
@@ -263,12 +269,15 @@ export function decodeAVS3(val) {
 }
 
 export function decodeAVS3audio(val) {
-	const parts = val.split('.');
-	if (parts.length != 2) return [error('AVS3 audio codec requires 2 parts')];
 
-	const argErrs = [];
-	if (!hexDigits(parts[1])) argErrs.push(error(`audio_codec_id not expressed in hexadecimal (${parts[1]})`));
-	if (argErrs.length) return argErrs;
+	if (!expressions.AVS3audio.regex.test(val)) 
+		return [error('Regex mismatch!'), error(expressions.AVS3audio.format), error(expressions.AVS3audio.description)];
+
+	const parts = val.split('.');
+
+	// the following checks should not occur due to regular expression checking
+	if (parts.length != 2) return [error('AVS3 audio codec requires 2 parts')];
+	if (!hexDigits(parts[1])) return [error(`audio_codec_id not expressed in hexadecimal (${parts[1]})`)];
 
 	const coding_params = { type: 'audio', codec: parts[0] };
 	const res = [];
@@ -296,12 +305,14 @@ export function decodeAVS3audio(val) {
 }
 
 export function decodeAVS2audio(val) {
-	const parts = val.split('.');
-	if (parts.length != 2) return [error('AVS2 audio codec requires 2 parts')];
+	if (!expressions.AVS2audio.regex.test(val)) 
+		return [error('Regex mismatch!'), error(expressions.AVS2audio.format), error(expressions.AVS2audio.description)];
 
-	const argErrs = [];
-	if (!hexDigits(parts[1])) argErrs.push(error(`audio_codec_id not expressed in hexadecimal (${parts[1]})`));
-	if (argErrs.length) return argErrs;
+	const parts = val.split('.');
+
+	// the following checks should not occur due to regular expression checking
+	if (parts.length != 2) return [error('AVS2 audio codec requires 2 parts')];
+	if (!hexDigits(parts[1])) return [error(`audio_codec_id not expressed in hexadecimal (${parts[1]})`)];
 
 	const coding_params = { type: 'audio', codec: parts[0] };
 	const res = [];
@@ -330,8 +341,8 @@ function outputHTML(label, messages) {
 }
 
 export function registerAVS3(addHandler) {
-	addHandler(['avs3'], 'AVS3 Video', decodeAVS3, outputHTML);
-	addHandler(['lav3'], 'AVS3 Library Track', decodeAVS3, outputHTML);
+	addHandler('avs3', 'AVS3 Video', decodeAVS3, outputHTML);
+	addHandler('lav3', 'AVS3 Library Track', decodeAVS3, outputHTML);
 	addHandler('av3a', 'AVS3 Audio', decodeAVS3audio, outputHTML);
 	addHandler('cavs', 'AVS2 Audio', decodeAVS2audio, outputHTML);
 }

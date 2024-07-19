@@ -38,8 +38,7 @@ import { hexDigits } from './utils.js';
 import { normal, error, warning } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
-
-const AC4format = 'ac-4.<bitstream_version>.<presentation_version>.<mdcompat>';
+import { expressions } from './regular_expressions.js';
 
 // eslint-disable-next-line no-unused-vars
 export function decodeEAC3(val) {
@@ -116,9 +115,10 @@ const decodeMDcompat = (mdcompat, pres_version) => {
 };
 
 export function decodeAC4(val) {
+	if (!expressions.AC4.regex.test(val)) return [error('Regex mismatch!'), error(expressions.AC4.format)];
 	const parts = val.split('.');
-
-	if (parts.length != 4) return [error(`AC-4 format is "${AC4format}"`)];
+	// neither of these checks should fail as the number of parts and the format are checked in the regupar expression
+	if (parts.length != 4) return [error(`AC-4 format is "${expressions.AC4.format}"`)];
 	if (!hexDigits(parts[1]) || !hexDigits(parts[2]) || !hexDigits(parts[3])) return [error('parameters contain non-hex digits')];
 
 	const coding_params = { type: 'audio', codec: parts[0] },

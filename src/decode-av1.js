@@ -30,9 +30,7 @@ const DEBUGGING = false;
 import { sscanf } from './sscanf-func.js';
 import { normal, error, warning } from './decode.js';
 import { simpleHTML } from './formatters.js';
-
-const AV1format =
-	'<sample entry 4CC>.<profile>.<level><tier>.<bitDepth>.<monochrome>.<chromaSubsampling>.<colorPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag></videoFullRangeFlag>';
+import { expressions } from './regular_expressions.js';
 
 export function decodeAV1(val) {
 	// defined in https://aomediacodec.github.io/av1-isobmff/#codecsparam
@@ -40,8 +38,12 @@ export function decodeAV1(val) {
         <sample entry 4CC>.<profile>.<level><tier>.<bitDepth>.<monochrome>.<chromaSubsampling>.
         <colorPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>
      */
+	if (!expressions.AV1.regex.text(val))
+		return [error('Regex mismatch!'), error(expressions.AV1.format), error(expressions.AV1.description)];
+
 	const parts = val.split('.');
-	if (parts.length < 4) return [error(`invalid format "${AV1format}"`)];
+	// this checks should not fail as the number of parts and the format are checked in the regupar expression
+	if (parts.length < 4) return [error(`invalid format "${expressions.AV1.format}"`)];
 
 	const res = [];
 
@@ -164,14 +166,14 @@ export function decodeAV1(val) {
 			res.push(error(`unknown tier (${levelAndTier[1]})`));
 	}
 
-	switch (parts[3]) {
-		case '08':
+	switch (parseInt(parts[3])) {
+		case 8:
 			res.push(normal('8 bit'));
 			break;
-		case '10':
+		case 10:
 			res.push(normal('10 bit'));
 			break;
-		case '12':
+		case 12:
 			res.push(normal('12 bit'));
 			break;
 		default:
@@ -390,10 +392,11 @@ export function decodeAV1(val) {
 		}
 	else res.push({ default: '1 (ITU-R BT.709)' });
 
+	const _dflt_videoFullRangeFlag = '0 (studio swing representation)';
 	if (parts.length > 9) {
 		switch (parts[9]) {
 			case '0':
-				res.push(normal('0 (studio swing representation)'));
+				res.push(normal(_dflt_videoFullRangeFlag));
 				break;
 			case '1':
 				res.push(normal('1 (full swing representation)'));
@@ -401,7 +404,7 @@ export function decodeAV1(val) {
 			default:
 				res.push(error(`unknown value for video_full_range (${parts[9]})`));
 		}
-	} else res.push({ default: '0 (studio swing representation)' });
+	} else res.push({ default: _dflt_videoFullRangeFlag });
 	return res;
 }
 

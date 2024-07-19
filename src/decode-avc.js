@@ -37,10 +37,17 @@ import { sscanf } from './sscanf-func.js';
 import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
+import { expressions } from './regular_expressions.js';
+
+/**
+ * AVCregex
+ * 4 ASCII Printable characters (see https://en.wikipedia.org/wiki/FourCC)
+ * followed by a period and then 6 hexadecimal characters
+ */
+
 
 export function decodeAVC(val) {
-	// regex from DVB TM-STREAM0087:  /avc[1-4]\.[a-fA-F\d]{6}/
-
+	
 	function AVCconstraint(val, constraint) {
 		// constraint 012345--
 		// bit        76543210
@@ -48,12 +55,14 @@ export function decodeAVC(val) {
 		return val & Math.pow(2, 7 - constraint) ? true : false;
 	}
 
+	if (!expressions.AVC.regex.test(val)) 
+		return [error('Regex mismatch!'), error(`${val.substring(0,4)}.${expressions.AVC.format_suffix}`), error(expressions.AV1.description)];
+
 	const parts = val.split('.');
 
+	// the following tests should not fail as the format is checked with the regular expression
 	if (parts.length != 2) return [error('invalid format')];
-
 	if (parts[1].length != 6) return [error(`invalid parameters length (${parts[1].length}) - should be 6`)];
-
 	if (!hexDigits(parts[1])) return [error('parameters contains non-hex digits')];
 
 	const prof = sscanf(parts[1], '%2x%2x%2x'),

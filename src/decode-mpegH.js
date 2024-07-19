@@ -35,9 +35,12 @@ import { hexDigits } from './utils.js';
 import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
+import { expressions } from './regular_expressions.js';
 
 export function decodeMPEGH(val) {
-	//const MHAregex = /^(mhm1|mhm2)\.0x[a-fA-F\d]{2}$/;
+	if (!expressions.MPEGH.regex.test(val))
+		return [error('Regex mismatch!'), error(expressions.MPEGH.format), error(expressions.MPEGH.description)];
+
 	const parts = val.split('.');
 
 	if (parts.length != 2) return [error('MPEG-H audio requires a profile-level-id')];
