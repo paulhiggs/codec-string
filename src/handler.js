@@ -18,28 +18,25 @@ import { datatypeIs } from './utils.js';
 
 const handlers = [];
 
-export function findHandler(codec) {
-	return handlers.find((h) => h.cccc == codec.toLowerCase());
-}
+export const findHandler = (codec) => handlers.find((h) => h.cccc == codec);
+
 
 function addHandler(FourCC, Label, Handler, HTMLPrinter) {
 	if (Handler === undefined) Handler = noHandler;
 	if (HTMLPrinter === undefined) HTMLPrinter = null;
 
 	if (datatypeIs(FourCC, 'string'))
-		if (!handlers.find((handler) => handler.cccc == FourCC.toLowerCase()))
-			handlers.push({ cccc: FourCC.toLowerCase(), label: Label, func: Handler, html_outputter: HTMLPrinter });
+		if (!handlers.find((handler) => handler.cccc == FourCC))
+			handlers.push({ cccc: FourCC, label: Label, func: Handler, html_outputter: HTMLPrinter });
 
 	if (datatypeIs(FourCC, 'array'))
 		FourCC.forEach((cc) => {
-			if (!handlers.find((handler) => handler.cccc == cc.toLowerCase()))
-				handlers.push({ cccc: cc.toLowerCase(), label: Label, func: Handler, html_outputter: HTMLPrinter });
+			if (!handlers.find((handler) => handler.cccc == cc))
+				handlers.push({ cccc: cc, label: Label, func: Handler, html_outputter: HTMLPrinter });
 		});
 }
 
-function noHandler() {
-	return '';
-}
+const noHandler = () => '';
 
 const registerFactories = [
 	registerAC4,

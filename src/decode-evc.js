@@ -294,9 +294,7 @@ export function decodeEVC(val) {
 		MAIN_STILL_PROFILE = 3;
 	const ProfileNames = ['Baseline profile', 'Main profile', 'Baseline Still Picture profile', 'Main Still Picture profile'];
 
-	function showbit(v) {
-		return v ? '1' : '0';
-	}
+	const showbit = (v) => v ? '1' : '0';
 
 	// see annex E.9 of ISO/IEC 14496-15
 	function printBitDepth(args) {
@@ -384,17 +382,11 @@ export function decodeEVC(val) {
 		return { value: args.value, description: res };
 	}
 
-	function printColourPrimaries(args) {
-		return describe(args.value, ISOIEC23091_2_ColourPrimaries);
-	}
+	const printColourPrimaries = (args) => describe(args.value, ISOIEC23091_2_ColourPrimaries);
 
-	function printTransferCharacteristics(args) {
-		return describe(args.value, ISOIEC23091_2_TransferCharacteristics);
-	}
+	const printTransferCharacteristics = (args) => describe(args.value, ISOIEC23091_2_TransferCharacteristics);
 
-	function printMatrixCoefficients(args) {
-		return describe(args.value, ISOIEC23091_2_MatrixCoefficients);
-	}
+	const printMatrixCoefficients = (args) => describe(args.value, ISOIEC23091_2_MatrixCoefficients);
 
 	function printFramePackingType(args) {
 		if (!args.value) return normal('no frame packing is used');
@@ -417,14 +409,10 @@ export function decodeEVC(val) {
 		return describe(args.value, ISOIEC23091_2_PackedContentInterpretationType);
 	}
 
-	function printSampleAspectRatio(args) {
-		return describe(args.value, ISOIEC23091_2_SampleAspectRatio);
-	}
+	const printSampleAspectRatio = (args) => describe(args.value, ISOIEC23091_2_SampleAspectRatio);
 
-	function evaluate(tool, highBit, lowBit, profile_idc) {
-		if (profile_idc == BASELINE_PROFILE && highBit | lowBit) return ` --> must be 0 for ${ProfileNames[BASELINE_PROFILE]}`;
-		return null;
-	}
+	const evaluate = (tool, highBit, lowBit, profile_idc) =>
+		(profile_idc == BASELINE_PROFILE && highBit | lowBit) ? ` --> must be 0 for ${ProfileNames[BASELINE_PROFILE]}` : null;
 
 	function analyseToolset(toolset_idc_h, toolset_idc_l, profile_idc) {
 		const res = [];

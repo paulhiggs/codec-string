@@ -37,17 +37,16 @@ import { bold, BREAK, HTMLsafe, err, warn, cell, dflt } from './markup.js';
 import { datatypeIs } from './utils.js';
 
 export function decodeLCEVC(val) {
-	const MAIN_PROFILE = 0,
-		MAIN_444_PROFILE = 1;
-	const ProfileNames = ['Main profile', 'Main 4:4:4 profile'];
 
 	function printProfile(args) {
 		// accprding to Annex A.3 of ISO/IEC 23094-2 (FDIS is MDS19801_WG04_N00025)
 		let res = null;
 		switch (args.value) {
-			case MAIN_PROFILE:
-			case MAIN_444_PROFILE:
-				res = ProfileNames[args.value];
+			case 0:
+				res = 'Main profile';
+				break;
+			case 1:
+				res = 'Main 4:4:4 profile';
 				break;
 			default:
 				res = error('invalid');
@@ -59,23 +58,9 @@ export function decodeLCEVC(val) {
 	function printLevel(args) {
 		// accprding to Annex A.4 of ISO/IEC 23094-2 (FDIS is MDS19801_WG04_N00025)
 		let res = null;
-		switch (args.value) {
-			case 1:
-				res = 'Level 1';
-				break;
-			case 2:
-				res = 'Level 2';
-				break;
-			case 3:
-				res = 'Level 3';
-				break;
-			case 4:
-				res = 'Level 4';
-				break;
-			default:
-				res = error('invalid');
-				break;
-		}
+		if (args.value >= 1 && args.value <=4)
+			res = `Level ${args.value}`;
+		else res = error('invalid');
 		return { value: args.value, description: res };
 	}
 
@@ -209,7 +194,6 @@ function lcevcHTML(label, messages) {
 	if (DEBUGGING) res += dumpJSONHTML(messages);
 	return res;
 }
-
 
 export function registerLCEVC(addHandler) {
 	addHandler('lvc1', 'MPEG Low Complexidy Enhancement Video Coding', decodeLCEVC, lcevcHTML);

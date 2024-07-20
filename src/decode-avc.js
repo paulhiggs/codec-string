@@ -48,12 +48,9 @@ import { expressions } from './regular_expressions.js';
 
 export function decodeAVC(val) {
 	
-	function AVCconstraint(val, constraint) {
-		// constraint 012345--
-		// bit        76543210
-		if (constraint < 0 || constraint > 5) return false;
-		return val & Math.pow(2, 7 - constraint) ? true : false;
-	}
+	// constraint 012345--
+	// bit        76543210
+	const AVCconstraint = (val, constraint) => (constraint >= 0 && constraint <= 5) && (val & Math.pow(2, 7 - constraint));
 
 	if (!expressions.AVC.regex.test(val)) 
 		return [error('Regex mismatch!'), error(`${val.substring(0,4)}.${expressions.AVC.format_suffix}`), error(expressions.AV1.description)];
@@ -213,9 +210,7 @@ export function decodeAVC(val) {
 	return res;
 }
 
-function outputHTML(label, messages) {
-	return simpleHTML(label, messages, DEBUGGING);
-}
+const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
 
 export function registerAVC(addHandler) {
 	addHandler(['avc1', 'avc2', 'avc3', 'avc4'], 'AVC/H.264', decodeAVC, outputHTML);

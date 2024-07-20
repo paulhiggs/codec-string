@@ -408,9 +408,7 @@ export function decodeAV1(val) {
 	return res;
 }
 
-function outputHTML(label, messages) {
-	return simpleHTML(label, messages, DEBUGGING);
-}
+const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
 
 export function registerAV1(addHandler) {
 	addHandler('av01', 'AV1', decodeAV1, outputHTML);

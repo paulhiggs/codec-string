@@ -528,9 +528,7 @@ export function decodeMPEG4audio(val) {
 	return MPEGaudioOTI(parseInt(parts[1], 16), parts.length >= 3 ? parseInt(parts[2]) : null);
 }
 
-function outputHTML(label, messages) {
-	return simpleHTML(label, messages, DEBUGGING);
-}
+const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
 
 export function registerMPEG(addHandler) {
 	addHandler('mp4a', 'AAC', decodeMPEG4audio, outputHTML);

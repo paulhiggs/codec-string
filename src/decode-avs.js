@@ -336,9 +336,7 @@ export function decodeAVS2audio(val) {
 	return res;
 }
 
-function outputHTML(label, messages) {
-	return simpleHTML(label, messages, DEBUGGING);
-}
+const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
 
 export function registerAVS3(addHandler) {
 	addHandler('avs3', 'AVS3 Video', decodeAVS3, outputHTML);

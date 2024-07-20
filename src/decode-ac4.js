@@ -137,9 +137,7 @@ export function decodeAC4(val) {
 	return res;
 }
 
-function outputHTML(label, messages) {
-	return simpleHTML(label, messages, DEBUGGING);
-}
+const  outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
 
 export function registerAC4(addHandler) {
 	// ETSI TS 103 285 table 8

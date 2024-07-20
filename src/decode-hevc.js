@@ -51,9 +51,7 @@ export function decodeHEVC(val) {
 		return error('unknown profile');
 	}
 
-	function showbit(v) {
-		return v ? '1' : '0';
-	}
+	const showbit = (v) => v ? '1' : '0';
 
 	const parts = val.split('.');
 
@@ -271,9 +269,7 @@ export function decodeHEVC(val) {
 	return res;
 }
 
-function outputHTML(label, messages) {
-	return simpleHTML(label, messages, DEBUGGING);
-}
+const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
 
 export function registerHEVC(addHandler) {
 	addHandler(['hev1', 'hvc1'], 'HEVC/H.265', decodeHEVC, outputHTML);
