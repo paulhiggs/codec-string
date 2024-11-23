@@ -67,5 +67,10 @@ export const expressions = {
 		regex: /mhm(1|2)\.0x[a-fA-F\d]{2}/,
 		format: '(mhm1 or mhm2).0xLL',
 		description: 'LL is 2 hexadecimal digits'
+	},
+	CUVV: {
+		regex: /cuvv.[01]+/,
+		format: 'cuvv.<verison_bits>',
+		description: '<version_bits> indicates the versions of HDR Vivid in the bitstream'
 	}
 };

@@ -10,6 +10,7 @@ import { registerMisc } from './decode-misc.js';
 import { registerMPEG } from './decode-mpeg.js';
 import { registerMPEGH } from './decode-mpegH.js';
 import { registerText } from './decode-text.js';
+import { registerUWA } from './decode-uwa.js';
 import { registerVC1 } from './decode-vc1.js';
 import { registerVP9 } from './decode-vp9.js';
 import { registerVVC } from './decode-vvc.js';
@@ -51,6 +52,7 @@ const registerFactories = [
 	registerMPEG,
 	registerMPEGH,
 	registerText,
+	registerUWA,
 	registerVC1,
 	registerVP9,
 	registerVVC,

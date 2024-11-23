@@ -14,6 +14,7 @@ supports
 * AVS3 video and audio
 * AVS2 audio
 * LCEVC - refer to ISO/IEC 14496-15:2022 Amd.1
+* HDR Vivid - refer to T/UWA 005-2.1
 
 ## Installation
 
