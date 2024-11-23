@@ -41,17 +41,17 @@ export const expressions = {
 		description: 'PP CC and LL are hexadecimal values'
 	},
 	AVS3video: { 
-		regex: /(avs3|lav3)(\.[a-fA-F\d]{2}){2}/,
+		regex: /(avs3|lav3)(\.[a-fA-F\d]{2}){2}$/,
 		format: "(avs3|lav3).<profile>.<level>",
 		description: "profile and level are 2 hexadecimal digits"
 	}, 
 	AVS3audio: {
-		regex: /av3a\.[a-fA-F\d]{1,2}/,
+		regex: /av3a\.[a-fA-F\d]{1,2}$/,
 		format: "av3a.<codec_id>",
 		description: "codec_is is 0 for general high rate coding, 1 for lossless, 2 for general full rate coding"
 	},
 	AVS2audio: { 
-		regex: /cavs\.[a-fA-F\d]{1,2}/,
+		regex: /cavs\.[a-fA-F\d]{1,2}$/,
 		format: "cavs.<codec_id>",
 		description: "codec_is is 0 for general high rate coding, 1 for lossless"
 	},
@@ -64,12 +64,12 @@ export const expressions = {
 		format: '<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}'
 	},
 	MPEGH: {
-		regex: /mhm(1|2)\.0x[a-fA-F\d]{2}/,
+		regex: /mhm(1|2)\.0x[a-fA-F\d]{2}$/,
 		format: '(mhm1 or mhm2).0xLL',
 		description: 'LL is 2 hexadecimal digits'
 	},
 	CUVV: {
-		regex: /cuvv.[01]+/,
+		regex: /cuvv.[01]+$/,
 		format: 'cuvv.<verison_bits>',
 		description: '<version_bits> indicates the versions of HDR Vivid in the bitstream'
 	}
