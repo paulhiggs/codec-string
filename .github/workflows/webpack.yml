@@ -2,9 +2,9 @@ name: NodeJS with Webpack
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
   workflow_dispatch:
 
 jobs:
@@ -13,27 +13,24 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [20.x]
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Provision NPM
-      run: npm install
+      - name: Provision NPM
+        run: npm install
 
-    - name: Create Webpacks
-      run: |
-        npx webpack --config ./webpack-esm.cjs --mode production
-        npx webpack --config ./webpack-cjs.cjs --mode production  --no-output-clean
-        npx webpack --config ./webpack-script.cjs --mode production --no-output-clean
+      - name: Create Webpacks
+        run: |
+          npx webpack --config ./webpack-esm.cjs --mode production
+          npx webpack --config ./webpack-cjs.cjs --mode production  --no-output-clean
+          npx webpack --config ./webpack-script.cjs --mode production --no-output-clean
 
-    - name: Show Results
-      run: ls -l .
-
-
-
+      - name: Show Results
+        run: ls -l .
