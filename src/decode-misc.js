@@ -25,7 +25,7 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-// eslint-disable-next-line no-unused-vars
+
 export function registerMisc(addHandler) {
 	addHandler('opus', 'Opus');
 	addHandler('flac', 'FLAC - Free Lossless Audio Codec');

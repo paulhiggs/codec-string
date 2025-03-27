@@ -28,20 +28,23 @@
   "author": "paul_higgs@hotmail.com",
   "license": "BSD",
   "dependencies": {
-    "@babel/preset-env": "^7.26.0",
-    "babel-loader": "^9.2.1",
+    "@babel/preset-env": "^7.26.9",
+    "babel-loader": "^10.0.0",
     "clean-webpack-plugin": "^4.0.0",
     "eslint-plugin-import-quotes": "^0.0.1",
-    "eslint-webpack-plugin": "^4.2.0",
+    "eslint-webpack-plugin": "^5.0.0",
     "html-webpack-plugin": "^5.6.3",
     "webpack-merge": "^6.0.1"
   },
   "devDependencies": {
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.1.0"
+    "@eslint/js": "^9.23.0",
+    "eslint": "^9.23.0",
+    "globals": "^16.0.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
   },
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/paulhiggs/codec-string"
-	}
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paulhiggs/codec-string"
+  }
 }
