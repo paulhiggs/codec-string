@@ -516,7 +516,7 @@ const MPEGaudioOTI = (oti, aacMode = null) => {
 		case 0x6b:
 			return [normal('MPEG-1 Part 3 (6B)')];
 	}
-	return [error(`invalid MP4 Audio Object Type Iindicator (${oti})`)];
+	return [error(`invalid MP4 Audio Object Type Indicator (${oti})`)];
 };
 
 export function decodeMPEG4audio(val) {
