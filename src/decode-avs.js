@@ -289,9 +289,11 @@ export function decodeAVS3audio(val) {
 			break;
 		case 1:
 			res.push(normal('Lossless Audio Coding'));
+			coding_params.codec_id='1';
 			break;
 		case 2:
 			res.push(normal('Full Rate Audio Coding'));
+			coding_params.codec_id='2';
 			break;
 		default:
 			res.push(error(`invalid audio_codec_id (${parts[1]}) specified`));

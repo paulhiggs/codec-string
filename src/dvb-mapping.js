@@ -362,6 +362,9 @@ const AudioTerms = [
 	{ term: '6.1.1', codec: 'mhm1', mode: 'LC', level: '1' },
 	{ term: '6.1.2', codec: 'mhm1', mode: 'LC', level: '2' },
 	{ term: '6.1.3', codec: 'mhm1', mode: 'LC', level: '3' },
+
+	{term: '7.1', codec: 'av3a', codec_id:'1' },
+	{term: '7.2', codec: 'av3a', codec_id:'2' },
 ];
 
 function tableLookup(entry) {
