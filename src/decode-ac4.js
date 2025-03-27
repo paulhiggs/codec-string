@@ -40,7 +40,6 @@ import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
 import { expressions } from './regular_expressions.js';
 
-// eslint-disable-next-line no-unused-vars
 export function decodeEAC3(val) {
 	if (val.toLowerCase() != 'ec-3') return [error('no additional parameters for Enhanced AC-3')];
 	const res = [];
