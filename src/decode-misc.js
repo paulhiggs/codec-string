@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2021-2024
+ * @copyright: Copyright (c) 2021-2025
  * @author: Paul Higgs
  * @file: decode-misc.js
  *
@@ -26,4 +26,7 @@
  *
  */
 // eslint-disable-next-line no-unused-vars
-export function registerMisc(addHandler) {}
+export function registerMisc(addHandler) {
+	addHandler('opus', 'Opus');
+	addHandler('flac', 'FLAC - Free Lossless Audio Codec');
+}
