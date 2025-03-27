@@ -1,7 +1,7 @@
 /**
- * @copyright: Copyright (c) 2021-2024
+ * @copyright: Copyright (c) 2021-2025
  * @author: Paul Higgs
- * @file: decode-av1.js
+ * @file: decode-aom.js
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,13 +32,15 @@ import { normal, error, warning } from './decode.js';
 import { simpleHTML } from './formatters.js';
 import { expressions } from './regular_expressions.js';
 
+import { decodeMPEG4audio } from './decode-mpeg.js';
+
 export function decodeAV1(val) {
 	// defined in https://aomediacodec.github.io/av1-isobmff/#codecsparam
 	/* 
         <sample entry 4CC>.<profile>.<level><tier>.<bitDepth>.<monochrome>.<chromaSubsampling>.
         <colorPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>
-     */
-	if (!expressions.AV1.regex.text(val))
+  */
+	if (!expressions.AV1.regex.test(val))
 		return [error('Regex mismatch!'), error(expressions.AV1.format), error(expressions.AV1.description)];
 
 	const parts = val.split('.');
@@ -408,8 +410,49 @@ export function decodeAV1(val) {
 	return res;
 }
 
+export function decodeIAMF(val) {
+	// defined in https://aomediacodec.github.io/iamf/v1.1.0.html
+
+	if (!expressions.IAMF.regex.test(val))
+		return [error('Regex mismatch!'), error(expressions.IAMF.format), error(expressions.IAMF.description)];
+
+	const parts = val.split('.');
+	if (parts.length < 4) return [error(`invalid format "${expressions.IAMF.format}"`)];
+
+	const res = [];
+	let other=[];
+	const primary_profile = parseInt(parts[1]);
+	const secondary_profile = parseInt(parts[2]);
+
+	res.push((primary_profile >= 0 && primary_profile<= 255) ? normal(`Primary profile: ${primary_profile}`) : error("<primary_profile> must be in the range 0..255"));
+	res.push((secondary_profile >= 0 && secondary_profile<= 255) ? normal(`Secondary profile: ${secondary_profile}`) : error("<secondary_profile> must be in the range 0..255"));
+
+	switch (parts[3]) {
+		case "Opus":
+			res.push(normal("Codec: Opus"));
+			break;
+		case "mp4a": {
+			res.push(normal("Codec: AAC-LC"));
+			let i=3, mp4codec = parts[i];
+			while (++i < parts.length)
+				mp4codec += '.' + parts[i];
+			other=decodeMPEG4audio(mp4codec);
+			break;
+		}
+		case "flaC":
+			res.push(normal("Codec: FLAC"));
+			break;
+		case "ipcm":
+			res.push(normal("Codec: LPCM"));
+			break;
+	}
+	return res.concat(other);
+}
+
+
 const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
 
-export function registerAV1(addHandler) {
+export function registerAOM(addHandler) {
 	addHandler('av01', 'AV1', decodeAV1, outputHTML);
+	addHandler('iamf', 'IAMF/Eclipsa', decodeIAMF, outputHTML);
 }

@@ -1,5 +1,5 @@
 export { decodeAC4 } from './decode-ac4.js';
-export { decodeAV1 } from './decode-av1.js';
+export { decodeAV1, decodeIAMF } from './decode-aom.js';
 export { decodeAVC } from './decode-avc.js';
 export { decodeAVS3, decodeAVS3audio, decodeAVS2audio } from './decode-avs.js';
 export { decodeDTS } from './decode-dts.js';

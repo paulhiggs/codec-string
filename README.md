@@ -5,9 +5,9 @@ supports
 * HEVC (hvc1, hev1) 
 * AVC (avc1)
 * AAC (mp4a)
-* AV1 (av01)
+* AV1 and IAMF from AOMedia
 * E-AC3 (ec-3) - no processing required
-* VP9 - see https://www.webmproject.org/vp9/mp4/
+* VP9
 * EVC - refer annex E.9 of ISO/IEC 14496-15:2022
 * VVC - refer annex E.6 of ISO/IEC 14496-15:2022
 * MPEG-H

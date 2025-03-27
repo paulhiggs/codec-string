@@ -35,6 +35,11 @@ export const expressions = {
 		format: '<sample entry 4CC>.<profile>.<level><tier>.<bitDepth>.<monochrome>.<chromaSubsampling>.<colorPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag></videoFullRangeFlag>',
 		description: "see https://aomediacodec.github.io/av1-isobmff/#codecsparam"
 	},
+	IAMF: {
+		regex: /^iamf\.\d{3}\.\d{3}\.(Opus|mp4a(\.[a-fA-F\d]{2})(\.\d+)?|flaC|ipcm)/,
+		format: '<sample entry 4CC>.<primary profile>.<secondary profile>.<non-IAMF elements>',
+		description: "see https://aomediacodec.github.io/iamf/v1.1.0.html#codecsparameter"
+	},
 	AVC: {
 		regex: /^[a-z0-9!"#$%&'()*+,./:;<=>?@[\] ^_`{|}~-]{4}.[a-f0-9]{6}$/i,
 		format_suffix: "PPCCLL",
