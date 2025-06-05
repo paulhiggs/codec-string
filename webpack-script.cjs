@@ -17,6 +17,7 @@ module.exports = merge(
 			},
 		},
 		output: {
+			enabledLibraryTypes: ['window'],
 			path: path.resolve(__dirname, 'dist/script'),
 			library: {
 				name: 'CodecString',
