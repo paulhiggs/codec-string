@@ -13,7 +13,7 @@ const webpackSettings = ({ scriptLoading }) => ({
 			import: './src/app.js',
 		},
 	},
-	mode: 'none',
+	mode: 'production',
 	module: {
 		rules: [
 			{
