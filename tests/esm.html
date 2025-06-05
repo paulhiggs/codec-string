@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+<title>ESM build test</title>
+<script type="module">
+	import { decode } from '/dist/esm/codec-string.js';
+	const inp = document.querySelector('#check-codec .input');
+	const results = document.querySelector('#check-codec .results');
+	const codec = inp.textContent.trim();
+	results.innerHTML = decode(codec).toHTML();
+	</script>
+</head>
+
+<body>
+	<div id="check-codec">
+		<h2 class="input">avc1.64002A</h2>
+		<div class="results"></div>
+	</div>
+	<p style="margin-top:2em; font-size: 1.2rem" ><a href="index.html">Back to index</a></p>
+</body>
+</html>

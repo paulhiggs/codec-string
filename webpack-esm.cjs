@@ -22,7 +22,19 @@ module.exports = merge(
 			outputModule: true,
 		},
 		devServer: {
-			static: path.resolve(__dirname, './tests'),
+			static: [
+				{
+					directory: path.resolve(__dirname, './tests'),
+					publicPath: '/tests',
+					serveIndex: true,
+				  watch: true,
+			  },
+				{
+					directory: path.resolve(__dirname, './dist'),
+					publicPath: '/dist',
+					watch: true,
+				}
+			],
 			allowedHosts: 'all',
 			host: '0.0.0.0',
 			hot: false,
