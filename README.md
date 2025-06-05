@@ -1,8 +1,8 @@
 # codec-string
 decode the codec= string in a media mime type
 
-supports 
-* HEVC (hvc1, hev1) 
+supports
+* HEVC (hvc1, hev1)
 * AVC (avc1)
 * AAC (mp4a)
 * AV1 and IAMF from AOMedia
@@ -43,23 +43,27 @@ library and an example application (`app.js` and `index.html`).
 
 ## Usage
 
-### ESM module
+### ESM module in a browser
 
 ```javascript
 import { decode } from 'esm/codec-string.js';
 
-console.log(decode('avc1.64002A'));
+const result = decode('avc1.64002A');
+console.dir(result);
+const elt = document.createElement('div');
+elt.innerHTML = result.toHTML();
+document.body.append(elt);
 ```
 
-### CommonJS module
+### CommonJS module in Node.js
 
 ```javascript
 const { decode } = require('cjs/codec-string.cjs');
 
-console.log(decode('avc1.64002A'));
+console.dir(decode('avc1.64002A'));
 ```
 
-### Legacy
+### Legacy script tag in a browser
 
 ```html
 <!doctype html>
