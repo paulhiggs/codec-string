@@ -17,6 +17,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "webpack --config ./webpack-esm.cjs --mode production && webpack --config ./webpack-cjs.cjs --mode production --no-output-clean && webpack --config ./webpack-script.cjs --mode production --no-output-clean",
+    "postbuild": "vitest --config ./vitest.build.config.js --run",
     "lint": "eslint src/*.js",
     "start": "webpack serve --config ./webpack-esm.cjs --mode development",
     "test": "vitest"
@@ -40,6 +41,7 @@
     "@eslint/js": "^9.27.0",
     "eslint": "^9.27.0",
     "globals": "^16.2.0",
+    "jsdom": "^26.1.0",
     "vitest": "^3.2.2",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.1"

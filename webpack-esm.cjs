@@ -22,7 +22,7 @@ module.exports = merge(
 			outputModule: true,
 		},
 		devServer: {
-			static: path.resolve(__dirname, './dist/esm'),
+			static: path.resolve(__dirname, './tests'),
 			allowedHosts: 'all',
 			host: '0.0.0.0',
 			hot: false,
