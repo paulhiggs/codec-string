@@ -10,11 +10,13 @@ module.exports = merge(
 	}),
 	{
 		output: {
+			enabledLibraryTypes: ['commonjs'],
 			path: path.resolve(__dirname, 'dist/cjs'),
 			library: {
-				name: 'codec-string',
 				type: 'commonjs',
 			},
+			filename: `[name].cjs`,
+			globalObject: 'this',
 		},
 	}
 );

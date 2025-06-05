@@ -6,6 +6,7 @@ export default defineConfig({
 		globals: true,
 		include: [
 			'tests/esm.test.js',
+			'tests/cjs.test.cjs',
 		],
 	},
 });

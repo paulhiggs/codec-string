@@ -54,7 +54,7 @@ console.log(decode('avc1.64002A'));
 ### CommonJS module
 
 ```javascript
-const { decode } = require('cjs/codec-string.js');
+const { decode } = require('cjs/codec-string.cjs');
 
 console.log(decode('avc1.64002A'));
 ```
