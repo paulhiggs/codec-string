@@ -73,11 +73,32 @@ console.dir(decode('avc1.64002A'));
 </head>
 <body>
 <script type="application/javascript">
-console.log(window.CodecString.decode('avc1.64002A'));
+const result = CodecString.decode('avc1.64002A');
+console.dir(result);
+const elt = document.createElement('div');
+elt.innerHTML = result.toHTML();
+document.body.append(elt);
 </script>
 </body>
 </html>
 ```
+
+### Testing
+
+Unit tests:
+
+```sh
+npm run test
+```
+
+Browser based tests:
+
+```sh
+npm run start
+```
+
+In a browser go to the page http://localhost:8080/tests/index.html
+this will list all of the available browser-based tests.
 
 ### License
 
