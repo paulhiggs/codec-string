@@ -10,10 +10,13 @@ module.exports = merge(
 	}),
 	{
 		output: {
-			path: path.resolve(__dirname, 'dist/esm'),
+			enabledLibraryTypes: ['module'],
+			environment: { module: true },
 			library: {
 				type: 'module',
 			},
+			module: true,
+			path: path.resolve(__dirname, 'dist/esm'),
 		},
 		experiments: {
 			outputModule: true,
@@ -22,7 +25,7 @@ module.exports = merge(
 			static: path.resolve(__dirname, './dist/esm'),
 			allowedHosts: 'all',
 			host: '0.0.0.0',
-			hot: true,
+			hot: false,
 		},
 	}
 );

@@ -49,6 +49,7 @@ const webpackSettings = ({ scriptLoading }) => ({
 	],
 	output: {
 		filename: `[name].js`,
+		globalObject: 'self',
 	},
 });
 
