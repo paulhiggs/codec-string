@@ -19,7 +19,7 @@
     "build": "webpack --config ./webpack-esm.cjs --mode production && webpack --config ./webpack-cjs.cjs --mode production --no-output-clean && webpack --config ./webpack-script.cjs --mode production --no-output-clean",
     "lint": "eslint src/*.js",
     "start": "webpack serve --config ./webpack-esm.cjs --mode development",
-    "test": "echo \"Error: no test specified\" && exit 0"
+    "test": "vitest"
   },
   "sideEffects": [
     "./src/decode.js"
