@@ -37,7 +37,7 @@ const webpackSettings = ({ scriptLoading }) => ({
 			issues: `${package_json.repository.url}/issues`,
 			product: package_json.name,
 			version:  package_json.version,
-			template: './src/index.ejs',
+			template: './src/index.html.ejs',
 			filename: 'index.html',
 			cache: false,
 			chunksSortMode: 'none',
