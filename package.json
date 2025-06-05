@@ -8,9 +8,9 @@
   },
   "exports": {
     ".": {
-      "import": "./src/index.js",
-      "require": "./src/index.cjs",
-      "script": "./src/index.cjs"
+      "import": "./dist/esm/codec-string.js",
+      "require": "./dist/cjs/codec-string.js",
+      "script": "./dist/script/codec-string.js"
     },
     "./package.json": "./package.json"
   },
