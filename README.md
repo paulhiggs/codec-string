@@ -55,6 +55,38 @@ elt.innerHTML = result.toHTML();
 document.body.append(elt);
 ```
 
+### Typescript
+
+See [index.d.ts](./index.d.ts) for Typescript types for this library.
+
+```typescript
+import { decode } from 'codec-string';
+
+interface CodecDetails {
+    label: string;
+    error?: string;
+    details: string[];
+}
+
+interface CodecInformation {
+    codec: string;
+    error?: string;
+    details: CodecDetails[];
+}
+
+const codec = 'avc1.64002A';
+const { error, decodes } = decode(codec);
+const ci: CodecInformation = {
+  codec,
+  error,
+  details: decodes.map(({parsed, error, label}) => ({
+    label,
+    error,
+    details: parsed.map(p => p.decode),
+  })),
+};
+```
+
 ### CommonJS module in Node.js
 
 ```javascript
