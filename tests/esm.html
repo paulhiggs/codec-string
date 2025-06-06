@@ -2,13 +2,14 @@
 <html>
 <head>
 <title>ESM build test</title>
-<script type="module">
-	import { decode } from '/dist/esm/codec-string.js';
-	const inp = document.querySelector('#check-codec .input');
-	const results = document.querySelector('#check-codec .results');
-	const codec = inp.textContent.trim();
-	results.innerHTML = decode(codec).toHTML();
-	</script>
+<script type="importmap">
+  {
+		"imports": {
+			"codec-string": "/dist/esm/codec-string.js"
+		}
+	}
+</script>
+<script type="module" src="/examples/esm.js"></script>
 </head>
 
 <body>

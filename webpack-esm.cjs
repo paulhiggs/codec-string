@@ -33,6 +33,11 @@ module.exports = merge(
 				{
 					directory: path.resolve(__dirname, './dist'),
 					publicPath: '/dist',
+					watch: false,
+				},
+				{
+					directory: path.resolve(__dirname, './examples'),
+					publicPath: '/examples',
 					watch: true,
 				}
 			],
