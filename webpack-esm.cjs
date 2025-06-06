@@ -6,6 +6,7 @@ const common = require('./webpack.common.cjs');
 
 module.exports = merge(
 	common.webpackSettings({
+		clean: true,
 		scriptLoading: 'module',
 	}),
 	{

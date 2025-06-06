@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const  package_json = require('./package.json');
 
-const webpackSettings = ({ scriptLoading }) => ({
+const webpackSettings = ({ clean, chunks, scriptLoading }) => ({
 	entry: {
 		'codec-string': './src/index.js',
 		app: {
@@ -27,7 +27,9 @@ const webpackSettings = ({ scriptLoading }) => ({
 		extensions: ['*', '.js'],
 	},
 	plugins: [
-		new CleanWebpackPlugin(),
+		new CleanWebpackPlugin({
+			dry: !!clean,
+		}),
 		new ESLintPlugin(),
 		new HtmlWebpackPlugin({
 			title: 'Codec string decoder (parse+print mode)',
@@ -41,13 +43,14 @@ const webpackSettings = ({ scriptLoading }) => ({
 			filename: 'index.html',
 			cache: false,
 			chunksSortMode: 'none',
-			chunks: ['codec-string', 'app'],
-			hash: true,
+			chunks: chunks ? chunks : ['codec-string', 'app'],
+			hash: false,
 			inject: 'head',
 			scriptLoading,
 		}),
 	],
 	output: {
+		clean: !!clean,
 		filename: `[name].js`,
 		globalObject: 'self',
 	},
