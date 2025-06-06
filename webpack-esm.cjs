@@ -6,23 +6,44 @@ const common = require('./webpack.common.cjs');
 
 module.exports = merge(
 	common.webpackSettings({
+		clean: true,
 		scriptLoading: 'module',
 	}),
 	{
 		output: {
-			path: path.resolve(__dirname, 'dist/esm'),
+			enabledLibraryTypes: ['module'],
+			environment: { module: true },
 			library: {
 				type: 'module',
 			},
+			module: true,
+			path: path.resolve(__dirname, 'dist/esm'),
 		},
 		experiments: {
 			outputModule: true,
 		},
 		devServer: {
-			static: path.resolve(__dirname, './dist/esm'),
+			static: [
+				{
+					directory: path.resolve(__dirname, './tests'),
+					publicPath: '/tests',
+					serveIndex: true,
+				  watch: true,
+			  },
+				{
+					directory: path.resolve(__dirname, './dist'),
+					publicPath: '/dist',
+					watch: false,
+				},
+				{
+					directory: path.resolve(__dirname, './examples'),
+					publicPath: '/examples',
+					watch: true,
+				}
+			],
 			allowedHosts: 'all',
 			host: '0.0.0.0',
-			hot: true,
+			hot: false,
 		},
 	}
 );
