@@ -63,6 +63,12 @@ const { decode } = require('cjs/codec-string.cjs');
 console.dir(decode('avc1.64002A'));
 ```
 
+To run the Node.js example after building this library:
+
+```sh
+(cd dist/cjs/ && node ./node_app.cjs )
+```
+
 ### Legacy script tag in a browser
 
 ```html
