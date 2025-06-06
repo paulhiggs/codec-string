@@ -25,6 +25,7 @@
   "sideEffects": [
     "./src/decode.js"
   ],
+  "types": "index.d.ts",
   "keywords": [],
   "author": "paul_higgs@hotmail.com",
   "license": "BSD",
@@ -51,5 +52,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/paulhiggs/codec-string"
-  }
+  },
+  "files": [
+    "index.d.ts",
+    "dist"
+  ]
 }
