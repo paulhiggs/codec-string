@@ -1,0 +1,10 @@
+{
+    "include": [
+        "index.d.ts"
+    ],
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "strict": true,
+        "skipLibCheck": false
+    }
+}

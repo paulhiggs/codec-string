@@ -1,6 +1,6 @@
 const path = require('path');
-
 const { merge } = require('webpack-merge');
+const CopyPlugin = require('copy-webpack-plugin');
 
 const common = require('./webpack.common.cjs');
 
@@ -19,6 +19,15 @@ module.exports = merge(
 			module: true,
 			path: path.resolve(__dirname, 'dist/esm'),
 		},
+		plugins: [
+			new CopyPlugin({
+				patterns: [
+					{
+						from: 'index.d.ts',
+					},
+				],
+			}),
+		],
 		experiments: {
 			outputModule: true,
 		},
