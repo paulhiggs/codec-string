@@ -1,6 +1,6 @@
 {
   "name": "codec-string",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "decode the codecs= string in a media mime type",
   "type": "module",
   "engines": {
