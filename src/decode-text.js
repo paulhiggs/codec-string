@@ -160,9 +160,9 @@ export function decodeSTPP(val) {
 	return [res];
 }
 
-const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
-
 export function registerText(addHandler) {
+	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
+
 	addHandler('stpp', 'XML timed-text subtitles', decodeSTPP, outputHTML);
 	addHandler('wvtt', 'WebVTT');
 }

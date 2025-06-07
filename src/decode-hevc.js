@@ -269,9 +269,9 @@ export function decodeHEVC(val) {
 	return res;
 }
 
-const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
-
 export function registerHEVC(addHandler) {
+	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
+
 	addHandler(['hev1', 'hvc1'], 'HEVC/H.265', decodeHEVC, outputHTML);
 	addHandler('lhv1', 'Layered HEVC');
 }

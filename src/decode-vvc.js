@@ -322,9 +322,9 @@ export function decodeVVC(val) {
 	return res;
 }
 
-const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
-
 export function registerVVC(addHandler) {
+	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
+
 	addHandler(['vvc1', 'vvi1'], 'MPEG Versatile Video Coding', decodeVVC, outputHTML);
 	addHandler('vvcN', 'VVC non-VCL track');
 	addHandler('vvs1', 'VVC subpicture track');

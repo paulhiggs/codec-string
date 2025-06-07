@@ -94,8 +94,8 @@ export function decodeMPEGH(val) {
 	return res;
 }
 
-const outputHTML= (label, messages) => simpleHTML(label, messages, DEBUGGING);
-
 export function registerMPEGH(addHandler) {
+	const outputHTML= (label, messages) => simpleHTML(label, messages, DEBUGGING);
+
 	addHandler(['mhm1', 'mhm2'], 'MPEG-H Audio', decodeMPEGH, outputHTML);
 }

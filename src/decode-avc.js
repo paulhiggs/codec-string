@@ -210,9 +210,9 @@ export function decodeAVC(val) {
 	return res;
 }
 
-const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
-
 export function registerAVC(addHandler) {
+	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
+
 	addHandler(['avc1', 'avc2', 'avc3', 'avc4'], 'AVC/H.264', decodeAVC, outputHTML);
 	addHandler(['mvc1', 'mvc2'], 'Multiview Coding', decodeAVC, outputHTML);
 	addHandler('svc1', 'Scalable Video Coding', decodeAVC, outputHTML);

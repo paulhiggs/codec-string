@@ -138,6 +138,7 @@ export function decodeAC4(val) {
 
 export function registerAC4(addHandler) {
 	const  outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
+
 	// ETSI TS 103 285 table 8
 	addHandler('ec-3', 'Enhanced AC-3', decodeEAC3, outputHTML);
 	addHandler('ac-4', 'Digital Audio Compression (AC-4)', decodeAC4, outputHTML);

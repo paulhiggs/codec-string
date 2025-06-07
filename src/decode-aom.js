@@ -450,9 +450,9 @@ export function decodeIAMF(val) {
 }
 
 
-const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
-
 export function registerAOM(addHandler) {
+	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
+	
 	addHandler('av01', 'AV1', decodeAV1, outputHTML);
 	addHandler('iamf', 'IAMF/Eclipsa', decodeIAMF, outputHTML);
 }

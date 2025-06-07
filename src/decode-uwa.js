@@ -61,8 +61,9 @@ export function decodeUWA(val) {
 	return res;
 }
 
-const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
 
 export function registerUWA(addHandler) {
+	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
+
 	addHandler('cuvv', 'HDR Vivid', decodeUWA, outputHTML);
 }

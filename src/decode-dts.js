@@ -39,9 +39,9 @@ export function decodeDTS(val) {
 	return res;
 }
 
-const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
-
 export function registerDTS(addHandler) {
+	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
+
 	// ETSI TS 103 285 table 10
 	addHandler('dtsc', 'DTS-HD Core', decodeDTS, outputHTML); // ETSI TS 102 114 annex H
 	addHandler('dtsh', 'DTS-HD (with legacy core)', decodeDTS, outputHTML); // ETSI TS 102 114 annex H
