@@ -2,6 +2,7 @@ import { registerAC4 } from './decode-ac4.js';
 import { registerAOM } from './decode-aom.js';
 import { registerAVC } from './decode-avc.js';
 import { registerAVS3 } from './decode-avs.js';
+import { registerDolbyVision } from './decode-dolby.js';
 import { registerDTS } from './decode-dts.js';
 import { registerEVC } from './decode-evc.js';
 import { registerHEVC } from './decode-hevc.js';
@@ -44,6 +45,7 @@ const registerFactories = [
 	registerAOM,
 	registerAVC,
 	registerAVS3,
+	registerDolbyVision,
 	registerDTS,
 	registerEVC,
 	registerHEVC,

@@ -79,7 +79,7 @@ class parsing {
 	setResult(result) {
 		if (Array.isArray(result)) this.parsed = result;
 		else if (typeof result == 'string') this.parsed = [].push(result);
-		else this.parsed = [error('failed to interpret deciding result')];
+		else this.parsed = [error('failed to interpret decoding result')];
 	}
 
 	toHTML() {

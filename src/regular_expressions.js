@@ -53,12 +53,16 @@ export const expressions = {
 	AVS3audio: {
 		regex: /av3a\.[a-fA-F\d]{1,2}$/,
 		format: "av3a.<codec_id>",
-		description: "codec_is is 0 for general high rate coding, 1 for lossless, 2 for general full rate coding"
+		description: "codec_id is 0 for general high rate coding, 1 for lossless, 2 for general full rate coding"
 	},
 	AVS2audio: { 
 		regex: /cavs\.[a-fA-F\d]{1,2}$/,
 		format: "cavs.<codec_id>",
-		description: "codec_is is 0 for general high rate coding, 1 for lossless"
+		description: "codec_id is 0 for general high rate coding, 1 for lossless"
+	},
+	DolbyVision: {
+		regex: /^(dvav|dvhe|dvh1|dva1)\.\d{2}\.\d{2}$/,
+		format: "[Codec_type].[bitstream_profile_ID].[Dolby_Vision_Level_ID]"
 	},
 	VP9: {
 		regex: /^vp09(\.\d{2}){3}(\.(\d{2})?){0,5}$/,
