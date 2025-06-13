@@ -28,7 +28,7 @@
 
 import { simpleHTML } from './formatters.js';
 import { expressions } from './regular_expressions.js';
-import { normal, error } from './decode.js';
+import { normal, info, error } from './decode.js';
 
  const DEBUGGING = false;
 
@@ -44,31 +44,57 @@ export function decodeDolbyVision(val) {
 	const profile = parseInt(parts[1]),
 		level = parseInt(parts[2]);
 
-	let res = [];
+	let map = [], res = [];
 
 	switch (parts[0]) {
 		case 'dvhe':
 			res.push(normal('HEVC-based Dolby Vision codec.'));
-			res.push(normal('Parameter sets (VPS, PPS, or SPS) are stored either in the sample entries or as part of the samples, or in both.'));
+			res.push(info('Parameter sets (VPS, PPS, or SPS) are stored either in the sample entries or as part of the samples, or in both.'));
+			map = [
+				{profile: 2, base_codec: "8-bit HEVC", retired: true},
+				{profile: 3, base_codec: "8-bit HEVC", retired: true},
+				{profile: 4, base_codec: "8-bit HEVC", retired: true},
+				{profile: 5, base_codec: "10-bit HEVC"}, 
+				{profile: 6, base_codec: "10-bit HEVC", retired: true},
+				{profile: 7, base_codec: "10-bit HEVC"}, 
+				{profile: 8, base_codec: "10-bit HEVC"},
+			] 
 			break;
 		case 'dvh1':
 			res.push(normal('HEVC-based Dolby Vision codec.'));
-			res.push(normal('Parameter sets (VPS, PPS, or SPS) are stored in the sample entries only.'));
+			res.push(info('Parameter sets (VPS, PPS, or SPS) are stored in the sample entries only.'));
+			map = [{profile: 20, base_codec: "10-bit MV-HEVC (for 3D) or HEVC (for 2D)"}];
 			break;
 		case 'dvav':
 			res.push(normal('AVC-based Dolby Vision codec.'));
-			res.push(normal('Parameter sets (PPS or SPS) are stored either in the sample entries or as part of the samples, or in both.'));
+			res.push(info('Parameter sets (PPS or SPS) are stored either in the sample entries or as part of the samples, or in both.'));
+			map = [
+				{profile: 0, base_codec: "Advanced Video Coding (AVC)", retired: true},
+				{profile: 1, base_codec: "AVC", retired: true},
+				{profile: 9, base_codec: "8-bit AVC (High, High Progressive or Conttrained High profile)"},
+			];
 			break;
 		case 'dva1':
 			res.push(normal('AVC-based Dolby Vision codec.'));
-			res.push(normal('Parameter sets (PPS or SPS) are stored either in the sample entries of the video stream or in the parameter set stream, but never in both.'));
+			res.push(info('Parameter sets (PPS or SPS) are stored either in the sample entries of the video stream or in the parameter set stream, but never in both.'));
+			break;
+		case 'dav1':
+			res.push(normal('AV1-based Dolby Vision codec.'));
+			map = [{profile: 10, base_codec: "10-bit AV1"}];
 			break;
 	}
 
-	res.push([5,7,8,9,20].includes(profile)
+  const validProfile = [0,1,2,3,4,5,6,7,8,9,10,20].includes(profile);
+	res.push(validProfile
 		? normal(`Bitstream Profile ID: ${parts[1]}`)
 		: error(`Unrecognised bitstream_profile_id (${parts[1]})`)
 	);
+	const opts = map.find((e) => e.profile = profile);
+	if (validProfile)
+		res.push(opts 
+			? info(`${opts.base_codec}  ${opts.retired ? "  (retired)" : ""}`)
+			: error(`invalid profile ${profile} for ${parts[0]}`)
+		);
 
 	res.push((level >= 1 && level <=13) 
 		? normal(`Level ID: ${parts[2]}`)
@@ -82,5 +108,5 @@ export function decodeDolbyVision(val) {
  export function registerDolbyVision(addHandler) {
 	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
  
-	addHandler(['dvhe', 'dvh1', 'dvav', 'dva1'], 'Dolby Vision stream', decodeDolbyVision, outputHTML);
+	addHandler(['dvhe', 'dvh1', 'dvav', 'dva1', 'dav1'], 'Dolby Vision stream', decodeDolbyVision, outputHTML);
  }

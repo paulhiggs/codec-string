@@ -32,6 +32,7 @@ import { err } from './markup.js';
 
 export const normal = (str) => ({ decode: str });
 export const warning = (str) => ({ warning: str });
+export const info = (str) => ({ informative: str});
 export const error = (str) => ({ error: str });
 export const title = (str) => ({ title: str });
 

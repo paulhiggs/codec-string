@@ -61,7 +61,7 @@ export const expressions = {
 		description: "codec_id is 0 for general high rate coding, 1 for lossless"
 	},
 	DolbyVision: {
-		regex: /^(dvav|dvhe|dvh1|dva1)\.\d{2}\.\d{2}$/,
+		regex: /^(dvav|dvhe|dvh1|dva1|dav1)\.\d{2}\.\d{2}$/,
 		format: "[Codec_type].[bitstream_profile_ID].[Dolby_Vision_Level_ID]"
 	},
 	VP9: {

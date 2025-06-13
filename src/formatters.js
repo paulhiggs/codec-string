@@ -26,7 +26,7 @@
  *
  */
 
-import { err, BREAK, LINE, code, bold, warn, HTMLsafe, dflt, italic, cell } from './markup.js';
+import { err, BREAK, LINE, code, bold, warn, HTMLsafe, dflt, italic, cell, space } from './markup.js';
 
 export function simpleHTML(label, parsed, debugging = false) {
 	if (this?.error) return err(this.error) + BREAK;
@@ -38,7 +38,7 @@ export function simpleHTML(label, parsed, debugging = false) {
 		else if (line?.warning) res += warn(HTMLsafe(line.warning)) + BREAK;
 		else if (line?.dvb_term) res += BREAK + bold('DVB term: ') + HTMLsafe(line.dvb_term) + BREAK;
 		else if (line?.default) res += dflt(HTMLsafe(`default value: ${line.default}`)) + BREAK;
-		else if (line?.informative) res += italic(HTMLsafe(line.informative)) + BREAK;
+		else if (line?.informative) res += space(2) + italic(HTMLsafe(line.informative)) + BREAK;
 	});
 	return res + (debugging ? dumpJSONHTML(parsed) : '');
 }
