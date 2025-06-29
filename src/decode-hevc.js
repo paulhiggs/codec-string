@@ -258,7 +258,7 @@ export function decodeHEVC(val) {
 			res.push(error(`unknown Level (${tier[1]})`));
 	}
 	if (lev) {
-		res.push({ decodes: `Level ${lev}` });
+		res.push(normal(`Level ${lev}`));
 		coding_params.level = lev;
 	}
 	res.push(...constraints);
