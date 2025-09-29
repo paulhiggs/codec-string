@@ -26,8 +26,8 @@
  *
  */
 
-// see annex E.6 through E.8 of  ISO/IEC 14496-15:2022 
-// 
+// see annex E.6 through E.8 of  ISO/IEC 14496-15:2022
+//
 
 // VVC - ISO/IEC 23090-3  - w19470
 
@@ -40,7 +40,6 @@ import { simpleHTML } from './formatters.js';
 import { expressions } from './regular_expressions.js';
 
 export function decodeVVC(val) {
-
 	function printProfile(profile) {
 		const general_profile_idc = parseInt(profile);
 		let res = null,
@@ -50,20 +49,47 @@ export function decodeVVC(val) {
 			case 1:
 				prof = 'Main 10';
 				break;
-			case 65:
-				prof = 'Main 10 Still Picture';
+			case 2:
+				prof = 'Main 12';
 				break;
-			case 33:
-				prof = 'Main 10 4:4:4';
-				break;
-			case 97:
-				prof = 'Main 10 4:4:4 Still Picture';
+			case 10:
+				prof = 'Main 12 Intra';
 				break;
 			case 17:
 				prof = 'Multilayer Main 10';
 				break;
+			case 33:
+				prof = 'Main 10 4:4:4';
+				break;
+			case 34:
+				prof = 'Main 12 4:4:4';
+				break;
+			case 35:
+				prof = 'Main 16 4:4:4';
+				break;
+			case 42:
+				prof = 'Main 12 4:4:4 Intra';
+				break;
+			case 43:
+				prof = 'Main 16 4:4:4 Intra';
+				break;
 			case 49:
 				prof = 'Multilayer Main 10 4:4:4';
+				break;
+			case 65:
+				prof = 'Main 10 Still Picture';
+				break;
+			case 66:
+				prof = 'Main 12 Still Picture';
+				break;
+			case 97:
+				prof = 'Main 10 4:4:4 Still Picture';
+				break;
+			case 98:
+				prof = 'Main 12 4:4:4 Still Picture';
+				break;
+			case 99:
+				prof = 'Main 16 4:4:4 Still Picture';
 				break;
 			default:
 				res = error(`unknown Profile (${profile})`);

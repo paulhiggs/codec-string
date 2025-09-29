@@ -1,6 +1,6 @@
 {
   "name": "codec-string",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "decode the codecs= string in a media mime type",
   "type": "module",
   "engines": {
@@ -8,9 +8,9 @@
   },
   "exports": {
     ".": {
+      "script": "./dist/script/codec-string.js",
       "import": "./dist/esm/codec-string.js",
-      "require": "./dist/cjs/codec-string.js",
-      "script": "./dist/script/codec-string.js"
+      "require": "./dist/cjs/codec-string.js"
     },
     "./package.json": "./package.json"
   },
