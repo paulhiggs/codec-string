@@ -40,18 +40,24 @@ export function decodeHEVC(val) {
 
 	// const HEVCregex = /^(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){1,6}$/;
 
-	function HEVCprofile(general_profile_idc, cap, gopocf) {
+	function HEVCprofile(general_profile_idc, cap, gopocf, gm8bcf) {
 		if (general_profile_idc == 1 || bitSet32(cap, 0)) return { str: 'Main (1)', profile: 'Main' };
 		if (general_profile_idc == 2 || bitSet32(cap, 1)) return { str: `Main 10 ${gopocf ? 'Still Picture ' : ''}(2)`, profile: 'Main 10' };
 		if (general_profile_idc == 3 || bitSet32(cap, 2)) return { str: 'Main Still Picture (3)', profile: 'Main Still' };
 		if (general_profile_idc == 4 || bitSet32(cap, 3)) return { str: 'Range Extensions (4)' };
 		if (general_profile_idc == 5 || bitSet32(cap, 4)) return { str: 'High Throughput (5)', profile: 'High Throughput' };
+		if (general_profile_idc == 6 || bitSet32(cap, 5)) return { str: 'Multiview Main (6)', profile: 'Multiview Main' };
+		if (general_profile_idc == 7 || bitSet32(cap, 6)) return { str: `Scalable Main ${gm8bcf ? '' : '10 '}(7)`, profile: 'Scalable Main' };
+		if (general_profile_idc == 8 || bitSet32(cap, 7)) return { str: '3D Main (8)', profile: '3D Main' };
 		if (general_profile_idc == 9 || bitSet32(cap, 8)) return { str: 'Screen Content Coding (9)', profile: 'Screen Content' };
+		if (general_profile_idc == 10 || bitSet32(cap, 9)) return { str: 'Multiview (10)', profile: 'Multiview' };
 		if (general_profile_idc == 11 || bitSet32(cap, 10)) return { str: 'High Throughput Screen Content Coding (11)', profile: 'High Throughput Screen Content' };
+		if (general_profile_idc == 12 || bitSet32(cap, 11)) return { str: 'Multiview extended (12)', profile: 'Multiview extended' };
+		if (general_profile_idc == 13 || bitSet32(cap, 12)) return { str: 'Multiview extended 10 (13)', profile: 'Multiview extended 10' };
 		return error('unknown profile');
 	}
 
-	const showbit = (v) => v ? '1' : '0';
+	const showbit = (v) => (v ? '1' : '0');
 
 	const parts = val.split('.');
 
@@ -103,7 +109,8 @@ export function decodeHEVC(val) {
 	if (argErr.length) return argErr;
 
 	const constraints = [];
-	let general_one_picture_only_constraint_flag = 0;
+	let general_one_picture_only_constraint_flag,
+		general_max_8bit_constraint_flag = 0;
 	constraints.push({ informative: `constraintFlags=${constraintFlags.toString()}` });
 
 	const general_progressive_source_flag = constraintFlags.bitset(48),
@@ -137,7 +144,8 @@ export function decodeHEVC(val) {
 	) {
 		constraints.push(normal(`general_max_12bit_constraint_flag=${showbit(constraintFlags.bitset(44))}`));
 		constraints.push(normal(`general_max_10bit_constraint_flag=${showbit(constraintFlags.bitset(43))}`));
-		constraints.push(normal(`general_max_8bit_constraint_flag=${showbit(constraintFlags.bitset(42))}`));
+		general_max_8bit_constraint_flag = constraintFlags.bitset(42);
+		constraints.push(normal(`general_max_8bit_constraint_flag=${showbit(general_max_8bit_constraint_flag)}`));
 		constraints.push(normal(`general_max_422chroma_constraint_flag=${showbit(constraintFlags.bitset(41))}`));
 		constraints.push(normal(`general_max_420chroma_constraint_flag=${showbit(constraintFlags.bitset(40))}`));
 		constraints.push(normal(`general_max_monochrome_constraint_flag=${showbit(constraintFlags.bitset(39))}`));
@@ -193,7 +201,12 @@ export function decodeHEVC(val) {
 
 	res.push(general_profile_space == -1 ? error('general_profile_space=') : normal(`general_profile_space=${general_profile_space}`));
 
-	const profile = HEVCprofile(general_profile_idc, general_profile_compatibility_flag, general_one_picture_only_constraint_flag);
+	const profile = HEVCprofile(
+		general_profile_idc,
+		general_profile_compatibility_flag,
+		general_one_picture_only_constraint_flag,
+		general_max_8bit_constraint_flag
+	);
 	if (profile?.error) res.push(error(profile.error));
 	if (profile?.profile) coding_params.profile = profile.profile;
 	if (profile?.str) res.push(normal(`general_profile_idc=${profile.str}`));
