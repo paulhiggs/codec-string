@@ -1,6 +1,6 @@
 {
   "name": "codec-string",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "decode the codecs= string in a media mime type",
   "type": "module",
   "engines": {
@@ -30,24 +30,24 @@
   "author": "paul_higgs@hotmail.com",
   "license": "BSD",
   "dependencies": {
-    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-env": "^7.28.5",
     "babel-loader": "^10.0.0",
     "clean-webpack-plugin": "^4.0.0",
     "eslint-plugin-import-quotes": "^0.0.1",
-    "eslint-webpack-plugin": "^5.0.1",
-    "html-webpack-plugin": "^5.6.3",
+    "eslint-webpack-plugin": "^5.0.2",
+    "html-webpack-plugin": "^5.6.5",
     "webpack-merge": "^6.0.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.27.0",
-    "copy-webpack-plugin": "^13.0.0",
+    "@eslint/js": "^9.39.2",
+    "copy-webpack-plugin": "^13.0.1",
     "del-webpack-plugin": "^2.1.0",
-    "eslint": "^9.27.0",
-    "globals": "^16.2.0",
-    "jsdom": "^26.1.0",
-    "vitest": "^3.2.2",
+    "eslint": "^9.39.2",
+    "globals": "^16.5.0",
+    "jsdom": "^27.3.0",
+    "vitest": "^4.0.16",
     "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.1"
+    "webpack-dev-server": "^5.2.2"
   },
   "repository": {
     "type": "git",
