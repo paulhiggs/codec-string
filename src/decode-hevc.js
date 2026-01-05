@@ -28,7 +28,7 @@
 const DEBUGGING = false;
 
 import { BitList, bitSet32 } from './bits.js';
-import { error, normal } from './decode.js';
+import { error, normal, info } from './decode.js';
 import { hexDigits } from './utils.js';
 import { sscanf } from './sscanf-func.js';
 import { DVBclassification } from './dvb-mapping.js';
@@ -282,9 +282,43 @@ export function decodeHEVC(val) {
 	return res;
 }
 
+export function decodeHEVCLayerInfo(val) {
+	const rx = /lhevcptl="(.*)"/g;
+	const arr = rx.exec(val);
+	if (!arr[1]) return [info('no LHEVC ProfileTierLevel information')];
+
+	const res = [];
+	// arr[1] contains the value provided in the lhevcptl mime parameter
+	const parts = arr[1].split(",");
+	const BLInternal = parseInt(parts[0]);
+  switch (BLInternal) {
+		case 0:
+			res.push(normal('Coded pictures with nuh_layer_id==0 are not present in the bitstream.'));
+			break;
+		case 1:
+			res.push(normal('Coded pictures with nuh_layer_id==0 may be present in the bitstream.'));
+			break;
+		default:
+			res.push(error(`invalid value for BLInternal (${parts[0]})`));
+	}
+	for (let i=1; i<parts.length; i++) {
+		const p2 = parts[i].split(".");
+		if (p2.length < 3)
+			res.push(error(`invalid format for ListItem${i} (${parts[i]})`));
+		else {
+			let listitem = `ListItem${i}: OlsIdx=${p2[0]}, MaxTid=${p2[1]}, PTL1=${p2[2]}`;
+			for (let j=3; j<p2.length; j++) 
+				listitem += `, PTL${j-1}=${p2[j]}`;
+			res.push(normal(listitem));
+		}
+	}
+
+	return res;
+}
+
 export function registerHEVC(addHandler) {
 	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
 
-	addHandler(['hev1', 'hvc1'], 'HEVC/H.265', decodeHEVC, outputHTML);
-	addHandler('lhv1', 'Layered HEVC');
+	addHandler(['hev1', 'hvc1', 'hev2', 'hvc2','hev3', 'hvc3'], 'HEVC/H.265', decodeHEVC, outputHTML);
+	addHandler(['lhv1', 'lhe1'], 'Layered HEVC', decodeHEVCLayerInfo, outputHTML);
 }
