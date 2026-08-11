@@ -38,7 +38,7 @@ import { expressions } from './regular_expressions.js';
 export function decodeUWA(val) {
 
 	if (!expressions.CUVV.regex.test(val)) 
-		return [error('Regex mismatch!'), error(`${val.substring(0,4)}.${expressions.CUVV.format_suffix}`), error(expressions.CUVV.description)];
+		return [error('Regex mismatch!'), error(`${expressions.CUVV.format}`), error(expressions.CUVV.description)];
 
 	const parts = val.split('.');
 
