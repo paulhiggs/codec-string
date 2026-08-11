@@ -39,7 +39,7 @@ import { datatypeIs } from './utils.js';
 export function decodeLCEVC(val) {
 
 	function printProfile(args) {
-		// accprding to Annex A.3 of ISO/IEC 23094-2 (FDIS is MDS19801_WG04_N00025)
+		// according to Annex A.3 of ISO/IEC 23094-2 (FDIS is MDS19801_WG04_N00025)
 		let res = null;
 		switch (args.value) {
 			case 0:
