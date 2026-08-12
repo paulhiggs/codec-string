@@ -35,10 +35,6 @@ import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
 
 export function decodeHEVC(val) {
-	// regex from DVB TM-STREAM0087: /(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fa-F\d]{1,8}\.[LH]\d{1,3}/
-	// but needs to include the 6 btyes from the decoder constraint flags
-
-	// const HEVCregex = /^(hev1|hvc1)\.[a-zA-Z]?\d{1,3}\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){1,6}$/;
 
 	function HEVCprofile(general_profile_idc, cap, gopocf, gm8bcf) {
 		if (general_profile_idc == 1 || bitSet32(cap, 0)) return { str: 'Main (1)', profile: 'Main' };

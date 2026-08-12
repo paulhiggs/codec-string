@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2025
+ * @copyright: Copyright (c) 2025-2026
  * @author: Paul Higgs
  * @file: decode-dolby.js
  *
@@ -37,16 +37,15 @@ import { normal, info, error } from './decode.js';
 
 export function decodeDolbyVision(val) {
 	if (!expressions.DolbyVision.regex.test(val)) return [error('Regex mismatch!'), error(expressions.DolbyVision.format)];
-	const parts = val.split('.');
-	// this check should not fail as the number of parts and the format are checked in the regular expression
-	if (parts.length != 3) return [error(`DolbyVision format is "${expressions.AC4.format}"`)];
+	const result = val.match(expressions.DolbyVision.regex_grouped)
+	if (!result || !result.groups) return [error('Regex mismatch!!'), error(expressions.DolbyVision.format)];
 
-	const profile = parseInt(parts[1]),
-		level = parseInt(parts[2]);
+	const profile = parseInt(result.groups.bitstream_profile_id),
+		level = parseInt(result.groups.Dolby_Vision_level_id);
 
 	let map = [], res = [];
 
-	switch (parts[0]) {
+	switch (result.groups.codec_type) {
 		case 'dvhe':
 			res.push(normal('HEVC-based Dolby Vision codec.'));
 			res.push(info('Parameter sets (VPS, PPS, or SPS) are stored either in the sample entries or as part of the samples, or in both.'));
@@ -86,19 +85,19 @@ export function decodeDolbyVision(val) {
 
   const validProfile = [0,1,2,3,4,5,6,7,8,9,10,20].includes(profile);
 	res.push(validProfile
-		? normal(`Bitstream Profile ID: ${parts[1]}`)
-		: error(`Unrecognised bitstream_profile_id (${parts[1]})`)
+		? normal(`Bitstream Profile ID: ${result.groups.bitstream_profile_id}`)
+		: error(`Unrecognised bitstream_profile_id (${result.groups.bitstream_profile_id})`)
 	);
 	const opts = map.find((e) => e.profile = profile);
 	if (validProfile)
 		res.push(opts 
 			? info(`${opts.base_codec}  ${opts.retired ? "  (retired)" : ""}`)
-			: error(`invalid profile ${profile} for ${parts[0]}`)
+			: error(`invalid profile ${profile} for ${result.groups.codec_type}`)
 		);
 
 	res.push((level >= 1 && level <=13) 
-		? normal(`Level ID: ${parts[2]}`)
-		: error(`Unrecognised level_id (${parts[2]})`)
+		? normal(`Level ID: ${result.groups.Dolby_Vision_level_id}`)
+		: error(`Unrecognised level_id (${result.groups.Dolby_Vision_level_id})`)
 	);
 
 	return res;

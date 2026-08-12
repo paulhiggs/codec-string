@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2021-2024
+ * @copyright: Copyright (c) 2021-2026
  * @author: Paul Higgs
  * @file: decode-vp9.js
  *
@@ -75,6 +75,9 @@ import { expressions } from './regular_expressions.js';
 
 export function decodeVP9(val) {
 	if (!expressions.VP9.regex.test(val)) return [error('Regex failure'), error(expressions.VP9.format)];
+
+	const result = val.match(expressions.VP9.regex_grouped);
+	if (!result || !result.groups) return [error('Regex mismatch!!'), error(expressions.VP9.format)];
 
 	const PROFILE_0 = 0,
 		PROFILE_1 = 1,
@@ -319,6 +322,7 @@ export function decodeVP9(val) {
 		return res;
 	}
 
+/*
 	const parts = val.split('.'),
 		res = [];
 	for (let i = 1; i < parts.length; i++)
@@ -329,7 +333,18 @@ export function decodeVP9(val) {
 				t.default = false;
 			}
 		}
+*/
+	for (let propertyName in result.groups) {
+		if (result.groups[propertyName]) {
+			const t = fields.find((elem) => elem.name== propertyName);
+			if (t) {
+				t.value = parseInt(result.groups[propertyName]);
+				t.default = false;
+			}
+		}
+	}
 
+	const res = [];
 	fields.forEach((field) => {
 		res.push({ name: field.name, value: field.parseFn ? field.parseFn(field) : field.value, is_default: field.default });
 	});

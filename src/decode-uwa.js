@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2024
+ * @copyright: Copyright (c) 2024-2026
  * @author: Paul Higgs
  * @file: decode-uwa.js
  *
@@ -40,18 +40,15 @@ export function decodeUWA(val) {
 	if (!expressions.CUVV.regex.test(val)) 
 		return [error('Regex mismatch!'), error(`${expressions.CUVV.format}`), error(expressions.CUVV.description)];
 
-	const parts = val.split('.');
+	const result = val.match(expressions.CUVV.regex_grouped);
+	if (!result || !result.groups) return  [error('Regex mismatch!!'), error(`${expressions.CUVV.format}`), error(expressions.CUVV.description)];
 
-	// the following tests should not fail as the format is checked with the regular expression
-	if (parts.length != 2) return [error('invalid format')];
+	const coding_params = { type: 'video', codec: result.groups.four_cc }, res = [];
 
-	const coding_params = { type: 'video', codec: parts[0] }, res = [];
+	for (let i=0; i<result.groups.version_bits.length; i++)
+		if (result.groups.version_bits[i] == '1')
+			res.push(normal(`HDR Vivid version ${result.groups.version_bits.length-i} is present`));
 
-	for (let i=0; i<parts[1].length; i++) {
-		if (parts[1][i] == '1') {
-			res.push(normal(`HDR Vivid version ${parts[1].length-i} is present`));
-		}
-	}
 	if (res.length == 0)
 		res.push(warning('No HDR Vivid versions present'));
 

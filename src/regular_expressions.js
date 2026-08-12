@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2024
+ * @copyright: Copyright (c) 2024-2026
  * @author: Paul Higgs
  * @file: regular_expressions.js
  *
@@ -28,11 +28,13 @@
 export const expressions = {
 	AC4: {
 		regex: /^ac-4(\.[a-fA-F\d]{1,2}){3}$/i,
+		regex_grouped: /^(?<four_cc>(ac-4))\.(?<bitstream_version>([a-fA-F\d]{1,2}))\.(?<presentation_version>([a-fA-F\d]{1,2}))\.(?<mdcompat>([a-fA-F\d]{1,2}))$/,
 		format:  'ac-4.<bitstream_version>.<presentation_version>.<mdcompat>'
 	},
 	AV1: {
 		regex: /^av01\.\d\.\d+[MH]\.\d{1,2}((\.\d?)(\.(\d{3})?(\.(\d{2})?(.(\d{2})?(.(\d{2})?(.\d?)?)?)?)?)?)?$/,
-		format: '<sample entry 4CC>.<profile>.<level><tier>.<bitDepth>.<monochrome>.<chromaSubsampling>.<colorPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag></videoFullRangeFlag>',
+		regex_grouped: /^(?<four_cc>(av01))\.(?<profile>(\d))\.(?<level>(\d+))(?<tier>([MH]))\.(?<bitdepth>(\d{1,2}))((\.(?<monochrome>(\d?)))(\.(?<chromaSubsampling>(\d{3}))?(\.(?<colorPrimaries>(\d{2}))?(.(?<transferCharacteristics>(\d{2}))?(.(?<matrixCoefficients>(\d{2}))?(.(?<videoFullRangeFlag>(\d?)))?)?)?)?)?)?$/,
+		format: '<sample entry 4CC>.<profile>.<level><tier>.<bitDepth>.<monochrome>.<chromaSubsampling>.<colorPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>',
 		description: "see https://aomediacodec.github.io/av1-isobmff/#codecsparam"
 	},
 	IAMF: {
@@ -42,30 +44,36 @@ export const expressions = {
 	},
 	AVC: {
 		regex: /^[a-z0-9!"#$%&'()*+,./:;<=>?@[\] ^_`{|}~-]{4}.[a-f0-9]{6}$/i,
+		regex_grouped: /^(?<four_cc>([a-z0-9!"#$%&'()*+,./:;<=>?@[\] ^_`{|}~-]{4})).(?<profile>([a-f0-9]{2}))(?<constraints>([a-f0-9]{2}))(?<level>([a-f0-9]{2}))$/i,
 		format_suffix: "PPCCLL",
 		description: 'PP CC and LL are hexadecimal values'
 	},
 	AVS3video: { 
 		regex: /(avs3|lav3)(\.[a-fA-F\d]{2}){2}$/,
+		regex_grouped: /(?<four_cc>(avs3|lav3)).(?<profile>([a-fA-F\d]{2})).(?<level>([a-fA-F\d]{2}))$/,
 		format: "(avs3|lav3).<profile>.<level>",
 		description: "profile and level are 2 hexadecimal digits"
 	}, 
 	AVS3audio: {
-		regex: /av3a\.[a-fA-F\d]{1,2}$/,
+		regex: /^av3a\.[a-fA-F\d]{1,2}$/,
+		regex_grouped: /^(?<four_cc>(av3a)).(?<codec_id>([a-fA-F\d]{1,2}))$/,
 		format: "av3a.<codec_id>",
 		description: "codec_id is 0 for general high rate coding, 1 for lossless, 2 for general full rate coding"
 	},
 	AVS2audio: { 
-		regex: /cavs\.[a-fA-F\d]{1,2}$/,
+		regex: /^cavs\.[a-fA-F\d]{1,2}$/,
+		regex_grouped: /^(?<four_cc>(cavs)).(?<codec_id>([a-fA-F\d]{1,2}))$/,
 		format: "cavs.<codec_id>",
 		description: "codec_id is 0 for general high rate coding, 1 for lossless"
 	},
 	DolbyVision: {
 		regex: /^(dvav|dvhe|dvh1|dva1|dav1)\.\d{2}\.\d{2}$/,
+		regex_grouped: /^(?<codec_type>(dvav|dvhe|dvh1|dva1|dav1))\.(?<bitstream_profile_id>(\d{2}))\.(?<Dolby_Vision_level_id>(\d{2}))$/,
 		format: "[Codec_type].[bitstream_profile_ID].[Dolby_Vision_Level_ID]"
 	},
 	VP9: {
 		regex: /^vp09(\.\d{2}){3}(\.(\d{2})?){0,5}$/,
+		regex_grouped: /^(?<four_cc>(vp09))\.(?<profile>(\d{2}))\.(?<level>(\d{2}))\.(?<bitDepth>(\d{2}))(\.(?<chromaSubsampling>(\d{2}))?(\.(?<colourPrimaries>(\d{2}))?(\.(?<transferCharacteristics>(\d{2}))?(\.(?<matrixCoefficients>(\d{2}))?(\.(?<videoFullRangeFlag>(\d{2}))?)?)?)?)?)?$/,
 		format: '<sample entry 4CC>.<profile>.<level>.<bitDepth>.<chromaSubsampling>.<colourPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>'
 	},
 	VVC: {
@@ -73,13 +81,18 @@ export const expressions = {
 		format: '<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}'
 	},
 	MPEGH: {
-		regex: /mhm(1|2)\.0x[a-fA-F\d]{2}$/,
+		regex: /^mhm(1|2)\.0x[a-fA-F\d]{2}$/,
+		regex_grouped: /^(?<four_cc>(mhm(1|2)))\.0x(?<profile_id>([a-fA-F\d]{2}))$/,
 		format: '(mhm1 or mhm2).0xLL',
 		description: 'LL is 2 hexadecimal digits'
 	},
 	CUVV: {
-		regex: /cuvv.[01]+$/,
+		regex: /^cuvv.[01]+$/,
+		regex_grouped: /^(?<four_cc>(cuvv)).(?<version_bits>([01])+)$/,
 		format: 'cuvv.<verison_bits>',
 		description: '<version_bits> indicates the versions of HDR Vivid in the bitstream'
+	},
+	HEVC: {
+		regex: /^(hev1|hvc1)\.([a-zA-Z]?\d{1,3})\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){1,6}$/,
 	}
 };

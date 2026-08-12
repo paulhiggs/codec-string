@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2021-2024
+ * @copyright: Copyright (c) 2021-2026
  * @author: Paul Higgs
  * @file: decode-avs.js
  *
@@ -27,7 +27,6 @@
  */
 const DEBUGGING = false;
 
-import { hexDigits } from './utils.js';
 import { normal, warning, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
@@ -223,27 +222,20 @@ export function decodeAVS3(val) {
 	if (!expressions.AVS3video.regex.test(val))
 		return [error('Regex mismatch!'), error(expressions.AVS3video.format), error(expressions.AVS3video.description)];
 
-	const parts = val.split('.');
-	// the following check should not occur due to regular expression checking
-	if (parts.length != 3) return [error('AVS3 codec requires 3 parts')];
+	const result = val.match(expressions.AVS3video.regex_grouped);
+	if (!result || !result.groups) return [error('Regex mismatch!!'), error(expressions.AVS3video.format), error(expressions.AVS3video.description)];
 
-	const argErrs = [];
-	// the following checks should not occur due to regular expression checking
-	if (!hexDigits(parts[1])) argErrs.push(error(`profile_id not expressed in hexadecimal (${parts[1]})`));
-	if (!hexDigits(parts[2])) argErrs.push(error(`level_id not expressed in hexadecimal (${parts[2]})`));
-	if (argErrs.length) return argErrs;
-
-	const coding_params = { type: 'video', codec: parts[0] };
+	const coding_params = { type: 'video', codec: result.groups.four_cc };
 	const res = [];
-	const profile_id = parseInt(parts[1], 16),
-		level_id = parseInt(parts[2], 16);
+	const profile_id = parseInt(result.groups.profile, 16),
+		level_id = parseInt(result.groups.level, 16);
 	const prof = AVS3ProfileStr(profile_id),
 		lev = AVS3LevelStr(level_id);
 	if (prof) {
 		res.push(normal(prof));
 		coding_params.profile = prof;
 	} else {
-		res.push(error(`invalid profile_id (${parts[1]}) specified`));
+		res.push(error(`invalid profile_id (${result.groups.profile}) specified`));
 		coding_params.profile = 'invalid';
 	}
 
@@ -252,14 +244,14 @@ export function decodeAVS3(val) {
 		res.push(normal(`Level ${lev}`));
 		coding_params.level = lev;
 	} else {
-		res.push(error(`invalid level_id (${parts[2]}) specified`));
+		res.push(error(`invalid level_id (${result.groups.level}) specified`));
 		coding_params.level = 'invalid';
 	}
 
 	if (res && lev) {
 		const foundProfile = avs3allowed.find((entry) => entry.profiles.includes(profile_id));
 		if (foundProfile && !foundProfile.levels.includes(level_id))
-			res.push(warning(`specified profile (${parts[1]}) does not support the specified level (${parts[2]})`));
+			res.push(warning(`specified profile (${result.groups.profile}) does not support the specified level (${result.groups.level})`));
 	}
 
 	const dvb = DVBclassification(coding_params);
@@ -273,15 +265,13 @@ export function decodeAVS3audio(val) {
 	if (!expressions.AVS3audio.regex.test(val)) 
 		return [error('Regex mismatch!'), error(expressions.AVS3audio.format), error(expressions.AVS3audio.description)];
 
-	const parts = val.split('.');
+	const result = val.match(expressions.AVS3audio.regex_grouped);
+	if (!result || !result.groups) return [error('Regex mismatch!!'), error(expressions.AVS3audio.format), error(expressions.AVS3audio.description)];
 
-	// the following checks should not occur due to regular expression checking
-	if (parts.length != 2) return [error('AVS3 audio codec requires 2 parts')];
-	if (!hexDigits(parts[1])) return [error(`audio_codec_id not expressed in hexadecimal (${parts[1]})`)];
-
-	const coding_params = { type: 'audio', codec: parts[0] };
+	console.log(result)
+	const coding_params = { type: 'audio', codec: result.groups.four_cc };
 	const res = [];
-	const audio_codec_id = parseInt(parts[1], 16);
+	const audio_codec_id = parseInt(result.groups.codec_id, 16);
 
 	switch (audio_codec_id) {
 		case 0:
@@ -296,7 +286,7 @@ export function decodeAVS3audio(val) {
 			coding_params.codec_id='2';
 			break;
 		default:
-			res.push(error(`invalid audio_codec_id (${parts[1]}) specified`));
+			res.push(error(`invalid audio_codec_id (${result.parts.codec_id}) specified`));
 			break;
 	}
 
@@ -310,15 +300,12 @@ export function decodeAVS2audio(val) {
 	if (!expressions.AVS2audio.regex.test(val)) 
 		return [error('Regex mismatch!'), error(expressions.AVS2audio.format), error(expressions.AVS2audio.description)];
 
-	const parts = val.split('.');
+	const result = val.match(expressions.AVS2audio.regex_grouped);
+	if (!result || !result.groups) return [error('Regex mismatch!!'), error(expressions.AVS2audio.format), error(expressions.AVS2audio.description)];
 
-	// the following checks should not occur due to regular expression checking
-	if (parts.length != 2) return [error('AVS2 audio codec requires 2 parts')];
-	if (!hexDigits(parts[1])) return [error(`audio_codec_id not expressed in hexadecimal (${parts[1]})`)];
-
-	const coding_params = { type: 'audio', codec: parts[0] };
+	const coding_params = { type: 'audio', codec: result.groups.four_cc };
 	const res = [];
-	const audio_codec_id = parseInt(parts[1], 16);
+	const audio_codec_id = parseInt(result.groups.codec_id, 16);
 
 	switch (audio_codec_id) {
 		case 0:
@@ -328,7 +315,7 @@ export function decodeAVS2audio(val) {
 			res.push(normal('Lossless Audio Coding'));
 			break;
 		default:
-			res.push(error(`invalid audio_codec_id (${parts[1]}) specified`));
+			res.push(error(`invalid audio_codec_id (${result.groups.codec_id}) specified`));
 			break;
 	}
 

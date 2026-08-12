@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2021-2024
+ * @copyright: Copyright (c) 2021-2026
  * @author: Paul Higgs
  * @file: decode-mpegH.js
  *
@@ -31,7 +31,6 @@
 
 const DEBUGGING = false;
 
-import { hexDigits } from './utils.js';
 import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
@@ -41,14 +40,12 @@ export function decodeMPEGH(val) {
 	if (!expressions.MPEGH.regex.test(val))
 		return [error('Regex mismatch!'), error(expressions.MPEGH.format), error(expressions.MPEGH.description)];
 
-	const parts = val.split('.');
-
-	if (parts.length != 2) return [error('MPEG-H audio requires a profile-level-id')];
-	if (!hexDigits(parts[1])) return [error(`profile_id not expressed in hexadecimal (${parts[1]})`)];
+	const result = val.match(expressions.MPEGH.regex_grouped);
+	if (!result || !result.groups) return [error('Regex mismatch!!'), error(expressions.MPEGH.format), error(expressions.MPEGH.description)];
 
 	const res = [],
-		level = parseInt(parts[1], 16),
-		coding_params = { type: 'audio', codec: parts[0] };
+		level = parseInt( result.groups.profile_id, 16),
+		coding_params = { type: 'audio', codec: result.groups.four_cc };
 
 	let profile = '';
 	switch (level) {
@@ -83,9 +80,9 @@ export function decodeMPEGH(val) {
 			coding_params.level = '3';
 			break;
 		default:
-			return [error(`invalid level (${parts[1]})`)];
+			return [error(`invalid level (${result.groups.profile_id})`)];
 	}
-	if (parts[0] == 'mhm2') profile += ', multi-steam';
+	if (result.groups.four_cc == 'mhm2') profile += ', multi-steam';
 	if (profile.length) res.push(normal(profile));
 
 	const dvb = DVBclassification(coding_params);

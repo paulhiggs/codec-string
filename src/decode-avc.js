@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2021-2024
+ * @copyright: Copyright (c) 2021-2026
  * @author: Paul Higgs
  * @file: decode-avc.js
  *
@@ -32,8 +32,6 @@
  **/
 const DEBUGGING = false;
 
-import { hexDigits } from './utils.js';
-import { sscanf } from './sscanf-func.js';
 import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
@@ -55,153 +53,151 @@ export function decodeAVC(val) {
 	if (!expressions.AVC.regex.test(val)) 
 		return [error('Regex mismatch!'), error(`${val.substring(0,4)}.${expressions.AVC.format_suffix}`), error(expressions.AV1.description)];
 
-	const parts = val.split('.');
+	const result = val.match(expressions.AVC.regex_grouped);
+	if (!result || !result.groups) return [error('Regex mismatch!!'), error(`${val.substring(0,4)}.${expressions.AVC.format_suffix}`), error(expressions.AV1.description)];
 
-	// the following tests should not fail as the format is checked with the regular expression
-	if (parts.length != 2) return [error('invalid format')];
-	if (parts[1].length != 6) return [error(`invalid parameters length (${parts[1].length}) - should be 6`)];
-	if (!hexDigits(parts[1])) return [error('parameters contains non-hex digits')];
-
-	const prof = sscanf(parts[1], '%2x%2x%2x'),
-		coding_params = { type: 'video', codec: parts[0] },
+	const profile = parseInt(result.groups.profile, 16),
+		constraints = parseInt(result.groups.constraint, 16),
+		level = parseInt(result.groups.level, 16),
+		coding_params = { type: 'video', codec: result.groups.four_cc },
 		res = [];
 
-	res.push(normal(`profile_idc=${prof[0]} constraint_set=${prof[1]} level_idc=${prof[2]}`));
+	res.push(normal(`profile_idc=${profile} constraint_set=${constraints} level_idc=${level}`));
 
-	let profile = '';
-	switch (prof[0]) {
+	let profile_str = '';
+	switch (profile) {
 		case 0x2c:
-			profile = 'CAVLC 4:4:4';
+			profile_str = 'CAVLC 4:4:4';
 			break;
 		case 0x42:
-			profile = `${AVCconstraint(prof[1], 1) ? 'Constrained ' : ''}Baseline`;
+			profile_str = `${AVCconstraint(constraints, 1) ? 'Constrained ' : ''}Baseline`;
 			break;
 		case 0x4d:
-			profile = `${AVCconstraint(prof[1], 1) ? 'Constrained ' : ''}Main`;
+			profile_str = `${AVCconstraint(constraints, 1) ? 'Constrained ' : ''}Main`;
 			break;
 		case 0x53:
-			profile = `Scalable ${AVCconstraint(prof[1], 5) ? 'Constrained ' : ''}Base`;
+			profile_str = `Scalable ${AVCconstraint(constraints, 5) ? 'Constrained ' : ''}Base`;
 			break;
 		case 0x56:
-			profile = 'Scalable ';
-			if (!AVCconstraint(prof[1], 3) && AVCconstraint(prof[1], 5)) profile += 'Constrained ';
-			if (AVCconstraint(prof[1], 3) && !AVCconstraint(prof[1], 5)) profile += 'Intra ';
-			profile += 'High';
+			profile_str = 'Scalable ';
+			if (!AVCconstraint(constraints, 3) && AVCconstraint(constraints, 5)) profile_str += 'Constrained ';
+			if (AVCconstraint(constraints, 3) && !AVCconstraint(constraints, 5)) profile_str += 'Intra ';
+			profile_str += 'High';
 			break;
 		case 0x58:
-			profile = 'Extended';
+			profile_str = 'Extended';
 			break;
 		case 0x63:
-			profile = `High 10${AVCconstraint(prof[1], 3) ? ' Intra' : ''}`;
+			profile_str = `High 10${AVCconstraint(constraints, 3) ? ' Intra' : ''}`;
 			break;
 		case 0x64:
-			if (AVCconstraint(prof[1], 4) && !AVCconstraint(prof[1], 5)) profile += 'Progressive ';
-			if (!AVCconstraint(prof[1], 4) && AVCconstraint(prof[1], 5)) profile += 'Constrained ';
-			profile += 'High';
+			if (AVCconstraint(constraints, 4) && !AVCconstraint(constraints, 5)) profile_str += 'Progressive ';
+			if (!AVCconstraint(constraints, 4) && AVCconstraint(constraints, 5)) profile_str += 'Constrained ';
+			profile_str += 'High';
 			break;
 		case 0x76:
-			profile = 'Multiview High';
+			profile_str = 'Multiview High';
 			break;
 		case 0x7a:
-			profile = `High 4:2:2${AVCconstraint(prof[1], 3) ? ' Intra' : ''}`;
+			profile_str = `High 4:2:2${AVCconstraint(constraints, 3) ? ' Intra' : ''}`;
 			break;
 		case 0x80:
-			profile = 'Stereo High';
+			profile_str = 'Stereo High';
 			break;
 		case 0x86:
-			profile = 'MFC High';
+			profile_str = 'MFC High';
 			break;
 		case 0x87:
-			profile = 'MFC Depth High';
+			profile_str = 'MFC Depth High';
 			break;
 		case 0x8a:
-			profile = 'Multiview Depth High High';
+			profile_str = 'Multiview Depth High High';
 			break;
 		case 0x8b:
-			profile = 'Enhanced Multiview Depth High High';
+			profile_str = 'Enhanced Multiview Depth High High';
 			break;
 		case 0xf4:
-			profile = `High 4:4:4${AVCconstraint(prof[1], 3) ? ' Intra' : ' Predictive'}`;
+			profile_str = `High 4:4:4${AVCconstraint(constraints, 3) ? ' Intra' : ' Predictive'}`;
 			break;
 		default:
 			coding_params.profile = 'unknown';
-			res.push(error(`unknown profile (${prof[0]})`));
+			res.push(error(`unknown profile (${profile})`));
 	}
-	if (profile.length) {
-		res.push(normal(`profile=${profile} (${prof[0].toString(16)})`));
-		coding_params.profile = profile;
+	if (profile_str.length) {
+		res.push(normal(`profile=${profile_str} (${profile.toString(16)})`));
+		coding_params.profile = profile_str;
 	}
 	let consts = 'constraints=';
-	for (let i = 0; i <= 5; i++) consts += AVCconstraint(prof[1], i) ? i : '-';
+	for (let i = 0; i <= 5; i++) consts += AVCconstraint(constraints, i) ? i : '-';
 	res.push(normal(consts));
 
-	let level = '';
-	switch (prof[2]) {
+	let level_str = '';
+	switch (level) {
 		case 0x0a:
-			level = '1';
+			level_str = '1';
 			break;
 		case 0x0b:
-			level = AVCconstraint(prof[1], 3) ? '1b' : '1.1';
+			level_str = AVCconstraint(constraints, 3) ? '1b' : '1.1';
 			break;
 		case 0x0c:
-			level = '1.2';
+			level_str = '1.2';
 			break;
 		case 0x1d:
-			level = '1.3';
+			level_str = '1.3';
 			break;
 		case 0x14:
-			level = '2';
+			level_str = '2';
 			break;
 		case 0x15:
-			level = '2.1';
+			level_str = '2.1';
 			break;
 		case 0x16:
-			level = '2.2';
+			level_str = '2.2';
 			break;
 		case 0x1e:
-			level = '3';
+			level_str = '3';
 			break;
 		case 0x1f:
-			level = '3.1';
+			level_str = '3.1';
 			break;
 		case 0x20:
-			level = '3.2';
+			level_str = '3.2';
 			break;
 		case 0x28:
-			level = '4';
+			level_str = '4';
 			break;
 		case 0x29:
-			level = '4.1';
+			level_str = '4.1';
 			break;
 		case 0x2a:
-			level = '4.2';
+			level_str = '4.2';
 			break;
 		case 0x32:
-			level = '5';
+			level_str = '5';
 			break;
 		case 0x33:
-			level = '5.1';
+			level_str = '5.1';
 			break;
 		case 0x34:
-			level = '5.2';
+			level_str = '5.2';
 			break;
 		case 0x3c:
-			level = '6';
+			level_str = '6';
 			break;
 		case 0x3d:
-			level = '6.1';
+			level_str = '6.1';
 			break;
 		case 0x3f:
-			level = '6.2';
+			level_str = '6.2';
 			break;
 		default:
 			coding_params.level = 'undefined';
-			res.push(error(`level=undefined (${prof[2]})`));
+			res.push(error(`level=undefined (${level})`));
 	}
 
-	if (level.length) {
-		coding_params.level = level;
-		res.push(normal(`level=${level} (${prof[2].toString(16)})`));
+	if (level_str.length) {
+		coding_params.level = level_str;
+		res.push(normal(`level=${level_str} (${level.toString(16)})`));
 	}
 
 	const dvb = DVBclassification(coding_params);

@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2021-2024
+ * @copyright: Copyright (c) 2021-2026
  * @author: Paul Higgs
  * @file: decode-ac4.js
  *
@@ -34,7 +34,6 @@
  **/
 const DEBUGGING = false;
 
-import { hexDigits } from './utils.js';
 import { normal, error, warning } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
@@ -114,16 +113,15 @@ const decodeMDcompat = (mdcompat, pres_version) => {
 };
 
 export function decodeAC4(val) {
-	if (!expressions.AC4.regex.test(val)) return [error('Regex mismatch!'), error(expressions.AC4.format)];
-	const parts = val.split('.');
-	// neither of these checks should fail as the number of parts and the format are checked in the regupar expression
-	if (parts.length != 4) return [error(`AC-4 format is "${expressions.AC4.format}"`)];
-	if (!hexDigits(parts[1]) || !hexDigits(parts[2]) || !hexDigits(parts[3])) return [error('parameters contain non-hex digits')];
+	if (!expressions.AC4.regex_grouped.test(val)) return [error('Regex mismatch!'), error(expressions.AC4.format)];
 
-	const coding_params = { type: 'audio', codec: parts[0] },
-		bs_version = parseInt(parts[1], 16),
-		pres_version = parseInt(parts[2], 16),
-		mdcompat = parseInt(parts[3], 16),
+	const result = val.match(expressions.AC4.regex_grouped)
+	if (!result || !result.groups) return [error('Regex mismatch!'), error(expressions.AC4.format)];
+	
+	const coding_params = { type: 'audio', codec: result.groups.four_cc },
+		bs_version = parseInt(result.groups.bitstream_version, 16),
+		pres_version = parseInt(result.groups.presentation_version, 16),
+		mdcompat = parseInt(result.groups.mdcompat, 16),
 		res = [];
 
 	res.push(normal(`bitstream_version: ${bs_version}`));

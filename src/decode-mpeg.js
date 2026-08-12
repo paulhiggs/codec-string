@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2024
+ * @copyright: Copyright (c) 2024-2026
  * @author: Paul Higgs
  * @file: decode-mpeg.js
  *
@@ -46,7 +46,6 @@
 
 const DEBUGGING = false;
 
-import { hexDigits } from './utils.js';
 import { normal, error, warning } from './decode.js';
 import { simpleHTML } from './formatters.js';
 
@@ -231,43 +230,44 @@ const AudioLayer = (layer) => {
 };
 
 // ISO/IEC 13818-2
+const mpeg2vRegexp = /^(?<four_cc>(mp2v)).(?<oti>([a-fA-F\d]{2}))$/;
 export function decodeMPEG2video(val) {
-	const parts = val.split('.');
-	if (parts.length != 2) return [error('invalid format')];
-	if (!hexDigits(parts[1])) return [error('parameters contains non-hex digits')];
-	return [MP4OTI(parseInt(parts[1], 16))];
+	const result = val.match(mpeg2vRegexp);
+	if (!result || !result.groups) return [error('invalid format')];
+
+	return [MP4OTI(parseInt(result.groups.oti, 16))];
 }
 
 // ISO/IEC 13818-7
+const mpeg2aRegexp = /^(?<four_cc>(mp2a)).(?<oti>([a-fA-F\d]{2}))(.(?<layer>([a-fA-F\d])))?$/;
 export function decodeMPEG2audio(val) {
-	const parts = val.split('.');
-	if (parts.length < 2 || parts.length > 3) return [error('invalid format')];
-	if (!hexDigits(parts[1])) return [error('parameters contains non-hex digits')];
+	const result = val.match(mpeg2aRegexp);
+	if (!result || !result.groups) return [error('invalid format')];
 
-	const oti = parseInt(parts[1], 16);
+	const oti = parseInt(result.groups.oti, 16);
 	const res = [];
 	res.push(MP4OTI(oti));
-	if (oti == 0x69) res.push(AudioLayer(2, parseInt(parts[2])));
+	if (oti == 0x69) res.push(AudioLayer(2, parseInt(result.groups.layer, 16)));
 
 	return res;
 }
 
+const mpeg1vRegexp = /^(?<four_cc>(mp1v)).(?<oti>([a-fA-F\d]{2}))$/;
 export function decodeMPEG1video(val) {
-	const parts = val.split('.');
-	if (parts.length != 2) return [error('invalid format')];
-	if (!hexDigits(parts[1])) return [error('parameters contains non-hex digits')];
-	return [MP4OTI(parseInt(parts[1], 16))];
+	const result = val.match(mpeg1vRegexp);
+	if (!result || !result.groups) return [error('invalid format')];
+	return [MP4OTI(parseInt(result.groups.oti,16))];
 }
 
+const mpeg1aRegexp = /^(?<four_cc>(mp1a)).(?<oti>([a-fA-F\d]{2}))(.(?<layer>([a-fA-F\d])))?$/;
 export function decodeMPEG1audio(val) {
-	const parts = val.split('.');
-	if (parts.length < 2 || parts.length > 3) return [error('invalid format')];
-	if (!hexDigits(parts[1])) return [error('parameters contains non-hex digits')];
+	const result = val.match(mpeg1aRegexp);
+	if (!result || !result.groups) return [error('invalid format')];
 
-	const oti = parseInt(parts[1], 16);
+	const oti = parseInt(result.groups.oti, 16);
 	const res = [];
 	res.push(MP4OTI(oti));
-	if (oti == 0x6b) res.push(AudioLayer(1, parseInt(parts[2], 16)));
+	if (oti == 0x6b) res.push(AudioLayer(1, parseInt(result.groups.layer, 16)));
 	return res;
 }
 
@@ -452,13 +452,13 @@ const MPEGvideoOTI = (oti, pli = null) => {
 	return [error(`invalid value for Object Type Identifier (${oti})`)];
 };
 
+const mp4vRegexp = /^(?<four_cc>(mp4v)).(?<oti>([a-fA-F\d]{2}))(.(?<pli>([a-fA-F\d]{1,2})))?$/;
 export function decodeMPEG4video(val) {
-	const parts = val.split('.');
-	if (parts.length < 2 || parts.length > 3) return [error('invalid format')];
-	if (!hexDigits(parts[1]) || (parts.length == 3 && !hexDigits(parts[2]))) return [error('parameters contains non-hex digits')];
+	const result = val.match(mp4vRegexp);
+	if (!result || !result.groups) return [error('invalid format')];
 
 	// https://www.ietf.org/rfc/rfc4281.txt
-	return MPEGvideoOTI(parseInt(parts[1], 16), parts.length >= 3 ? parseInt(parts[2]) : null);
+	return MPEGvideoOTI(parseInt(result.groups.oti, 16), result.groups.pli ? parseInt(result.groups.pli, 16) : null);
 }
 
 const MPEGaudioOTI = (oti, aacMode = null) => {
@@ -519,13 +519,13 @@ const MPEGaudioOTI = (oti, aacMode = null) => {
 	return [error(`invalid MP4 Audio Object Type Indicator (${oti})`)];
 };
 
+const mp4aRegexp = /^(?<four_cc>(mp4a)).(?<oti>([a-fA-F\d]{2}))(.(?<aacMode>(\d{1,2})))?$/;
 export function decodeMPEG4audio(val) {
-	const parts = val.split('.');
-	if (parts.length < 2) return [error('invalid format')];
-	if (!hexDigits(parts[1])) return [error('OTI must be expressed in hexadecimal')];
+	const result = val.match(mp4aRegexp);
+	if (!result || !result.groups) return  [error('invalid format')]
 
 	// https://cconcolato.github.io/media-mime-support/
-	return MPEGaudioOTI(parseInt(parts[1], 16), parts.length >= 3 ? parseInt(parts[2]) : null);
+	return MPEGaudioOTI(parseInt(result.groups.oti, 16), result.groups.aacMode ? parseInt(result.groups.aacMode) : null);
 }
 
 export function registerMPEG(addHandler) {
