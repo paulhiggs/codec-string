@@ -66,8 +66,8 @@ export function decodeHEVC(val) {
 	if (!hexDigits(parts[2])) argErr.push(error(`general_profile_compatibility_flag not expressed in hexadecimal (${parts[2]})`));
 
 	const general_profile_compatibility_flag = parseInt(parts[2], 16);
-	let general_profile_idc = -1,
-		general_profile_space = -1;
+	let general_profile_idc,
+		general_profile_space;
 
 	if (parts[1][0] == 'A' || parts[1][0] == 'B' || parts[1][0] == 'C') {
 		const gp = sscanf(parts[1], '%c%d');

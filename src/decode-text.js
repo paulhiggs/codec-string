@@ -33,7 +33,7 @@ import { simpleHTML } from './formatters.js';
 export function decodeSTPP(val) {
 	const parts = val.split('.');
 
-	let res = error('STPP decode failure');
+	let res;
 	if (parts.length > 1) {
 		if (parts[1].toLowerCase() == 'ttml') {
 			// https://www.w3.org/TR/ttml-profile-registry/

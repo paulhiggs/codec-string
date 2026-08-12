@@ -48,7 +48,7 @@ export function decodeEAC3(val) {
 }
 
 const decodeMDcompat = (mdcompat, pres_version) => {
-	let res = '';
+	let res;
 	switch (pres_version) {
 		case 0:
 			// clause 4.3.3.3.8 of ETSI TS 103 190-1 v1.3.1
@@ -109,7 +109,7 @@ const decodeMDcompat = (mdcompat, pres_version) => {
 		default:
 			return warning(`unsupported presentation version (${pres_version})`);
 	}
-	return normal(res);
+	return normal(res || "");
 };
 
 export function decodeAC4(val) {

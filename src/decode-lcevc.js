@@ -40,7 +40,7 @@ export function decodeLCEVC(val) {
 
 	function printProfile(args) {
 		// according to Annex A.3 of ISO/IEC 23094-2 (FDIS is MDS19801_WG04_N00025)
-		let res = null;
+		let res;
 		switch (args.value) {
 			case 0:
 				res = 'Main profile';
@@ -56,11 +56,8 @@ export function decodeLCEVC(val) {
 	}
 
 	function printLevel(args) {
-		// accprding to Annex A.4 of ISO/IEC 23094-2 (FDIS is MDS19801_WG04_N00025)
-		let res = null;
-		if (args.value >= 1 && args.value <=4)
-			res = `Level ${args.value}`;
-		else res = error('invalid');
+		// according to Annex A.4 of ISO/IEC 23094-2 (FDIS is MDS19801_WG04_N00025)
+		const res = (args.value >= 1 && args.value <=4) ? `Level ${args.value}` : error('invalid');
 		return { value: args.value, description: res };
 	}
 

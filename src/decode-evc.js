@@ -316,8 +316,8 @@ export function decodeEVC(val) {
 	}
 
 	function printProfile(args) {
-		// accprding to Annex A.3 of ISO/IEC 23094-1 (FDIS is w19229)
-		let res = null;
+		// according to Annex A.3 of ISO/IEC 23094-1 (FDIS is w19229)
+		let res;
 		switch (args.value) {
 			case BASELINE_PROFILE:
 			case MAIN_PROFILE:
@@ -333,8 +333,8 @@ export function decodeEVC(val) {
 	}
 
 	function printLevel(args) {
-		// accprding to Annex A.4 of ISO/IEC 23094-1 (FDIS is w19229)
-		let res = null;
+		// according to Annex A.4 of ISO/IEC 23094-1 (FDIS is w19229)
+		let res;
 		switch (args.value) {
 			case 10:
 				res = 'Level 1';

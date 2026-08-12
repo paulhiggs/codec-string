@@ -47,7 +47,7 @@ export function decodeMPEGH(val) {
 		level = parseInt( result.groups.profile_id, 16),
 		coding_params = { type: 'audio', codec: result.groups.four_cc };
 
-	let profile = '';
+	let profile;
 	switch (level) {
 		case 0x0b:
 			profile = 'LC Profile Level 1';
