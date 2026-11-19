@@ -77,7 +77,8 @@ export const expressions = {
 		format: '<sample entry 4CC>.<profile>.<level>.<bitDepth>.<chromaSubsampling>.<colourPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>'
 	},
 	VVC: {
-		regex: /^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-zA-Z2-7]+)?(\.S[a-fA-F\d]{1,2}(\+[a-fA-F\d]{1,2})*)?(\.O\d+(\+\d+)?)?$/,
+		regex: /^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-zA-Z2-7]+)?(\.S[a-zA-Z2-7]{7}(\+[a-zA-Z2-7]{7})*)?(\.O(?:\d+(?:\+\d+)?|\+\d+))?$/,
+		regex_grouped: /^(?<four_cc>vvc1|vvi1)\.(?<profile>\d+)\.(?<tier>[LH])(?<level>\d+)(?:\.C(?<constraints>[a-zA-Z2-7]+))?(?:\.S(?<sub_profiles>[a-zA-Z2-7]{7}(?:\+[a-zA-Z2-7]{7})*))?(?:\.O(?=\d|\+\d)(?<ols_idx>\d+)?(?:\+(?<max_tid>\d+))?)?$/,
 		format: '<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}'
 	},
 	MPEGH: {
@@ -87,10 +88,17 @@ export const expressions = {
 		description: 'LL is 2 hexadecimal digits'
 	},
 	CUVV: {
-		regex: /^cuvv.[01]+$/,
-		regex_grouped: /^(?<four_cc>cuvv).(?<version_bits>[01]+)$/,
-		format: 'cuvv.<verison_bits>',
+		regex: /^cuvv\.[01]+$/,
+		regex_grouped: /^(?<four_cc>cuvv)\.(?<version_bits>[01]+)$/,
+		format: 'cuvv.<version_bits>',
 		description: '<version_bits> indicates the versions of HDR Vivid in the bitstream'
+	},
+	STPP: {
+		// profiles follow section 2 of the W3C TTML profile registry: identifiers joined by "+" (all of) and "|" (any one of)
+		regex: /^stpp(\.ttml(\.[a-z\d]+(\+[a-z\d]+)*(\|[a-z\d]+(\+[a-z\d]+)*)*)?)?$/i,
+		regex_grouped: /^(?<four_cc>stpp)(?:\.(?<format>ttml)(?:\.(?<profiles>[a-z\d]+(?:\+[a-z\d]+)*(?:\|[a-z\d]+(?:\+[a-z\d]+)*)*))?)?$/i,
+		format: 'stpp{.ttml{.<profiles>}}',
+		description: '<profiles> is one or more TTML profile identifiers from the W3C TTML profile registry, joined by + (all of) or | (any one of)'
 	},
 	HEVC: {
 		regex: /^(hev1|hvc1)\.([a-zA-Z]?\d{1,3})\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){1,6}$/,
