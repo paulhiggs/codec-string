@@ -93,6 +93,13 @@ export const expressions = {
 		format: 'cuvv.<version_bits>',
 		description: '<version_bits> indicates the versions of HDR Vivid in the bitstream'
 	},
+	STPP: {
+		// profiles follow section 2 of the W3C TTML profile registry: identifiers joined by "+" (all of) and "|" (any one of)
+		regex: /^stpp(\.ttml(\.[a-z\d]+(\+[a-z\d]+)*(\|[a-z\d]+(\+[a-z\d]+)*)*)?)?$/i,
+		regex_grouped: /^(?<four_cc>stpp)(?:\.(?<format>ttml)(?:\.(?<profiles>[a-z\d]+(?:\+[a-z\d]+)*(?:\|[a-z\d]+(?:\+[a-z\d]+)*)*))?)?$/i,
+		format: 'stpp{.ttml{.<profiles>}}',
+		description: '<profiles> is one or more TTML profile identifiers from the W3C TTML profile registry, joined by + (all of) or | (any one of)'
+	},
 	HEVC: {
 		regex: /^(hev1|hvc1)\.([a-zA-Z]?\d{1,3})\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){1,6}$/,
 	}

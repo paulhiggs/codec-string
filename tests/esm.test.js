@@ -145,7 +145,6 @@ describe('ESM index test', () => {
 	test.each([
 		['stpp', [{ warning: 'generic XML timed text, no TTML profile is signalled' }]],
 		['stpp.ttml', [{ decode: 'generic timed text' }]],
-		['stpp.xyz', [{ warning: 'unknown STPP mode "xyz"' }]],
 		['stpp.ttml.foo', [{ warning: 'unknown TTML mode "foo"' }]],
 	])('STPP decode %s', (codec, expected) => {
 		expect(stppDecodes(codec)).toEqual(expected);
@@ -201,11 +200,16 @@ describe('ESM index test', () => {
 		expect(parsed.at(-2).decode).toEqual('EBU-TT-D 1.0');
 	});
 
-	test('STPP warns about text after the profile', () => {
-		const parsed = stppDecodes('stpp.ttml.im1t.extra');
-		expect(parsed[0].decode).toEqual('IMSC1 text');
-		expect(parsed.at(-1)).toEqual({ warning: 'unexpected text after the TTML profile "extra"' });
-	});
+	test.each(['stpp.xyz', 'stpp.ttml.im1t.extra', 'stpp.ttml.im1t|', 'stpp.ttml.|im1t', 'stpp.ttml.im1t++etd1', 'stpp.ttml.', 'stpp.'])(
+		'STPP rejects %s',
+		(codec) => {
+			expect(stppDecodes(codec)).toEqual([
+				{ error: 'Regex mismatch!' },
+				{ error: 'stpp{.ttml{.<profiles>}}' },
+				{ error: '<profiles> is one or more TTML profile identifiers from the W3C TTML profile registry, joined by + (all of) or | (any one of)' },
+			]);
+		},
+	);
 
 	test('STPP decode stpp.ttml.im1t+etd1|im2t ("+" takes precedence over "|")', () => {
 		const parsed = stppDecodes('stpp.ttml.im1t+etd1|im2t');

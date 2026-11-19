@@ -27,8 +27,9 @@
  */
 const DEBUGGING = false;
 
-import { normal, warning } from './decode.js';
+import { normal, error, warning } from './decode.js';
 import { simpleHTML } from './formatters.js';
+import { expressions } from './regular_expressions.js';
 
 // The profile codes after "stpp.ttml." are registered in:
 //   TTML Media Type Definition and Profile Registry, W3C Group Note, 2 July 2026
@@ -228,16 +229,16 @@ function decodeProfileExpression(expression) {
 }
 
 export function decodeSTPP(val) {
-	const parts = val.split('.');
-	if (parts.length == 1) return [warning('generic XML timed text, no TTML profile is signalled')];
-	if (parts[1].toLowerCase() != 'ttml') return [warning(`unknown STPP mode "${parts[1]}"`)];
-	if (parts.length == 2) return [normal('generic timed text')];
+	// the regex follows the registry grammar, so a missing or empty identifier, or anything after the profiles, is rejected
+	const result = val.match(expressions.STPP.regex_grouped);
+	if (!result || !result.groups) return [error('Regex mismatch!'), error(expressions.STPP.format), error(expressions.STPP.description)];
+
+	const { format, profiles } = result.groups;
+	if (!format) return [warning('generic XML timed text, no TTML profile is signalled')];
+	if (!profiles) return [normal('generic timed text')];
 
 	// https://www.w3.org/TR/ttml-profile-registry/
-	const res = decodeProfileExpression(parts[2]);
-	// the registry does not allow "." in a profile identifier, so anything after the profile expression is invalid
-	if (parts.length > 3) res.push(warning(`unexpected text after the TTML profile "${parts.slice(3).join('.')}"`));
-	return res;
+	return decodeProfileExpression(profiles);
 }
 
 export function registerText(addHandler) {
