@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2024
+ * @copyright: Copyright (c) 2024-2026
  * @author: Paul Higgs
  * @file: formatters.js
  *
@@ -27,6 +27,7 @@
  */
 
 import { err, BREAK, LINE, code, bold, warn, HTMLsafe, dflt, italic, cell, space } from './markup.js';
+import { datatypeIs } from './utils.js';
 
 export function simpleHTML(label, parsed, debugging = false) {
 	if (this?.error) return err(this.error) + BREAK;
@@ -74,5 +75,89 @@ export function jsonHTML(label, parsed) {
 	let res = '';
 	if (label) res += bold(HTMLsafe(label)) + BREAK;
 	res += JSON.stringify(parsed);
+	return res;
+}
+
+/**
+ * render the description of a key/value message as HTML
+ *
+ * @param {*} description the description, as a string, an array of strings or { title, label, value, warning } objects, or an { error } or { warning } object
+ * @returns {string} HTML for the description cell
+ */
+function keyValueDescription(description) {
+	let desc = '';
+	switch (datatypeIs(description)) {
+		case 'string':
+			desc = description;
+			break;
+		case 'array':
+			description.forEach((d) => {
+				if (datatypeIs(d, 'string')) desc += d + BREAK;
+				else if (datatypeIs(d, 'object')) {
+					if (d?.title) desc += bold(d.title);
+					if (d?.warning) desc += warn(d.warning);
+					else if (d?.label && Object.prototype.hasOwnProperty.call(d, 'value')) {
+						desc += d.label + ': ';
+						if (datatypeIs(d.value, 'string') || datatypeIs(d.value, 'number')) desc += d.value;
+						else if (datatypeIs(d.value, 'object')) {
+							if (d.value?.warning) desc += warn(d.value.warning);
+						}
+					}
+					desc += BREAK;
+				}
+			});
+			break;
+		case 'object':
+			if (description?.error) desc = err(description.error);
+			else if (description?.warning) desc = warn(description.warning);
+			break;
+		default:
+			desc = warn('unrecognised description');
+			break;
+	}
+	return desc;
+}
+
+/**
+ * HTML table formatter for codecs strings made of <key><value> pairs, such as EVC and LCEVC (ISO/IEC 14496-15 annex E.9 and E.10)
+ *
+ * Each message is one table row of name, value, description and default marker
+ *   { name, value, description, is_default } - a key and its decoded value
+ *   { error } or { warning }                 - a message spanning the whole row
+ *
+ * @param {string} label             the label shown above the table
+ * @param {Array} messages           the messages from the decoder
+ * @param {function} extraRow        optional, called with each message first; returns the HTML cells for a row type
+ *                                   that only one decoder has, or null to use the common rendering
+ * @param {object} options           optional; zebra: shade alternate rows, debugging: append the messages as JSON
+ * @returns {string} HTML
+ */
+export function keyValueHTML(label, messages, extraRow = null, options = {}) {
+	const TABLE_STYLE =
+		'<style>table {border-collapse: collapse;border: none;} th, td {text-align: left; padding: 8px;} ' +
+		`tr {border-bottom: 1pt solid black;} ${options?.zebra ? 'tr:nth-child(even) {background-color: #f2f2f2;}' : ''}</style>`;
+
+	let res = '';
+	if (label) res += bold(HTMLsafe(label)) + BREAK;
+	res += TABLE_STYLE + '<table>';
+	messages.forEach((msg) => {
+		res += '<tr>';
+		const extra = extraRow ? extraRow(msg) : null;
+		if (extra != null) res += extra;
+		else if (msg?.name) {
+			res += cell(msg.name);
+			let desc = '';
+			if (msg?.decode) desc = msg.decode;
+			else if (msg?.warning) desc = warn(msg.warning);
+			else if (msg?.description) desc = keyValueDescription(msg.description);
+			res += msg.value != null ? cell(msg.value) + cell(desc) : cell(desc, 2);
+			res += cell(msg?.is_default ? dflt('default') : '');
+		} else if (msg?.error) res += cell(err(msg.error), 4);
+		else if (msg?.warning) res += cell(warn(msg.warning), 4);
+		else res += cell(err(`invalid element ${JSON.stringify(msg)}`), 4);
+		res += '</tr>';
+	});
+	res += '</table>';
+	if (options?.debugging) res += dumpJSONHTML(messages);
 	return res;
 }

@@ -286,4 +286,25 @@ describe('ESM index test', () => {
 	test('LCEVC decodeLCEVC can be called directly', () => {
 		expect(decodeLCEVC('lvc1.vlev3')[1]).toEqual({ name: 'Level (vlev)', is_default: false, value: 3, description: 'Level 3' });
 	});
+
+	// LCEVC and EVC share the keyValueHTML() table formatter
+	test('LCEVC HTML output is a key/value table', () => {
+		const html = decode('lvc1.vprf1.vlev2.abcd5').decodes[0].toHTML();
+		expect(html).toContain('<tr><td>Profile (vprf)</td><td>1</td><td>Main 4:4:4 profile</td><td></td></tr>');
+		expect(html).toContain('<tr><td>Level (vlev)</td><td>2</td><td>Level 2</td><td></td></tr>');
+		expect(html).toMatch(/<td colspan="4"><span style="color:orange">unrecognised key \(abcd\)/);
+		expect(html).not.toContain('nth-child(even)');
+	});
+
+	test('LCEVC HTML output marks default values and shows errors', () => {
+		const html = decode('lvc1.vprf7').decodes[0].toHTML();
+		expect(html).toContain('<td><span style="color:red">invalid profile (7), profiles 0 and 1 are defined</span></td>');
+		expect(html).toContain('<td>Level 4</td><td><span style="font-style:italic">default</span></td>');
+	});
+
+	test('EVC HTML output keeps the toolset rows and zebra striping', () => {
+		const html = decode('evc1.vprf1.vtoh000001').decodes[0].toHTML();
+		expect(html).toContain('tr:nth-child(even) {background-color: #f2f2f2;}');
+		expect(html).toContain('<td>Toolset High (vtoh)</td><td>0x000001</td>');
+	});
 });

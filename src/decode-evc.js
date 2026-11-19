@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2021-2024
+ * @copyright: Copyright (c) 2021-2026
  * @author: Paul Higgs
  * @file: decode-evc.js
  *
@@ -33,9 +33,8 @@ const DEBUGGING = false;
 
 import { bitSet32 } from './bits.js';
 import { error, warning, title, normal } from './decode.js';
-import { bold, BREAK, HTMLsafe, err, warn, cell, dflt } from './markup.js';
-import { dumpJSONHTML } from './formatters.js';
-import { datatypeIs } from './utils.js';
+import { BREAK, HTMLsafe, err, warn, cell, dflt } from './markup.js';
+import { keyValueHTML } from './formatters.js';
 
 // see clause 8.1 of ISO/IEC 23091-2
 function ISOIEC23091_2_ColourPrimaries(value) {
@@ -684,79 +683,29 @@ export function decodeEVC(val) {
 }
 
 function evcHTML(label, messages) {
-	// const TABLE_STYLE = '<style>table {border-collapse: collapse;border: 1px solid black;} th, td {text-align: left; padding: 8px;} tr:nth-child(even) {background-color: #f2f2f2;}</style>';
-	const TABLE_STYLE =
-		'<style>table {border-collapse: collapse;border: none;} th, td {text-align: left; padding: 8px;} ' +
-		'tr {border-bottom: 1pt solid black;} tr:nth-child(even) {background-color: #f2f2f2;}</style>';
 	function printHex3(value) {
 		let enc = value.toString(16);
 		while (enc.length < 6) enc = '0' + enc;
 		return `0x${enc}`;
 	}
 
-	let res = '';
-	if (label) res += bold(HTMLsafe(label)) + BREAK;
-	res += TABLE_STYLE + '<table>';
-	messages.forEach((msg) => {
-		res += '<tr>';
-		if (msg?.name) {
-			res += cell(msg.name);
-			let desc = '';
-			if (msg?.decode) desc = msg.decode;
-			else if (msg?.warning) desc = warn(msg.warning);
-			else if (msg?.description) {
-				switch (datatypeIs(msg.description)) {
-					case 'string':
-						desc = msg.description;
-						break;
-					case 'array':
-						msg.description.forEach((d) => {
-							if (datatypeIs(d, 'string')) desc += d + BREAK;
-							else if (datatypeIs(d, 'object')) {
-								if (d?.title) desc += bold(d.title);
-								if (d?.warning) desc += warn(d.warning);
-								else if (d?.label && Object.prototype.hasOwnProperty.call(d, 'value')) {
-									desc += d.label + ': ';
-									if (datatypeIs(d.value, 'string') || datatypeIs(d.value, 'number')) desc += d.value;
-									else if (datatypeIs(d.value, 'object')) {
-										if (d.value?.warning) desc += warn(d.value.warning);
-									}
-								}
-								desc += BREAK;
-							}
-						});
-						break;
-					case 'object':
-						if (msg.description?.error) desc = err(msg.description.error);
-						else if (msg.description?.warning) desc = warn(msg.description.warning);
-						break;
-					default:
-						desc = warn('unrecognised description');
-						break;
-				}
-			}
-			res += msg.value != null ? cell(msg.value) + cell(desc) : cell(desc, 2);
-			res += cell(msg?.is_default ? dflt('default') : '');
-		} else if (msg?.toolset) {
-			const toolset = msg.toolset;
-			res += cell(`${toolset.label} (${toolset.key})`);
-			res += cell(toolset.value != null ? printHex3(toolset.value) : warn('novalue'));
-			let tools = '';
-			if (toolset.description)
-				toolset.description.forEach((d) => {
-					tools += d.tool + ' ' + d.description + (d.error ? ` ${err(HTMLsafe(d.error))}` : '') + BREAK;
-				});
-			if (tools.length) res += cell(tools, 1, 2);
-			res += cell(toolset?.is_default ? dflt('default') : '');
-		} 
-		else if (msg?.error) res += cell(err(msg.error), 4);
-		else if (msg?.warning) res += cell(warn(msg.warning), 4);
-		else res += cell(err(`invalid element ${JSON.stringify(msg)}`), 4);
-		res += '</tr>';
-	});
-	res += '</table>';
-	if (DEBUGGING) res += dumpJSONHTML(messages);
-	return res;
+	// toolset rows are specific to EVC, other rows use the common key/value rendering
+	function toolsetRow(msg) {
+		if (msg?.name || !msg?.toolset) return null;
+		const toolset = msg.toolset;
+		let res = cell(`${toolset.label} (${toolset.key})`);
+		res += cell(toolset.value != null ? printHex3(toolset.value) : warn('novalue'));
+		let tools = '';
+		if (toolset.description)
+			toolset.description.forEach((d) => {
+				tools += d.tool + ' ' + d.description + (d.error ? ` ${err(HTMLsafe(d.error))}` : '') + BREAK;
+			});
+		if (tools.length) res += cell(tools, 1, 2);
+		res += cell(toolset?.is_default ? dflt('default') : '');
+		return res;
+	}
+
+	return keyValueHTML(label, messages, toolsetRow, { zebra: true, debugging: DEBUGGING });
 }
 
 export function registerEVC(addHandler) {

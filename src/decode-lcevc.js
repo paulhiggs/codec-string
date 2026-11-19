@@ -35,9 +35,7 @@
 const DEBUGGING = false;
 
 import { error, warning } from './decode.js';
-import { dumpJSONHTML } from './formatters.js';
-import { bold, BREAK, HTMLsafe, err, warn, cell, dflt } from './markup.js';
-import { datatypeIs } from './utils.js';
+import { keyValueHTML } from './formatters.js';
 
 // profiles according to Annex A.3 of ISO/IEC 23094-2:2021
 const LCEVC_profiles = {
@@ -140,63 +138,7 @@ export function decodeLCEVC(val) {
 }
 
 function lcevcHTML(label, messages) {
-	// const TABLE_STYLE = '<style>table {border-collapse: collapse;border: 1px solid black;} th, td {text-align: left; padding: 8px;} tr:nth-child(even) {background-color: #f2f2f2;}</style>';
-	const TABLE_STYLE =
-		'<style>table {border-collapse: collapse;border: none;} th, td {text-align: left; padding: 8px;} ' +
-		'tr {border-bottom: 1pt solid black;} </style>';
-
-	let res = '';
-	if (label) res += bold(HTMLsafe(label)) + BREAK;
-	res += TABLE_STYLE + '<table>';
-	messages.forEach((msg) => {
-		res += '<tr>';
-		if (msg?.name) {
-			res += cell(msg.name);
-			let desc = '';
-			if (msg?.decode) desc = msg.decode;
-			else if (msg?.warning) desc = warn(msg.warning);
-			else if (msg?.description) {
-				switch (datatypeIs(msg.description)) {
-					case 'string':
-						desc = msg.description;
-						break;
-					case 'array':
-						msg.description.forEach((d) => {
-							if (datatypeIs(d, 'string')) desc += d + BREAK;
-							else if (datatypeIs(d, 'object')) {
-								if (d?.title) desc += bold(d.title);
-								if (d?.warning) desc += warn(d.warning);
-								else if (d?.label && Object.prototype.hasOwnProperty.call(d, 'value')) {
-									desc += d.label + ': ';
-									if (datatypeIs(d.value, 'string') || datatypeIs(d.value, 'number')) desc += d.value;
-									else if (datatypeIs(d.value, 'object')) {
-										if (d.value?.warning) desc += warn(d.value.warning);
-									}
-								}
-								desc += BREAK;
-							}
-						});
-						break;
-					case 'object':
-						if (msg.description?.error) desc = err(msg.description.error);
-						else if (msg.description?.warning) desc = warn(msg.description.warning);
-						break;
-					default:
-						desc = warn('unrecognised description');
-						break;
-				}
-			}
-			res += msg.value != null ? cell(msg.value) + cell(desc) : cell(desc, 2);
-			res += cell(msg?.is_default ? dflt('default') : '');
-		}
-		else if (msg?.error) res += cell(err(msg.error), 4);
-		else if (msg?.warning) res += cell(warn(msg.warning), 4);
-		else res += cell(err(`invalid element ${JSON.stringify(msg)}`), 4);
-		res += '</tr>';
-	});
-	res += '</table>';
-	if (DEBUGGING) res += dumpJSONHTML(messages);
-	return res;
+	return keyValueHTML(label, messages, null, { debugging: DEBUGGING });
 }
 
 export function registerLCEVC(addHandler) {
