@@ -57,7 +57,7 @@ export function decodeAVC(val) {
 	if (!result || !result.groups) return [error('Regex mismatch!!'), error(`${val.substring(0,4)}.${expressions.AVC.format_suffix}`), error(expressions.AV1.description)];
 
 	const profile = parseInt(result.groups.profile, 16),
-		constraints = parseInt(result.groups.constraint, 16),
+		constraints = parseInt(result.groups.constraints, 16),
 		level = parseInt(result.groups.level, 16),
 		coding_params = { type: 'video', codec: result.groups.four_cc },
 		res = [];
