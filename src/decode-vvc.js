@@ -39,6 +39,15 @@ import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
 import { expressions } from './regular_expressions.js';
 
+const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'; // RFC 4648, clause 6
+
+// convert an RFC 4648 base32 string (without '=' padding) to a string of '0'/'1' characters, most significant bit first
+function base32ToBits(str) {
+	let bits = '';
+	for (const ch of str.toUpperCase()) bits += BASE32_ALPHABET.indexOf(ch).toString(2).padStart(5, '0');
+	return bits;
+}
+
 export function decodeVVC(val) {
 	function printProfile(profile) {
 		const general_profile_idc = parseInt(profile);
@@ -232,7 +241,7 @@ export function decodeVVC(val) {
 		{ bit: 56, name: 'gci_no_mts_constraint_flag' },
 		{ bit: 57, name: 'gci_no_lfnst_constraint_flag' },
 		{ bit: 58, name: 'gci_no_joint_cbcr_constraint_flag' },
-		{ bit: 58, name: 'gci_no_sbt_constraint_flag' },
+		{ bit: 59, name: 'gci_no_sbt_constraint_flag' },
 		{ bit: 60, name: 'gci_no_act_constraint_flag' },
 		{ bit: 61, name: 'gci_no_explicit_scaling_list_constraint_flag' },
 		{ bit: 62, name: 'gci_no_dep_quant_constraint_flag' },
@@ -245,37 +254,70 @@ export function decodeVVC(val) {
 		{ bit: 69, name: 'gci_no_lmcs_constraint_flag' },
 		{ bit: 70, name: 'gci_no_ladf_constraint_flag' },
 		{ bit: 71, name: 'gci_no_virtual_boundaries_constraint_flag' },
-		{ bit: 72, name: 'gci_num_reserved_bits', length: 8 },
-		{ bit: 79, unspecified: true },
+		{ bit: 72, name: 'gci_num_additional_bits', length: 8 },
+	];
+	const GCI_ADDITIONAL_BITS_START = 80; // first bit after gci_num_additional_bits
+
+	// optional flags, present when gci_num_additional_bits > 5
+	const VVC_additional_constraints = [
+		'gci_all_rap_pictures_constraint_flag',
+		'gci_no_extended_precision_processing_constraint_flag',
+		'gci_no_ts_residual_coding_rice_constraint_flag',
+		'gci_no_rrc_rice_extension_constraint_flag',
+		'gci_no_persistent_rice_adaptation_constraint_flag',
+		'gci_no_reverse_last_sig_coeff_constraint_flag',
 	];
 
-	function printConstraints(general_constraint_info) {
-		// general_constraint_info is base32, so convert it to hex
-		let byteset = parseInt(general_constraint_info, 32).toString(16);
-		while (byteset.length % 2) byteset += '0';
+	function printConstraints(constraint_info) {
+		// 14496-15 says the 'C' value is ptl_frame_only_constraint_flag, ptl_multilayer_enabled_flag and then the
+		// general_constraint_info() syntax structure, encoded as base32 (RFC 4648, clause 6). Trailing zero bits and '='
+		// padding may be omitted, so missing bits at the tail are read as 0 and any bits beyond the end are ignored
+		const GCI_OFFSET = 2; // general_constraint_info() starts after the two ptl_ flags
+
+		let bits = base32ToBits(constraint_info);
+		while (bits.length % 8) bits += '0';
 
 		const res = [],
 			constraintFlags = new BitList();
-		let i = 0;
-		while (i < byteset.length) {
-			constraintFlags.push(parseInt(byteset.substring(i, i + 2), 16));
-			i += 2;
-		}
+		for (let i = 0; i < bits.length; i += 8) constraintFlags.push(parseInt(bits.substring(i, i + 8), 2));
 
 		res.push({ diagnostic: constraintFlags.toString() });
-		res.push({ diagnostic: constraintFlags.toBitString() });
+		res.push({ diagnostic: bits });
+
+		res.push(normal(`ptl_frame_only_constraint_flag=${constraintFlags.bitsetB(0)}`));
+		res.push(normal(`ptl_multilayer_enabled_flag=${constraintFlags.bitsetB(1)}`));
 
 		let gotFlags = false;
 		VVC_general_constraints.forEach((constraint) => {
+			const bit = constraint.bit + GCI_OFFSET;
 			if (constraint.existance) {
-				if (constraintFlags.bitsetB(constraint.bit)) gotFlags = true;
-				res.push(normal(`${constraint.name}=${constraintFlags.bitsetB(constraint.bit)}`));
+				if (constraintFlags.bitsetB(bit)) gotFlags = true;
+				res.push(normal(`${constraint.name}=${constraintFlags.bitsetB(bit)}`));
 			} else if (gotFlags) {
 				if (constraint.length) {
-					res.push(normal(`${constraint.name}=${constraintFlags.valueB(constraint.bit, constraint.length)}`));
-				} else if (constraintFlags.bitsetB(constraint.bit)) res.push(normal(constraint.name));
+					res.push(normal(`${constraint.name}=${constraintFlags.valueB(bit, constraint.length)}`));
+				} else if (constraintFlags.bitsetB(bit)) res.push(normal(constraint.name));
 			}
 		});
+
+		if (gotFlags) {
+			const gci_num_additional_bits = constraintFlags.valueB(VVC_general_constraints.at(-1).bit + GCI_OFFSET, 8);
+			let pos = GCI_ADDITIONAL_BITS_START + GCI_OFFSET,
+				numAdditionalBitsUsed = 0;
+			if (gci_num_additional_bits > 5) {
+				VVC_additional_constraints.forEach((name, i) => {
+					if (constraintFlags.bitsetB(pos + i)) res.push(normal(name));
+				});
+				numAdditionalBitsUsed = VVC_additional_constraints.length;
+				pos += numAdditionalBitsUsed;
+			}
+			const numReservedBits = gci_num_additional_bits - numAdditionalBitsUsed;
+			if (numReservedBits > 0) {
+				let reserved = '';
+				for (let i = 0; i < numReservedBits; i++) reserved += constraintFlags.bitsetB(pos + i) ? '1' : '0';
+				res.push(normal(`gci_reserved_bit[0..${numReservedBits - 1}]=${reserved}`));
+			}
+		}
 		return res;
 	}
 
@@ -287,10 +329,13 @@ export function decodeVVC(val) {
 		//general_sub_profile_idc[ i ] specifies the i-th interoperability indicator registered as specified by Rec. ITU-T T.35,
 		// the contents of which are not specified in this document.
 		// ITU T.35 (2000) - Procedure for the allocation of ITU-T defined codes for non-standard facilities
+		//
+		// 14496-15 says each general_sub_profile_idc (u(32)) is encoded as base32 (RFC 4648, clause 6), trailing '=' padding
+		// may be omitted, and bits beyond the end of the 32-bit syntax element are ignored
 
 		for (let i = 0; i < subProfiles.length; i++) {
-			const p = parseInt(subProfiles[i], 16);
-			res.push(normal(`Sub profile (${i + 1})=${p}`));
+			const bits = base32ToBits(subProfiles[i]).substring(0, 32).padEnd(32, '0');
+			res.push(normal(`Sub profile (${i + 1})=${parseInt(bits, 2)}`));
 		}
 		return res;
 	}
