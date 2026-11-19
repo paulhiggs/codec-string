@@ -112,7 +112,7 @@ describe('commonjs build test', () => {
 	});
 
 	test('HDR Vivid warns when no versions are present', () => {
-		expect(cuvvDecodes('cuvv.0000')).toEqual([{ warning: 'No HDR Vivid versions present' }]);
+		expect(cuvvDecodes('cuvv.0000').filter((p) => !p.dvb_term)).toEqual([{ warning: 'No HDR Vivid versions present' }]);
 	});
 
 	test.each(['cuvv.2', 'cuvv.', 'cuvv.01a'])('HDR Vivid rejects %s', (codec) => {
@@ -124,5 +124,10 @@ describe('commonjs build test', () => {
 
 	test('HDR Vivid decodeUWA rejects cuvvX1 (the . after cuvv is required)', () => {
 		expect(decodeUWA('cuvvX1')[0]).toEqual({ error: 'Regex mismatch!' });
+	});
+
+
+	test.each(['cuvv.1', 'cuvv.1101', 'cuvv.0000'])('HDR Vivid %s maps to DVB VideoConformancePointsCS 2.3.4', (codec) => {
+		expect(cuvvDecodes(codec).find((p) => p.dvb_term)?.dvb_term).toEqual('urn:dvb:metadata:cs:VideoConformancePointsCS:2026:2.3.4');
 	});
 });

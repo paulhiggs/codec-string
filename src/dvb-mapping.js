@@ -367,6 +367,12 @@ const AudioTerms = [
 	{term: '7.2', codec: 'av3a', codec_id:'2' },
 ];
 
+const VideoConformancePointsCS = 'urn:dvb:metadata:cs:VideoConformancePointsCS:2026';
+const VideoConformancePointsTerms = [
+	// urn:dvb:dash:hdr-dmi:T/UWA-005 - HDR dynamic mapping information (HDR Vivid) as specified in T/UWA 005
+	{ term: '2.3.4', codec: 'cuvv' },
+];
+
 function tableLookup(entry) {
 	const ek = Object.keys(entry),
 		tk = Object.keys(this);
@@ -409,6 +415,9 @@ export function DVBclassification(params) {
 			break;
 		case 'audio':
 			res = match(AudioCodecCS, AudioTerms, params);
+			break;
+		case 'dynamic_hdr':
+			res = match(VideoConformancePointsCS, VideoConformancePointsTerms, params);
 			break;
 	}
 

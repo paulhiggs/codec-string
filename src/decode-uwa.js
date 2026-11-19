@@ -39,7 +39,8 @@ export function decodeUWA(val) {
 	const result = val.match(expressions.CUVV.regex_grouped);
 	if (!result || !result.groups) return [error('Regex mismatch!'), error(expressions.CUVV.format), error(expressions.CUVV.description)];
 
-	const coding_params = { type: 'video', codec: result.groups.four_cc },
+	// HDR Vivid is HDR dynamic mapping information, so it is classified as a DVB video conformance point, not a video codec
+	const coding_params = { type: 'dynamic_hdr', codec: result.groups.four_cc },
 		res = [],
 		version_bits = result.groups.version_bits;
 
