@@ -77,8 +77,8 @@ export const expressions = {
 		format: '<sample entry 4CC>.<profile>.<level>.<bitDepth>.<chromaSubsampling>.<colourPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>'
 	},
 	VVC: {
-		regex: /^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-zA-Z2-7]+)?(\.S[a-zA-Z2-7]{1,7}(\+[a-zA-Z2-7]{1,7})*)?(\.O(?:\d+(?:\+\d+)?|\+\d+))?$/,
-		regex_grouped: /^(?<four_cc>vvc1|vvi1)\.(?<profile>\d+)\.(?<tier>[LH])(?<level>\d+)(?:\.C(?<constraints>[a-zA-Z2-7]+))?(?:\.S(?<sub_profiles>[a-zA-Z2-7]{1,7}(?:\+[a-zA-Z2-7]{1,7})*))?(?:\.O(?=\d|\+\d)(?<ols_idx>\d+)?(?:\+(?<max_tid>\d+))?)?$/,
+		regex: /^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-zA-Z2-7]+)?(\.S[a-zA-Z2-7]{7}(\+[a-zA-Z2-7]{7})*)?(\.O(?:\d+(?:\+\d+)?|\+\d+))?$/,
+		regex_grouped: /^(?<four_cc>vvc1|vvi1)\.(?<profile>\d+)\.(?<tier>[LH])(?<level>\d+)(?:\.C(?<constraints>[a-zA-Z2-7]+))?(?:\.S(?<sub_profiles>[a-zA-Z2-7]{7}(?:\+[a-zA-Z2-7]{7})*))?(?:\.O(?=\d|\+\d)(?<ols_idx>\d+)?(?:\+(?<max_tid>\d+))?)?$/,
 		format: '<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}'
 	},
 	MPEGH: {

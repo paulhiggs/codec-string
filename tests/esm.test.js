@@ -58,4 +58,26 @@ describe('ESM index test', () => {
 	test.each(['vvc1.1.M51', 'vvc1.1', 'vvc1.1.L51.O+', 'vvc1.1.L51.C1'])('VVC rejects %s', (codec) => {
 		expect(errors(vvcDecodes(codec))[0].error).toEqual('Regex mismatch!');
 	});
+
+	test('VVC decode vvc1.1.L51.SAAAAAAI+7777777 (sub-profiles are 7 base32 characters)', () => {
+		const parsed = vvcDecodes('vvc1.1.L51.SAAAAAAI+7777777');
+		expect(errors(parsed)).toEqual([]);
+		expect(decodeText(parsed).slice(3)).toEqual(['Sub profile (1)=0x00000001 (1)', 'Sub profile (2)=0xFFFFFFFF (4294967295)']);
+	});
+
+	test.each(['vvc1.1.L51.SB', 'vvc1.1.L51.SAAAAAA', 'vvc1.1.L51.SAAAAAAAA', 'vvc1.1.L51.SAAAAAAI+B'])('VVC rejects sub-profile %s', (codec) => {
+		expect(errors(vvcDecodes(codec))[0].error).toEqual('Regex mismatch!');
+	});
+
+	const warnings = (parsed) => parsed.filter((p) => p.warning).map((p) => p.warning);
+
+	test('VVC warns about High Tier below Level 4.0', () => {
+		const parsed = vvcDecodes('vvc1.1.H51');
+		expect(decodeText(parsed)).toEqual(['Main 10', 'High Tier (H)', 'Level 3.1']);
+		expect(warnings(parsed)).toEqual(['High Tier is not specified for Level 3.1, only for Level 4.0 and above']);
+	});
+
+	test.each(['vvc1.1.H64', 'vvc1.1.H83', 'vvc1.1.H255', 'vvc1.1.L51'])('VVC does not warn about the tier of %s', (codec) => {
+		expect(warnings(vvcDecodes(codec))).toEqual([]);
+	});
 });

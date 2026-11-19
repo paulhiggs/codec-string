@@ -34,7 +34,7 @@
 const DEBUGGING = false;
 
 import { BitList } from './bits.js';
-import { normal, error } from './decode.js';
+import { normal, error, warning } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
 import { expressions } from './regular_expressions.js';
@@ -91,6 +91,7 @@ export function decodeVVC(val) {
 		105: '6.3',
 		255: '15.5',
 	};
+	const VVC_HIGH_TIER_MIN_LEVEL_IDC = 64; // Level 4.0
 
 	function printProfile(profile) {
 		const prof = VVC_profiles[parseInt(profile)];
@@ -105,6 +106,9 @@ export function decodeVVC(val) {
 
 		res.push(t ? normal(t) : error(`unknown Tier (${tier})`));
 		res.push(lev ? normal(`Level ${lev}`) : error(`unknown Level (${op_level_idc})`));
+		// VVC only specifies the High tier for Level 4 and above
+		if (tier == 'H' && lev && op_level_idc < VVC_HIGH_TIER_MIN_LEVEL_IDC)
+			res.push(warning(`High Tier is not specified for Level ${lev}, only for Level 4.0 and above`));
 		return { output: res, tier: t, level: lev };
 	}
 
