@@ -1,5 +1,5 @@
 /* globals describe, test, expect */
-import { decode } from '../dist/esm/codec-string.js';
+import { decode, decodeUWA } from '../dist/esm/codec-string.js';
 
 describe('ESM index test', () => {
 	test('H.264 decode', () => {
@@ -89,5 +89,40 @@ describe('ESM index test', () => {
 
 	test.each(['vvc1.1.L51.O0+6', 'vvc1.1.L51.O+0', 'vvc1.1.L51.O9'])('VVC does not warn about the temporal layers of %s', (codec) => {
 		expect(warnings(vvcDecodes(codec))).toEqual([]);
+	});
+
+	// HDR Vivid (T/UWA 005-2.1): each bit of the version map is one version, the lowest (rightmost) bit is version 1
+	const cuvvDecodes = (codec) => {
+		const result = decode(codec);
+		expect(result).toBeDefined();
+		expect(result.decodes.length).toEqual(1);
+		expect(result.decodes[0].label).toEqual('HDR Vivid');
+		return result.decodes[0].parsed;
+	};
+
+	test.each([
+		['cuvv.1', ['HDR Vivid version 1 is present']],
+		['cuvv.0001', ['HDR Vivid version 1 is present']],
+		['cuvv.1101', ['HDR Vivid version 4 is present', 'HDR Vivid version 3 is present', 'HDR Vivid version 1 is present']],
+		['cuvv.1010', ['HDR Vivid version 4 is present', 'HDR Vivid version 2 is present']],
+	])('HDR Vivid decode %s', (codec, versions) => {
+		const parsed = cuvvDecodes(codec);
+		expect(parsed.filter((p) => p.error || p.warning)).toEqual([]);
+		expect(parsed.filter((p) => p.decode).map((p) => p.decode)).toEqual(versions);
+	});
+
+	test('HDR Vivid warns when no versions are present', () => {
+		expect(cuvvDecodes('cuvv.0000')).toEqual([{ warning: 'No HDR Vivid versions present' }]);
+	});
+
+	test.each(['cuvv.2', 'cuvv.', 'cuvv.01a'])('HDR Vivid rejects %s', (codec) => {
+		const parsed = cuvvDecodes(codec);
+		expect(parsed[0]).toEqual({ error: 'Regex mismatch!' });
+		expect(parsed[1]).toEqual({ error: 'cuvv.<version_bits>' });
+	});
+
+
+	test('HDR Vivid decodeUWA rejects cuvvX1 (the . after cuvv is required)', () => {
+		expect(decodeUWA('cuvvX1')[0]).toEqual({ error: 'Regex mismatch!' });
 	});
 });

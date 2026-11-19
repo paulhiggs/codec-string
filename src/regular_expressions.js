@@ -88,9 +88,9 @@ export const expressions = {
 		description: 'LL is 2 hexadecimal digits'
 	},
 	CUVV: {
-		regex: /^cuvv.[01]+$/,
-		regex_grouped: /^(?<four_cc>(cuvv)).(?<version_bits>([01])+)$/,
-		format: 'cuvv.<verison_bits>',
+		regex: /^cuvv\.[01]+$/,
+		regex_grouped: /^(?<four_cc>cuvv)\.(?<version_bits>[01]+)$/,
+		format: 'cuvv.<version_bits>',
 		description: '<version_bits> indicates the versions of HDR Vivid in the bitstream'
 	},
 	HEVC: {

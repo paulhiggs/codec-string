@@ -36,28 +36,27 @@ import { simpleHTML } from './formatters.js';
 import { expressions } from './regular_expressions.js';
 
 export function decodeUWA(val) {
-
-	if (!expressions.CUVV.regex.test(val)) 
-		return [error('Regex mismatch!'), error(`${expressions.CUVV.format}`), error(expressions.CUVV.description)];
-
 	const result = val.match(expressions.CUVV.regex_grouped);
-	if (!result || !result.groups) return  [error('Regex mismatch!!'), error(`${expressions.CUVV.format}`), error(expressions.CUVV.description)];
+	if (!result || !result.groups) return [error('Regex mismatch!'), error(expressions.CUVV.format), error(expressions.CUVV.description)];
 
-	const coding_params = { type: 'video', codec: result.groups.four_cc }, res = [];
+	const coding_params = { type: 'video', codec: result.groups.four_cc },
+		res = [],
+		version_bits = result.groups.version_bits;
 
-	for (let i=0; i<result.groups.version_bits.length; i++)
-		if (result.groups.version_bits[i] == '1')
-			res.push(normal(`HDR Vivid version ${result.groups.version_bits.length-i} is present`));
+	// T/UWA 005-2.1 clause 9.2: CUVA_version_map "specifies the HDR Vivid version numbers, and each bit represents one version.
+	// The highest bit indicates the highest version number, and the lowest bit the lowest version number. For example, "1101"
+	// means that the ES contains versions 4, 3, and 1." So the rightmost bit is version 1.
+	for (let i = 0; i < version_bits.length; i++) {
+		if (version_bits[i] == '1') res.push(normal(`HDR Vivid version ${version_bits.length - i} is present`));
+	}
 
-	if (res.length == 0)
-		res.push(warning('No HDR Vivid versions present'));
+	if (res.length == 0) res.push(warning('No HDR Vivid versions present'));
 
 	const dvb = DVBclassification(coding_params);
 	if (dvb.length != 0) res.push({ dvb_term: dvb });
 
 	return res;
 }
-
 
 export function registerUWA(addHandler) {
 	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
