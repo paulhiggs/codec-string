@@ -49,134 +49,62 @@ function base32ToBits(str) {
 }
 
 export function decodeVVC(val) {
-	function printProfile(profile) {
-		const general_profile_idc = parseInt(profile);
-		let res = null,
-			prof = null;
+	// general_profile_idc values, table A.1 in VVC
+	const VVC_profiles = {
+		1: 'Main 10',
+		2: 'Main 12',
+		10: 'Main 12 Intra',
+		17: 'Multilayer Main 10',
+		33: 'Main 10 4:4:4',
+		34: 'Main 12 4:4:4',
+		35: 'Main 16 4:4:4',
+		42: 'Main 12 4:4:4 Intra',
+		43: 'Main 16 4:4:4 Intra',
+		49: 'Multilayer Main 10 4:4:4',
+		65: 'Main 10 Still Picture',
+		66: 'Main 12 Still Picture',
+		97: 'Main 10 4:4:4 Still Picture',
+		98: 'Main 12 4:4:4 Still Picture',
+		99: 'Main 16 4:4:4 Still Picture',
+	};
 
-		switch (general_profile_idc) {
-			case 1:
-				prof = 'Main 10';
-				break;
-			case 2:
-				prof = 'Main 12';
-				break;
-			case 10:
-				prof = 'Main 12 Intra';
-				break;
-			case 17:
-				prof = 'Multilayer Main 10';
-				break;
-			case 33:
-				prof = 'Main 10 4:4:4';
-				break;
-			case 34:
-				prof = 'Main 12 4:4:4';
-				break;
-			case 35:
-				prof = 'Main 16 4:4:4';
-				break;
-			case 42:
-				prof = 'Main 12 4:4:4 Intra';
-				break;
-			case 43:
-				prof = 'Main 16 4:4:4 Intra';
-				break;
-			case 49:
-				prof = 'Multilayer Main 10 4:4:4';
-				break;
-			case 65:
-				prof = 'Main 10 Still Picture';
-				break;
-			case 66:
-				prof = 'Main 12 Still Picture';
-				break;
-			case 97:
-				prof = 'Main 10 4:4:4 Still Picture';
-				break;
-			case 98:
-				prof = 'Main 12 4:4:4 Still Picture';
-				break;
-			case 99:
-				prof = 'Main 16 4:4:4 Still Picture';
-				break;
-			default:
-				res = error(`unknown Profile (${profile})`);
-				break;
-		}
-		return { output: [res ? res : normal(prof)], profile: prof ? prof : '' };
+	const VVC_tiers = {
+		L: 'Main Tier (L)',
+		H: 'High Tier (H)',
+	};
+
+	// op_level_idc values, table 135 in VVC
+	const VVC_levels = {
+		16: '1.0',
+		32: '2.0',
+		35: '2.1',
+		48: '3.0',
+		51: '3.1',
+		64: '4.0',
+		67: '4.1',
+		80: '5.0',
+		83: '5.1',
+		86: '5.2',
+		96: '6.0',
+		99: '6.1',
+		102: '6.2',
+		105: '6.3',
+		255: '15.5',
+	};
+
+	function printProfile(profile) {
+		const prof = VVC_profiles[parseInt(profile)];
+		return { output: [prof ? normal(prof) : error(`unknown Profile (${profile})`)], profile: prof ? prof : '' };
 	}
 
 	function printTier(tier, level) {
 		const res = [],
-			op_level_idc = parseInt(level);
-		let t = null;
+			op_level_idc = parseInt(level),
+			t = VVC_tiers[tier] || null,
+			lev = VVC_levels[op_level_idc] || null;
 
-		switch (tier) {
-			case 'L':
-				t = 'Main Tier (L)';
-				break;
-			case 'H':
-				t = 'High Tier (H)';
-				break;
-			default:
-				res.push(error(`unknown Tier (${tier})`));
-				break;
-		}
-		if (t) res.push(normal(t));
-
-		let lev = null;
-		switch (op_level_idc) {
-			// table 135 in VVC
-			case 16:
-				lev = '1.0';
-				break;
-			case 32:
-				lev = '2.0';
-				break;
-			case 35:
-				lev = '2.1';
-				break;
-			case 48:
-				lev = '3.0';
-				break;
-			case 51:
-				lev = '3.1';
-				break;
-			case 64:
-				lev = '4.0';
-				break;
-			case 67:
-				lev = '4.1';
-				break;
-			case 80:
-				lev = '5.0';
-				break;
-			case 83:
-				lev = '5.1';
-				break;
-			case 86:
-				lev = '5.2';
-				break;
-			case 96:
-				lev = '6.0';
-				break;
-			case 99:
-				lev = '6.1';
-				break;
-			case 102:
-				lev = '6.2';
-				break;
-			case 105:
-				lev = '6.3';
-				break;
-			case 255:
-				lev = '15.5';
-				break;
-			default:
-				res.push(error(`unknown Level (${op_level_idc})`));
-		}
-		if (lev) res.push(normal(`Level ${lev}`));
+		res.push(t ? normal(t) : error(`unknown Tier (${tier})`));
+		res.push(lev ? normal(`Level ${lev}`) : error(`unknown Level (${op_level_idc})`));
 		return { output: res, tier: t, level: lev };
 	}
 
