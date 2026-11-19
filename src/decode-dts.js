@@ -32,7 +32,7 @@ import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
 
 export function decodeDTS(val) {
-	if (val.length != 4) return [error('no codec argments should be provided for DTS Audio')];
+	if (val.length != 4) return [error('no codec arguments should be provided for DTS Audio')];
 	const res = [],
 		dvb = DVBclassification({ type: 'audio', codec: 'DTS', level: ['dtsx', 'dtsy'].includes(val.toLowerCase()) ? 'UHD' : 'HD', mode: val.toLowerCase() });
 	if (dvb.length != 0) res.push({ dvb_term: dvb });

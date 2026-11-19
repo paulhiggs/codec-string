@@ -42,19 +42,14 @@ import { expressions } from './regular_expressions.js';
  * 4 ASCII Printable characters (see https://en.wikipedia.org/wiki/FourCC)
  * followed by a period and then 6 hexadecimal characters
  */
-
-
 export function decodeAVC(val) {
 	
 	// constraint 012345--
 	// bit        76543210
-	const AVCconstraint = (val, constraint) => (constraint >= 0 && constraint <= 5) && (val & Math.pow(2, 7 - constraint));
-
-	if (!expressions.AVC.regex.test(val)) 
-		return [error('Regex mismatch!'), error(`${val.substring(0,4)}.${expressions.AVC.format_suffix}`), error(expressions.AV1.description)];
+	const AVCconstraint = (_val, _constraint) => (_constraint >= 0 && _constraint <= 5) && (_val & Math.pow(2, 7 - _constraint));
 
 	const result = val.match(expressions.AVC.regex_grouped);
-	if (!result || !result.groups) return [error('Regex mismatch!!'), error(`${val.substring(0,4)}.${expressions.AVC.format_suffix}`), error(expressions.AV1.description)];
+	if (!result || !result.groups) return [error('Regex mismatch!'), error(`${val.substring(0,4)}.${expressions.AVC.format_suffix}`), error(expressions.AVC.description)];
 
 	const profile = parseInt(result.groups.profile, 16),
 		constraints = parseInt(result.groups.constraints, 16),

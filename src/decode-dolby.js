@@ -36,12 +36,28 @@ import { normal, info, error } from './decode.js';
 // and DolbyVisionInMPEGDASHSpecification.pdf - available at https://dolby.my.salesforce.com/sfc/dist/version/download/?oid=00D700000009YuG&ids=0684u00000V1DFXAA3&d=/a/4u000000l6FV/TqYPD0f0c3Zm40JJrFKFn1m29QdUxuVB.U_GzZzbXgE&operationContext=DELIVERY&viewId=05HQQ00000ThX6T2AV&dpt=
 
 export function decodeDolbyVision(val) {
-	if (!expressions.DolbyVision.regex.test(val)) return [error('Regex mismatch!'), error(expressions.DolbyVision.format)];
 	const result = val.match(expressions.DolbyVision.regex_grouped)
-	if (!result || !result.groups) return [error('Regex mismatch!!'), error(expressions.DolbyVision.format)];
+	if (!result || !result.groups) return [error('Regex mismatch!'), error(expressions.DolbyVision.format)];
 
 	const profile = parseInt(result.groups.bitstream_profile_id),
 		level = parseInt(result.groups.Dolby_Vision_level_id);
+
+	// dvhe/dvh1 and dvav/dva1 differ only in where parameter sets are stored, so each pair supports the same profiles
+	const HEVCprofiles = [
+		{profile: 2, base_codec: "8-bit HEVC", retired: true},
+		{profile: 3, base_codec: "8-bit HEVC", retired: true},
+		{profile: 4, base_codec: "8-bit HEVC", retired: true},
+		{profile: 5, base_codec: "10-bit HEVC"},
+		{profile: 6, base_codec: "10-bit HEVC", retired: true},
+		{profile: 7, base_codec: "10-bit HEVC"},
+		{profile: 8, base_codec: "10-bit HEVC"},
+		{profile: 20, base_codec: "10-bit MV-HEVC (for 3D) or HEVC (for 2D)"},
+	];
+	const AVCprofiles = [
+		{profile: 0, base_codec: "Advanced Video Coding (AVC)", retired: true},
+		{profile: 1, base_codec: "AVC", retired: true},
+		{profile: 9, base_codec: "8-bit AVC (High, High Progressive or Constrained High profile)"},
+	];
 
 	let map = [], res = [];
 
@@ -49,33 +65,22 @@ export function decodeDolbyVision(val) {
 		case 'dvhe':
 			res.push(normal('HEVC-based Dolby Vision codec.'));
 			res.push(info('Parameter sets (VPS, PPS, or SPS) are stored either in the sample entries or as part of the samples, or in both.'));
-			map = [
-				{profile: 2, base_codec: "8-bit HEVC", retired: true},
-				{profile: 3, base_codec: "8-bit HEVC", retired: true},
-				{profile: 4, base_codec: "8-bit HEVC", retired: true},
-				{profile: 5, base_codec: "10-bit HEVC"}, 
-				{profile: 6, base_codec: "10-bit HEVC", retired: true},
-				{profile: 7, base_codec: "10-bit HEVC"}, 
-				{profile: 8, base_codec: "10-bit HEVC"},
-			] 
+			map = HEVCprofiles;
 			break;
 		case 'dvh1':
 			res.push(normal('HEVC-based Dolby Vision codec.'));
 			res.push(info('Parameter sets (VPS, PPS, or SPS) are stored in the sample entries only.'));
-			map = [{profile: 20, base_codec: "10-bit MV-HEVC (for 3D) or HEVC (for 2D)"}];
+			map = HEVCprofiles;
 			break;
 		case 'dvav':
 			res.push(normal('AVC-based Dolby Vision codec.'));
 			res.push(info('Parameter sets (PPS or SPS) are stored either in the sample entries or as part of the samples, or in both.'));
-			map = [
-				{profile: 0, base_codec: "Advanced Video Coding (AVC)", retired: true},
-				{profile: 1, base_codec: "AVC", retired: true},
-				{profile: 9, base_codec: "8-bit AVC (High, High Progressive or Conttrained High profile)"},
-			];
+			map = AVCprofiles;
 			break;
 		case 'dva1':
 			res.push(normal('AVC-based Dolby Vision codec.'));
 			res.push(info('Parameter sets (PPS or SPS) are stored either in the sample entries of the video stream or in the parameter set stream, but never in both.'));
+			map = AVCprofiles;
 			break;
 		case 'dav1':
 			res.push(normal('AV1-based Dolby Vision codec.'));
@@ -88,10 +93,10 @@ export function decodeDolbyVision(val) {
 		? normal(`Bitstream Profile ID: ${result.groups.bitstream_profile_id}`)
 		: error(`Unrecognised bitstream_profile_id (${result.groups.bitstream_profile_id})`)
 	);
-	const opts = map.find((e) => e.profile = profile);
+	const opts = map.find((e) => e.profile === profile);
 	if (validProfile)
 		res.push(opts 
-			? info(`${opts.base_codec}  ${opts.retired ? "  (retired)" : ""}`)
+			? info(`${opts.base_codec}${opts.retired ? " (retired)" : ""}`)
 			: error(`invalid profile ${profile} for ${result.groups.codec_type}`)
 		);
 

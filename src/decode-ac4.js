@@ -71,12 +71,12 @@ const decodeMDcompat = (mdcompat, pres_version) => {
 					break;
 				case 5:
 				case 6:
-					return warning(`${res} Reserved`);
+					return warning(`${res}Reserved`);
 				case 7:
 					res += 'Unrestricted';
 					break;
 				default:
-					return error(`${res} invalid value (${mdcompat}).`);
+					return error(`${res}invalid value (${mdcompat}).`);
 			}
 			break;
 		case 1:
@@ -98,26 +98,24 @@ const decodeMDcompat = (mdcompat, pres_version) => {
 				case 4:
 				case 5:
 				case 6:
-					return warning(`${res} Reserved`);
+					return warning(`${res}Reserved`);
 				case 7:
 					res += 'Unrestricted';
 					break;
 				default:
-					return error(`${res} invalid value (${mdcompat}).`);
+					return error(`${res}invalid value (${mdcompat}).`);
 			}
 			break;
 		default:
 			return warning(`unsupported presentation version (${pres_version})`);
 	}
-	return normal(res || "");
+	return normal(res);
 };
 
 export function decodeAC4(val) {
-	if (!expressions.AC4.regex_grouped.test(val)) return [error('Regex mismatch!'), error(expressions.AC4.format)];
+	const result = val.match(expressions.AC4.regex_grouped);
+	if (!result?.groups) return [error('Regex mismatch!'), error(expressions.AC4.format)];
 
-	const result = val.match(expressions.AC4.regex_grouped)
-	if (!result || !result.groups) return [error('Regex mismatch!'), error(expressions.AC4.format)];
-	
 	const coding_params = { type: 'audio', codec: result.groups.four_cc },
 		bs_version = parseInt(result.groups.bitstream_version, 16),
 		pres_version = parseInt(result.groups.presentation_version, 16),

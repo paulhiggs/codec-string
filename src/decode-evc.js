@@ -373,7 +373,7 @@ export function decodeEVC(val) {
 				res = 'Level 6.1';
 				break;
 			case 62:
-				res = 'Level 6.1';
+				res = 'Level 6.2';
 				break;
 			default:
 				res = error('invalid');
@@ -389,7 +389,7 @@ export function decodeEVC(val) {
 	const printMatrixCoefficients = (args) => describe(args.value, ISOIEC23091_2_MatrixCoefficients);
 
 	function printFramePackingType(args) {
-		if (!args.value) return normal('no frame packing is used');
+		if (args.value === null) return normal('no frame packing is used');
 		const qsf = Math.floor(args.value / 10),
 			vfpt = args.value % 10;
 		return {
@@ -405,13 +405,13 @@ export function decodeEVC(val) {
 	}
 
 	function printPackedContentInterpretationType(args) {
-		if (!args.value) return normal('packed content is not used');
+		if (args.value === null) return normal('packed content is not used');
 		return describe(args.value, ISOIEC23091_2_PackedContentInterpretationType);
 	}
 
 	const printSampleAspectRatio = (args) => describe(args.value, ISOIEC23091_2_SampleAspectRatio);
 
-	const evaluate = (tool, highBit, lowBit, profile_idc) =>
+	const evaluate = (highBit, lowBit, profile_idc) =>
 		(profile_idc == BASELINE_PROFILE && highBit | lowBit) ? ` --> must be 0 for ${ProfileNames[BASELINE_PROFILE]}` : null;
 
 	function analyseToolset(toolset_idc_h, toolset_idc_l, profile_idc) {
@@ -420,7 +420,7 @@ export function decodeEVC(val) {
 			res.push({
 				tool: t.tool,
 				description: `[h:${showbit(bitSet32(toolset_idc_h, t.bit))} l:${showbit(bitSet32(toolset_idc_l, t.bit))}]`,
-				error: evaluate(t.tool, bitSet32(toolset_idc_h, t.bit), bitSet32(toolset_idc_l, t.bit), profile_idc),
+				error: evaluate(bitSet32(toolset_idc_h, t.bit), bitSet32(toolset_idc_l, t.bit), profile_idc),
 			});
 		});
 		return res;
@@ -431,7 +431,7 @@ export function decodeEVC(val) {
 		const l = values.find((v) => v.key == KEY_TOOLSET_LOW);
 		const p = values.find((v) => v.key == KEY_PROFILE);
 
-		if (!h || !l || !p) return [error('cant decode toolset')];
+		if (!h || !l || !p) return [error("can't decode toolset")];
 
 		const res = [];
 		res.push({ toolset: { key: h.key, label: h.label, value: h.value, description: analyseToolset(h.value, l.value, p.value), is_default: h.default } });
@@ -583,9 +583,9 @@ export function decodeEVC(val) {
 	const res = [], parts = val.split('.');
 
 	for (let i = 1; i < parts.length; i++) {
-		const key = parts[i].substring(0, 4);
+		const key = parts[i].substring(0, 4).toLowerCase();
 		const value = parts[i].substring(4);
-		switch (key.toLowerCase()) {
+		switch (key) {
 			case KEY_PROFILE: {
 				const ProfileRegex = /^\d+$/;
 				const k = SetKeyValue(args, key, value, ProfileRegex);
@@ -611,7 +611,7 @@ export function decodeEVC(val) {
 				break;
 			}
 			case KEY_BIT_DEPTH: {
-				const BitDepthRegex = /^\d\d$/i;
+				const BitDepthRegex = /^\d\d$/;
 				const k = SetKeyValue(args, key, value, BitDepthRegex);
 				if (k) res.push(k);
 				break;
@@ -665,7 +665,7 @@ export function decodeEVC(val) {
 				break;
 			}
 			default:
-				res.push(warning('unrecognised key  (' + key + ')'));
+				res.push(warning('unrecognised key (' + key + ')'));
 				break;
 		}
 	}

@@ -39,11 +39,9 @@ export function decodeAV1(val) {
         <sample entry 4CC>.<profile>.<level><tier>.<bitDepth>.<monochrome>.<chromaSubsampling>.
         <colorPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>
   */
-	if (!expressions.AV1.regex.test(val))
-		return [error('Regex mismatch!'), error(expressions.AV1.format), error(expressions.AV1.description)];
 
 	const result = val.match(expressions.AV1.regex_grouped);
-	if (!result || !result.groups) return [error('Regex mismatch!!'), error(expressions.AV1.format), error(expressions.AV1.description)];
+	if (!result || !result.groups) return [error('Regex mismatch!'), error(expressions.AV1.format), error(expressions.AV1.description)];
 	const res = [];
 
 	switch (result.groups.profile) {
@@ -147,7 +145,7 @@ export function decodeAV1(val) {
 			lev = 'Max';
 			break;
 		default:
-			res.push(error(`unknown (${result.groups.level})`));
+			res.push(error(`unknown level (${result.groups.level})`));
 	}
 	if (lev.length) res.push(normal(`Level ${lev}`));
 
@@ -224,7 +222,7 @@ export function decodeAV1(val) {
 					res.push(warning('CSP_RESERVED'));
 					break;
 				default:
-					res.push(error(`invalid value for subsampling_y (${result.groups.chromaSubsampling[2]})`));
+					res.push(error(`invalid value for chroma_sample_position (${result.groups.chromaSubsampling[2]})`));
 			}
 			if (result.groups.chromaSubsampling[0] != '1' || result.groups.chromaSubsampling[1] != '1')
 				if (result.groups.chromaSubsampling[2] != '0') res.push(error('third digit must be 0 when first or second digit are not set to 1'));
@@ -232,7 +230,7 @@ export function decodeAV1(val) {
 	else res.push({ default: '110 4:2:0' });
 
 	if (result.groups.colorPrimaries)
-		switch (result.groups.colorPrimaries) {
+		switch (parseInt(result.groups.colorPrimaries)) {
 			case 1:
 				res.push(normal('CP_BT_709 - BT.709'));
 				break;
@@ -383,10 +381,10 @@ export function decodeAV1(val) {
 				res.push(normal('MC_CHROMAT_CL - Chromaticity-derived constant luminance'));
 				break;
 			case 14:
-				res.push(normal('MC_ICTCP BT.2100 - ICtCp'));
+				res.push(normal('MC_ICTCP - BT.2100 ICtCp'));
 				break;
 			default:
-				res.push(error(`unknown value for marrix_coefficients (${result.groups.matrixCoefficients})`));
+				res.push(error(`unknown value for matrix_coefficients (${result.groups.matrixCoefficients})`));
 		}
 	else res.push({ default: '1 (ITU-R BT.709)' });
 
@@ -428,10 +426,12 @@ export function decodeIAMF(val) {
 			res.push(normal("Codec: Opus"));
 			break;
 		case "mp4a": {
-			res.push(normal("Codec: AAC-LC"));
-			let i=3, mp4codec = parts[i];
-			while (++i < parts.length)
-				mp4codec += '.' + parts[i];
+			// IAMF only permits AAC-LC, i.e. mp4a.40.2
+			const mp4codec = parts.slice(3).join('.');
+			if (parts[4]?.toLowerCase() === '40' && parseInt(parts[5]) === 2)
+				res.push(normal("Codec: AAC-LC"));
+			else
+				res.push(error(`Codec: IAMF requires AAC-LC (mp4a.40.2), found ${mp4codec}`));
 			other=decodeMPEG4audio(mp4codec);
 			break;
 		}
@@ -441,6 +441,8 @@ export function decodeIAMF(val) {
 		case "ipcm":
 			res.push(normal("Codec: LPCM"));
 			break;
+		default:
+			res.push(error(`unknown codec (${parts[3]})`));
 	}
 	return res.concat(other);
 }

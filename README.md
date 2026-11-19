@@ -138,10 +138,18 @@ npm run start
 In a browser go to the page http://localhost:8080/tests/index.html
 this will list all of the available browser-based tests.
 
+### Acknowledgements
+
+Some code review and fixes were carried out with the help of
+[Claude Code](https://claude.com/claude-code) (Anthropic's Claude Opus 5.5),
+including tidying of the AC-4 decoder, simplification of the regular
+expressions, a fix for AV1 colour primaries decoding and stricter IAMF
+codec validation.
+
 ### License
 
 This software is distributed under the terms of the Simplified BSD License.
 See the file `LICENSE.txt` for details.
 
-*Copyright (c) 2021-2024, Paul Higgs*<br/>
+*Copyright (c) 2021-2026, Paul Higgs*<br/>
 *All rights reserved*
