@@ -1,5 +1,5 @@
 /* globals describe, test, expect */
-const { decode, decodeUWA } = require('../dist/cjs/codec-string.cjs');
+const { decode, decodeSTPP, decodeUWA, simpleHTML } = require('../dist/cjs/codec-string.cjs');
 
 describe('commonjs build test', () => {
 	test('H.264 decode', () => {
@@ -129,5 +129,96 @@ describe('commonjs build test', () => {
 
 	test.each(['cuvv.1', 'cuvv.1101', 'cuvv.0000'])('HDR Vivid %s maps to DVB VideoConformancePointsCS 2.3.4', (codec) => {
 		expect(cuvvDecodes(codec).find((p) => p.dvb_term)?.dvb_term).toEqual('urn:dvb:metadata:cs:VideoConformancePointsCS:2026:2.3.4');
+	});
+
+	// XML timed text (stpp), with TTML profiles from the W3C TTML profile registry
+	const stppDecodes = (codec) => {
+		const result = decode(codec);
+		expect(result).toBeDefined();
+		expect(result.decodes.length).toEqual(1);
+		expect(result.decodes[0].label).toEqual('XML timed-text subtitles');
+		return result.decodes[0].parsed;
+	};
+	const IMSC1_TEXT = 'http://www.w3.org/ns/ttml/profile/imsc1/text',
+		EBU_TT_D = 'urn:ebu:tt:distribution:2014-01';
+
+	test.each([
+		['stpp', [{ warning: 'generic XML timed text, no TTML profile is signalled' }]],
+		['stpp.ttml', [{ decode: 'generic timed text' }]],
+		['stpp.xyz', [{ warning: 'unknown STPP mode "xyz"' }]],
+		['stpp.ttml.foo', [{ warning: 'unknown TTML mode "foo"' }]],
+	])('STPP decode %s', (codec, expected) => {
+		expect(stppDecodes(codec)).toEqual(expected);
+	});
+
+	test('STPP decode stpp.ttml.im1t (name, identifier and designator)', () => {
+		expect(stppDecodes('stpp.ttml.im1t')).toEqual([
+			{ decode: 'IMSC1 text', identifier: 'im1t', designator: IMSC1_TEXT },
+			{ informative: IMSC1_TEXT },
+		]);
+	});
+
+	test.each([
+		['etd1', 'EBU-TT-D 1.0'],
+		['ede1', 'EBU-TT-D-Basic-DE (IRT)'],
+		['im3t', 'IMSC1.2 text'],
+		['IM1T', 'IMSC1 text'],
+	])('STPP decode stpp.ttml.%s', (identifier, name) => {
+		expect(stppDecodes(`stpp.ttml.${identifier}`)[0].decode).toEqual(name);
+	});
+
+	test.each([
+		'cfi1', 'cft1', 'da1p', 'ede1', 'etd1', 'etd2', 'etl1', 'etx1', 'etx2', 'etx3', 'im1i', 'im1t', 'im2i',
+		'im2t', 'im3t', 'im4t', 'nst1', 'rtp1', 'tt1f', 'tt1p', 'tt1s', 'tt1t', 'tt2f', 'tt2p', 'tt2t',
+	])('STPP decodes registered TTML profile %s', (identifier) => {
+		const parsed = stppDecodes(`stpp.ttml.${identifier}`);
+		expect(parsed[0].identifier).toEqual(identifier);
+		expect(parsed[0].designator).toBeTruthy();
+		expect(parsed.filter((p) => p.warning || p.error)).toEqual([]);
+	});
+
+	test('STPP decode stpp.ttml.im1t|etd1 (any one of)', () => {
+		expect(stppDecodes('stpp.ttml.im1t|etd1')).toEqual([
+			{ decode: 'one of the following:' },
+			{ decode: 'IMSC1 text', identifier: 'im1t', designator: IMSC1_TEXT },
+			{ informative: IMSC1_TEXT },
+			{ decode: 'EBU-TT-D 1.0', identifier: 'etd1', designator: EBU_TT_D },
+			{ informative: EBU_TT_D },
+		]);
+	});
+
+	test('STPP decode stpp.ttml.im1t+etd1 (all of)', () => {
+		expect(stppDecodes('stpp.ttml.im1t+etd1')).toEqual([
+			{ decode: 'all of: IMSC1 text + EBU-TT-D 1.0' },
+			{ informative: `IMSC1 text: ${IMSC1_TEXT}` },
+			{ informative: `EBU-TT-D 1.0: ${EBU_TT_D}` },
+		]);
+	});
+
+	test('STPP warns about an unknown profile in a combination', () => {
+		const parsed = stppDecodes('stpp.ttml.im1t+foo|etd1');
+		expect(parsed[1]).toEqual({ warning: 'all of: IMSC1 text + unknown TTML mode "foo"' });
+		expect(parsed.at(-2).decode).toEqual('EBU-TT-D 1.0');
+	});
+
+	test('STPP warns about text after the profile', () => {
+		const parsed = stppDecodes('stpp.ttml.im1t.extra');
+		expect(parsed[0].decode).toEqual('IMSC1 text');
+		expect(parsed.at(-1)).toEqual({ warning: 'unexpected text after the TTML profile "extra"' });
+	});
+
+	test('STPP decode stpp.ttml.im1t+etd1|im2t ("+" takes precedence over "|")', () => {
+		const parsed = stppDecodes('stpp.ttml.im1t+etd1|im2t');
+		expect(parsed.filter((p) => p.decode).map((p) => p.decode)).toEqual(['one of the following:', 'all of: IMSC1 text + EBU-TT-D 1.0', 'IMSC1.1 text']);
+	});
+
+	test('STPP HTML output shows the designator as an informative line', () => {
+		const html = simpleHTML('XML timed-text subtitles', stppDecodes('stpp.ttml.im1t'));
+		expect(html).toContain('IMSC1 text<br>');
+		expect(html).toMatch(/font-style:italic[^>]*>http:\/\/www\.w3\.org\/ns\/ttml\/profile\/imsc1\/text</);
+	});
+
+	test('STPP decodeSTPP can be called directly', () => {
+		expect(decodeSTPP('stpp.ttml.etd1')[0]).toEqual({ decode: 'EBU-TT-D 1.0', identifier: 'etd1', designator: EBU_TT_D });
 	});
 });
