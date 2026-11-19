@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2023-2024
+ * @copyright: Copyright (c) 2023-2026
  * @author: Paul Higgs
  * @file: dvb-mapping.js
  *

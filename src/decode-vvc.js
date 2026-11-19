@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2021-2024
+ * @copyright: Copyright (c) 2021-2026
  * @author: Paul Higgs
  * @file: decode-vvc.js
  *
