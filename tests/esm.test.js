@@ -278,8 +278,9 @@ describe('ESM index test', () => {
 	});
 
 	test('LCEVC warns about an unrecognised key and reports an empty key', () => {
-		expect(lcevcDecodes('lvc1.abcd5')).toEqual([{ warning: 'unrecognised key (abcd)' }, LCEVC_MAIN_DEFAULT, LCEVC_LEVEL4_DEFAULT]);
+		expect(lcevcDecodes('lvc1.abcd5')).toEqual([{ warning: 'unrecognised key (abcd), the meaning of its value (5) cannot be determined' }, LCEVC_MAIN_DEFAULT, LCEVC_LEVEL4_DEFAULT]);
 		expect(lcevcDecodes('lvc1.')[0]).toEqual({ error: 'empty key at position 1, keys are separated by a single "."' });
+		expect(lcevcDecodes('lvc1.ab')[0]).toEqual({ error: 'invalid key (ab), keys are four characters followed by the value' });
 	});
 
 	test('LCEVC decodeLCEVC can be called directly', () => {

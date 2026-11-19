@@ -120,7 +120,11 @@ export function decodeLCEVC(val) {
 			default:
 				if ([KEY_PROFILE, KEY_LEVEL].includes(key.toLowerCase()))
 					res.push(error(`key ${key} is not permitted, keys are case sensitive (use ${key.toLowerCase()})`));
-				else res.push(warning(`unrecognised key (${key})`));
+				else if (parts[i].length < 4)
+					res.push(error(`invalid key (${parts[i]}), keys are four characters followed by the value`));
+				else
+					// annex E.10 permits additional keys, which are ignored when not recognised
+					res.push(warning(`unrecognised key (${key}), the meaning of its value (${value}) cannot be determined`));
 				break;
 		}
 	}
