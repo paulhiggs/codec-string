@@ -1,5 +1,5 @@
 /* globals describe, test, expect */
-const { decode, decodeSTPP, decodeUWA, simpleHTML } = require('../dist/cjs/codec-string.cjs');
+const { decode, decodeLCEVC, decodeSTPP, decodeUWA, simpleHTML } = require('../dist/cjs/codec-string.cjs');
 
 describe('commonjs build test', () => {
 	test('H.264 decode', () => {
@@ -224,5 +224,65 @@ describe('commonjs build test', () => {
 
 	test('STPP decodeSTPP can be called directly', () => {
 		expect(decodeSTPP('stpp.ttml.etd1')[0]).toEqual({ decode: 'EBU-TT-D 1.0', identifier: 'etd1', designator: EBU_TT_D });
+	});
+
+	// LCEVC codec strings, ISO/IEC 14496-15:2025 annex E.10 (keys 'vprf' and 'vlev', defaults 0 and 4)
+	const lcevcDecodes = (codec) => {
+		const result = decode(codec);
+		expect(result).toBeDefined();
+		expect(result.decodes.length).toEqual(1);
+		expect(result.decodes[0].label).toEqual('MPEG Low Complexity Enhancement Video Coding');
+		return result.decodes[0].parsed;
+	};
+	const LCEVC_MAIN_DEFAULT = { name: 'Profile (vprf)', is_default: true, value: 0, description: 'Main profile' };
+	const LCEVC_LEVEL4_DEFAULT = { name: 'Level (vlev)', is_default: true, value: 4, description: 'Level 4' };
+
+	test('LCEVC decode lvc1 uses the default profile and level', () => {
+		expect(lcevcDecodes('lvc1')).toEqual([LCEVC_MAIN_DEFAULT, LCEVC_LEVEL4_DEFAULT]);
+	});
+
+	test('LCEVC decode lvc1.vprf0.vlev1 (annex E.10 example)', () => {
+		expect(lcevcDecodes('lvc1.vprf0.vlev1')).toEqual([
+			{ name: 'Profile (vprf)', is_default: false, value: 0, description: 'Main profile' },
+			{ name: 'Level (vlev)', is_default: false, value: 1, description: 'Level 1' },
+		]);
+	});
+
+	test('LCEVC decode lvc1.vprf1.vlev2', () => {
+		expect(lcevcDecodes('lvc1.vprf1.vlev2')).toEqual([
+			{ name: 'Profile (vprf)', is_default: false, value: 1, description: 'Main 4:4:4 profile' },
+			{ name: 'Level (vlev)', is_default: false, value: 2, description: 'Level 2' },
+		]);
+	});
+
+	test('LCEVC keys are case sensitive', () => {
+		expect(lcevcDecodes('lvc1.VPRF1.VLEV2')).toEqual([
+			{ error: 'key VPRF is not permitted, keys are case sensitive (use vprf)' },
+			{ error: 'key VLEV is not permitted, keys are case sensitive (use vlev)' },
+			LCEVC_MAIN_DEFAULT,
+			LCEVC_LEVEL4_DEFAULT,
+		]);
+	});
+
+	test('LCEVC rejects a duplicate key', () => {
+		expect(lcevcDecodes('lvc1.vprf1.vprf0')[0]).toEqual({ error: 'key vprf can only be provided once' });
+	});
+
+	test('LCEVC reports an invalid profile and level', () => {
+		expect(lcevcDecodes('lvc1.vprf7')[0].description).toEqual({ error: 'invalid profile (7), profiles 0 and 1 are defined' });
+		expect(lcevcDecodes('lvc1.vlev9')[1].description).toEqual({ error: 'invalid level (9), levels 1 to 4 are defined' });
+	});
+
+	test('LCEVC rejects a non-numeric value', () => {
+		expect(lcevcDecodes('lvc1.vprfx')[0].error).toMatch(/^invalid value for key=vprf \(x\)/);
+	});
+
+	test('LCEVC warns about an unrecognised key and reports an empty key', () => {
+		expect(lcevcDecodes('lvc1.abcd5')).toEqual([{ warning: 'unrecognised key (abcd)' }, LCEVC_MAIN_DEFAULT, LCEVC_LEVEL4_DEFAULT]);
+		expect(lcevcDecodes('lvc1.')[0]).toEqual({ error: 'empty key at position 1, keys are separated by a single "."' });
+	});
+
+	test('LCEVC decodeLCEVC can be called directly', () => {
+		expect(decodeLCEVC('lvc1.vlev3')[1]).toEqual({ name: 'Level (vlev)', is_default: false, value: 3, description: 'Level 3' });
 	});
 });
