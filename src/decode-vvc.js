@@ -269,7 +269,8 @@ export function decodeVVC(val) {
 
 		for (let i = 0; i < subProfiles.length; i++) {
 			const bits = base32ToBits(subProfiles[i]).substring(0, 32).padEnd(32, '0');
-			res.push(normal(`Sub profile (${i + 1})=${parseInt(bits, 2)}`));
+			const value = parseInt(bits, 2);
+			res.push(normal(`Sub profile (${i + 1})=0x${value.toString(16).toUpperCase().padStart(8, '0')} (${value})`));
 		}
 		return res;
 	}
