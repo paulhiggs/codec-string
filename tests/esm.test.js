@@ -80,4 +80,14 @@ describe('ESM index test', () => {
 	test.each(['vvc1.1.H64', 'vvc1.1.H83', 'vvc1.1.H255', 'vvc1.1.L51'])('VVC does not warn about the tier of %s', (codec) => {
 		expect(warnings(vvcDecodes(codec))).toEqual([]);
 	});
+
+	test('VVC warns about MaxTid greater than 6', () => {
+		const parsed = vvcDecodes('vvc1.1.L51.O0+7');
+		expect(decodeText(parsed)).toContain("Maximum Temporal Id ('MaxTid')=7");
+		expect(warnings(parsed)).toEqual(['MaxTid (7) is greater than 6']);
+	});
+
+	test.each(['vvc1.1.L51.O0+6', 'vvc1.1.L51.O+0', 'vvc1.1.L51.O9'])('VVC does not warn about the temporal layers of %s', (codec) => {
+		expect(warnings(vvcDecodes(codec))).toEqual([]);
+	});
 });
