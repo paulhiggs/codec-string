@@ -167,6 +167,12 @@ export function decodeVVC(val) {
 			case 102:
 				lev = '6.2';
 				break;
+			case 105:
+				lev = '6.3';
+				break;
+			case 255:
+				lev = '15.5';
+				break;
 			default:
 				res.push(error(`unknown Level (${op_level_idc})`));
 		}
