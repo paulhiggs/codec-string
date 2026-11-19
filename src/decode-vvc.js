@@ -274,52 +274,32 @@ export function decodeVVC(val) {
 		return res;
 	}
 
-	function printTemporalLayers(indexes) {
-		const res = [],
-			layerIndexes = indexes.split('+');
-		if (layerIndexes[0]) res.push(normal(`Output Layer Set index ('OlsIdx')=${layerIndexes[0]}`));
-		if (layerIndexes[1]) res.push(normal(`Maximum Temporal Id ('MaxTid')=${layerIndexes[1]}`));
+	function printTemporalLayers(ols_idx, max_tid) {
+		const res = [];
+		if (ols_idx) res.push(normal(`Output Layer Set index ('OlsIdx')=${ols_idx}`));
+		if (max_tid) res.push(normal(`Maximum Temporal Id ('MaxTid')=${max_tid}`));
 		return res;
 	}
 
-	if (!expressions.VVC.regex.test(val)) return [error('Regex mismatch!'), error(expressions.VVC.format)];
+	const result = val.match(expressions.VVC.regex_grouped);
+	if (!result || !result.groups) return [error('Regex mismatch!'), error(expressions.VVC.format)];
 
-	const res = [],
-		parts = val.match(expressions.VVC.regex),
-		coding_params = { type: 'video' };
+	const { four_cc, profile, tier, level, constraints, sub_profiles, ols_idx, max_tid } = result.groups,
+		res = [],
+		coding_params = { type: 'video', codec: four_cc };
 
-	if (parts.length > 1) coding_params.codec = parts[1];
-	parts.forEach((part) => {
-		if (part && part.substring(0, 1) == '.') {
-			const cmd = part.substring(1, 2);
-			if (cmd >= '0' && cmd <= '9') {
-				const prof = printProfile(part.substring(1));
-				res.push(...prof.output);
-				coding_params.profile = prof.profile;
-			} else {
-				switch (cmd) {
-					case 'L':
-					case 'H':
-						{
-							const tier_and_level = printTier(cmd, part.substring(2));
-							res.push(...tier_and_level.output);
-							coding_params.tier = tier_and_level.tier;
-							coding_params.level = tier_and_level.level;
-						}
-						break;
-					case 'C':
-						res.push(...printConstraints(part.substring(2)));
-						break;
-					case 'S':
-						res.push(...printSubProfile(part.substring(2)));
-						break;
-					case 'O':
-						res.push(...printTemporalLayers(part.substring(2)));
-						break;
-				}
-			}
-		}
-	});
+	const prof = printProfile(profile);
+	res.push(...prof.output);
+	coding_params.profile = prof.profile;
+
+	const tier_and_level = printTier(tier, level);
+	res.push(...tier_and_level.output);
+	coding_params.tier = tier_and_level.tier;
+	coding_params.level = tier_and_level.level;
+
+	if (constraints) res.push(...printConstraints(constraints));
+	if (sub_profiles) res.push(...printSubProfile(sub_profiles));
+	if (ols_idx || max_tid) res.push(...printTemporalLayers(ols_idx, max_tid));
 
 	const dvb = DVBclassification(coding_params);
 	if (dvb.length != 0) res.push({ dvb_term: dvb });
