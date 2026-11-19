@@ -104,7 +104,7 @@ export function decodeVVC(val) {
 				res = error(`unknown Profile (${profile})`);
 				break;
 		}
-		return { output: res ? res : normal(prof), profile: prof ? prof : '' };
+		return { output: [res ? res : normal(prof)], profile: prof ? prof : '' };
 	}
 
 	function printTier(tier, level) {
@@ -181,7 +181,7 @@ export function decodeVVC(val) {
 	}
 
 	const VVC_general_constraints = [
-		{ bit: 0, name: 'gci_present_flag', existance: true },
+		{ bit: 0, name: 'gci_present_flag', existence: true },
 		{ bit: 1, name: 'gci_intra_only_constraint_flag' },
 		{ bit: 2, name: 'gci_all_layers_independent_constraint_flag' },
 		{ bit: 3, name: 'gci_one_au_only_constraint_flag' },
@@ -296,7 +296,7 @@ export function decodeVVC(val) {
 		let gotFlags = false;
 		VVC_general_constraints.forEach((constraint) => {
 			const bit = constraint.bit + GCI_OFFSET;
-			if (constraint.existance) {
+			if (constraint.existence) {
 				if (constraintFlags.bitsetB(bit)) gotFlags = true;
 				res.push(normal(`${constraint.name}=${constraintFlags.bitsetB(bit)}`));
 			} else if (gotFlags) {
@@ -366,7 +366,7 @@ export function decodeVVC(val) {
 			const cmd = part.substring(1, 2);
 			if (cmd >= '0' && cmd <= '9') {
 				const prof = printProfile(part.substring(1));
-				res.push(prof.output);
+				res.push(...prof.output);
 				coding_params.profile = prof.profile;
 			} else {
 				switch (cmd) {
