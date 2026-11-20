@@ -1,5 +1,5 @@
 /* globals describe, test, expect */
-import { decode, decodeHEVC, decodeLCEVC, decodeSTPP, decodeUWA, simpleHTML } from '../dist/esm/codec-string.js';
+import { decode, decodeHEVC, decodeLCEVC, decodeSTPP, decodeUWA, expressions, simpleHTML } from '../dist/esm/codec-string.js';
 
 describe('ESM index test', () => {
 	test('H.264 decode', () => {
@@ -402,5 +402,14 @@ describe('ESM index test', () => {
 		const parsed = hevcDecodes('hvc1.1.6.L91.B0');
 		expect(errors(parsed)).toEqual([{ error: 'unknown Level (91)' }]);
 		expect(decodeText(parsed).filter((t) => t.startsWith('Level '))).toEqual([]);
+	});
+
+	// #71: expressions.HEVC accepts every sample entry type registered for HEVC (not used by decodeHEVC() yet)
+	test.each(['hev1', 'hvc1', 'hev2', 'hvc2', 'hev3', 'hvc3'])('HEVC regex accepts %s', (fourCC) => {
+		expect(expressions.HEVC.regex.test(`${fourCC}.1.6.L93.B0`)).toBe(true);
+	});
+
+	test.each(['hev4', 'hvc0', 'lhv1', 'avc1'])('HEVC regex rejects %s', (fourCC) => {
+		expect(expressions.HEVC.regex.test(`${fourCC}.1.6.L93.B0`)).toBe(false);
 	});
 });
