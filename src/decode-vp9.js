@@ -71,7 +71,15 @@ const DEBUGGING = false;
 import { error } from './decode.js';
 import { err, BREAK, HTMLsafe, cell, bold, warn, dflt } from './markup.js';
 import { dumpJSONHTML } from './formatters.js';
-import { expressions } from './regular_expressions.js';
+
+// regular expressions for the codecs string
+const expressions = {
+	VP9: {
+		regex: /^vp09(\.\d{2}){3}(\.(\d{2})?){0,5}$/,
+		regex_grouped: /^(?<four_cc>vp09)\.(?<profile>\d{2})\.(?<level>\d{2})\.(?<bitDepth>\d{2})(\.(?<chromaSubsampling>\d{2})?(\.(?<colourPrimaries>\d{2})?(\.(?<transferCharacteristics>\d{2})?(\.(?<matrixCoefficients>\d{2})?(\.(?<videoFullRangeFlag>\d{2})?)?)?)?)?)?$/,
+		format: '<sample entry 4CC>.<profile>.<level>.<bitDepth>.<chromaSubsampling>.<colourPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>'
+	},
+};
 
 export function decodeVP9(val) {
 	if (!expressions.VP9.regex.test(val)) return [error('Regex failure'), error(expressions.VP9.format)];

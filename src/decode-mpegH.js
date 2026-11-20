@@ -34,7 +34,16 @@ const DEBUGGING = false;
 import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
-import { expressions } from './regular_expressions.js';
+
+// regular expressions for the codecs string
+const expressions = {
+	MPEGH: {
+		regex: /^mhm(1|2)\.0x[a-fA-F\d]{2}$/,
+		regex_grouped: /^(?<four_cc>mhm[12])\.0x(?<profile_id>[a-fA-F\d]{2})$/,
+		format: '(mhm1 or mhm2).0xLL',
+		description: 'LL is 2 hexadecimal digits'
+	},
+};
 
 export function decodeMPEGH(val) {
 	if (!expressions.MPEGH.regex.test(val))

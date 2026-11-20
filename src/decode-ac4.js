@@ -37,7 +37,15 @@ const DEBUGGING = false;
 import { normal, error, warning } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
-import { expressions } from './regular_expressions.js';
+
+// regular expressions for the codecs string
+const expressions = {
+	AC4: {
+		regex: /^ac-4(\.[a-fA-F\d]{1,2}){3}$/i,
+		regex_grouped: /^(?<four_cc>ac-4)\.(?<bitstream_version>[a-fA-F\d]{1,2})\.(?<presentation_version>[a-fA-F\d]{1,2})\.(?<mdcompat>[a-fA-F\d]{1,2})$/,
+		format:  'ac-4.<bitstream_version>.<presentation_version>.<mdcompat>'
+	},
+};
 
 export function decodeEAC3(val) {
 	if (val.toLowerCase() != 'ec-3') return [error('no additional parameters for Enhanced AC-3')];

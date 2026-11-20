@@ -29,9 +29,23 @@ const DEBUGGING = false;
 
 import { normal, error, warning } from './decode.js';
 import { simpleHTML } from './formatters.js';
-import { expressions } from './regular_expressions.js';
 
 import { decodeMPEG4audio } from './decode-mpeg.js';
+
+// regular expressions for the codecs string
+const expressions = {
+	AV1: {
+		regex: /^av01\.\d\.\d+[MH]\.\d{1,2}((\.\d?)(\.(\d{3})?(\.(\d{2})?(.(\d{2})?(.(\d{2})?(.\d?)?)?)?)?)?)?$/,
+		regex_grouped: /^(?<four_cc>av01)\.(?<profile>\d)\.(?<level>\d+)(?<tier>[MH])\.(?<bitdepth>\d{1,2})((\.(?<monochrome>\d?))(\.(?<chromaSubsampling>\d{3})?(\.(?<colorPrimaries>\d{2})?(.(?<transferCharacteristics>\d{2})?(.(?<matrixCoefficients>\d{2})?(.(?<videoFullRangeFlag>\d?))?)?)?)?)?)?$/,
+		format: '<sample entry 4CC>.<profile>.<level><tier>.<bitDepth>.<monochrome>.<chromaSubsampling>.<colorPrimaries>.<transferCharacteristics>.<matrixCoefficients>.<videoFullRangeFlag>',
+		description: "see https://aomediacodec.github.io/av1-isobmff/#codecsparam"
+	},
+	IAMF: {
+		regex: /^iamf\.\d{3}\.\d{3}\.(Opus|mp4a(\.[a-fA-F\d]{2})(\.\d+)?|flaC|ipcm)$/,
+		format: '<sample entry 4CC>.<primary profile>.<secondary profile>.<non-IAMF elements>',
+		description: "see https://aomediacodec.github.io/iamf/v1.1.0.html#codecsparameter"
+	},
+};
 
 export function decodeAV1(val) {
 	// defined in https://aomediacodec.github.io/av1-isobmff/#codecsparam

@@ -35,7 +35,16 @@ const DEBUGGING = false;
 import { normal, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
-import { expressions } from './regular_expressions.js';
+
+// regular expressions for the codecs string
+const expressions = {
+	AVC: {
+		regex: /^[a-z0-9!"#$%&'()*+,./:;<=>?@[\] ^_`{|}~-]{4}.[a-f0-9]{6}$/i,
+		regex_grouped: /^(?<four_cc>[a-z0-9!"#$%&'()*+,./:;<=>?@[\] ^_`{|}~-]{4}).(?<profile>[a-f0-9]{2})(?<constraints>[a-f0-9]{2})(?<level>[a-f0-9]{2})$/i,
+		format_suffix: "PPCCLL",
+		description: 'PP CC and LL are hexadecimal values'
+	},
+};
 
 /**
  * AVCregex

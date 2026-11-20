@@ -33,7 +33,16 @@ const DEBUGGING = false;
 import { warning, error, normal } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
-import { expressions } from './regular_expressions.js';
+
+// regular expressions for the codecs string
+const expressions = {
+	CUVV: {
+		regex: /^cuvv\.[01]+$/,
+		regex_grouped: /^(?<four_cc>cuvv)\.(?<version_bits>[01]+)$/,
+		format: 'cuvv.<version_bits>',
+		description: '<version_bits> indicates the versions of HDR Vivid in the bitstream'
+	},
+};
 
 export function decodeUWA(val) {
 	const result = val.match(expressions.CUVV.regex_grouped);

@@ -1,5 +1,5 @@
 /* globals describe, test, expect */
-const { decode, decodeHEVC, decodeHEVCLayerInfo, decodeLCEVC, decodeSTPP, decodeUWA, expressions, simpleHTML } = require('../dist/cjs/codec-string.cjs');
+const { decode, decodeHEVC, decodeHEVCLayerInfo, decodeLCEVC, decodeSTPP, decodeUWA, simpleHTML } = require('../dist/cjs/codec-string.cjs');
 
 describe('commonjs build test', () => {
 	test('H.264 decode', () => {
@@ -419,22 +419,38 @@ describe('commonjs build test', () => {
 		expect(decodeText(parsed).filter((t) => t.startsWith('Level '))).toEqual([]);
 	});
 
-	// #71: expressions.HEVC accepts every sample entry type registered for HEVC (not used by decodeHEVC() yet)
-	test.each(['hev1', 'hvc1', 'hev2', 'hvc2', 'hev3', 'hvc3'])('HEVC regex accepts %s', (fourCC) => {
-		expect(expressions.HEVC.regex.test(`${fourCC}.1.6.L93.B0`)).toBe(true);
+	// #71, #56: decodeHEVC() validates the codecs string with the HEVC regex, which accepts every sample entry type registered for HEVC
+	const HEVC_REGEX_MISMATCH = [
+		{ error: 'Regex mismatch!' },
+		{ error: '<sample entry 4CC>.{A|B|C}<general_profile_idc>.<general_profile_compatibility_flags>.[LH]<general_level_idc>.<constraint byte>{.<constraint byte>}' },
+		{ error: 'see clause E.3 of ISO/IEC 14496-15: the compatibility flags are up to 8 hexadecimal digits, and there are 1 to 6 constraint bytes of 1 or 2 hexadecimal digits' },
+	];
+	test.each(['hev1', 'hvc1', 'hev2', 'hvc2', 'hev3', 'hvc3'])('HEVC accepts the sample entry type %s', (fourCC) => {
+		expect(errors(hevcDecodes(`${fourCC}.1.6.L93.B0`))).toEqual([]);
 	});
 
-	test.each(['hev4', 'hvc0', 'lhv1', 'avc1'])('HEVC regex rejects %s', (fourCC) => {
-		expect(expressions.HEVC.regex.test(`${fourCC}.1.6.L93.B0`)).toBe(false);
+	test.each(['hev4', 'hvc0', 'lhv1', 'avc1'])('HEVC rejects the sample entry type %s', (fourCC) => {
+		expect(decodeHEVC(`${fourCC}.1.6.L93.B0`)).toEqual(HEVC_REGEX_MISMATCH);
 	});
 
 	// #71: the profile part is an optional general_profile_space letter A, B or C (lowercase is accepted, see #62)
-	test.each(['1', 'A1', 'B2', 'C3', 'a1', 'c3'])('HEVC regex accepts the profile %s', (profile) => {
-		expect(expressions.HEVC.regex.test(`hvc1.${profile}.6.L93.B0`)).toBe(true);
+	test.each(['1', 'A1', 'B2', 'C3', 'a1', 'c3'])('HEVC accepts the profile %s', (profile) => {
+		expect(errors(hevcDecodes(`hvc1.${profile}.6.L93.B0`))).toEqual([]);
 	});
 
-	test.each(['D1', 'z1', 'AA1', 'A'])('HEVC regex rejects the profile %s', (profile) => {
-		expect(expressions.HEVC.regex.test(`hvc1.${profile}.6.L93.B0`)).toBe(false);
+	test.each(['D1', 'z1', 'AA1', 'A'])('HEVC rejects the profile %s with its own message', (profile) => {
+		expect(errors(hevcDecodes(`hvc1.${profile}.6.L93.B0`))[0].error).toMatch(/^invalid general_profile_space and general_profile_idc/);
+	});
+
+	// #56: anything else that is not in the clause E.3 format is rejected by the regex
+	test.each([
+		'hvc1.1.6.l93.B0', // lowercase tier
+		'hvc1.1.6.L93.B0.0.0.0.0.0.0', // 7 constraint bytes
+		'hvc1.1.123456789.L93.B0', // 9 hexadecimal digits in the compatibility flags
+		'hvc1.1.6.L93.B00', // a constraint byte of 3 hexadecimal digits
+		'hvc1.1.6.L1234.B0', // a level of 4 digits
+	])('HEVC rejects %s with a regex mismatch', (codec) => {
+		expect(hevcDecodes(codec)).toEqual(HEVC_REGEX_MISMATCH);
 	});
 
 	// #60: no stray quote in the general_one_picture_only_constraint_flag output

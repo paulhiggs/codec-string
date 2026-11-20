@@ -30,7 +30,28 @@ const DEBUGGING = false;
 import { normal, warning, error } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
-import { expressions } from './regular_expressions.js';
+
+// regular expressions for the codecs string
+const expressions = {
+	AVS3video: { 
+		regex: /(avs3|lav3)(\.[a-fA-F\d]{2}){2}$/,
+		regex_grouped: /(?<four_cc>avs3|lav3).(?<profile>[a-fA-F\d]{2}).(?<level>[a-fA-F\d]{2})$/,
+		format: "(avs3|lav3).<profile>.<level>",
+		description: "profile and level are 2 hexadecimal digits"
+	},
+	AVS3audio: {
+		regex: /^av3a\.[a-fA-F\d]{1,2}$/,
+		regex_grouped: /^(?<four_cc>av3a).(?<codec_id>[a-fA-F\d]{1,2})$/,
+		format: "av3a.<codec_id>",
+		description: "codec_id is 0 for general high rate coding, 1 for lossless, 2 for general full rate coding"
+	},
+	AVS2audio: { 
+		regex: /^cavs\.[a-fA-F\d]{1,2}$/,
+		regex_grouped: /^(?<four_cc>cavs).(?<codec_id>[a-fA-F\d]{1,2})$/,
+		format: "cavs.<codec_id>",
+		description: "codec_id is 0 for general high rate coding, 1 for lossless"
+	},
+};
 
 const avs3 = {
 	profileMain8: 0x20,

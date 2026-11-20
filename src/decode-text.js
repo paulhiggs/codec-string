@@ -29,7 +29,17 @@ const DEBUGGING = false;
 
 import { normal, error, warning } from './decode.js';
 import { simpleHTML } from './formatters.js';
-import { expressions } from './regular_expressions.js';
+
+// regular expressions for the codecs string
+const expressions = {
+	STPP: {
+		// profiles follow section 2 of the W3C TTML profile registry: identifiers joined by "+" (all of) and "|" (any one of)
+		regex: /^stpp(\.ttml(\.[a-z\d]+(\+[a-z\d]+)*(\|[a-z\d]+(\+[a-z\d]+)*)*)?)?$/i,
+		regex_grouped: /^(?<four_cc>stpp)(?:\.(?<format>ttml)(?:\.(?<profiles>[a-z\d]+(?:\+[a-z\d]+)*(?:\|[a-z\d]+(?:\+[a-z\d]+)*)*))?)?$/i,
+		format: 'stpp{.ttml{.<profiles>}}',
+		description: '<profiles> is one or more TTML profile identifiers from the W3C TTML profile registry, joined by + (all of) or | (any one of)'
+	},
+};
 
 // The profile codes after "stpp.ttml." are registered in:
 //   TTML Media Type Definition and Profile Registry, W3C Group Note, 2 July 2026

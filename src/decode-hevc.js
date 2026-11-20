@@ -34,6 +34,15 @@ import { sscanf } from './sscanf-func.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
 
+// regular expressions for the codecs string
+const expressions = {
+	HEVC: {
+		regex: /^(hev1|hvc1|hev2|hvc2|hev3|hvc3)\.([A-Ca-c]?\d{1,3})\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){1,6}$/,
+		format: '<sample entry 4CC>.{A|B|C}<general_profile_idc>.<general_profile_compatibility_flags>.[LH]<general_level_idc>.<constraint byte>{.<constraint byte>}',
+		description: 'see clause E.3 of ISO/IEC 14496-15: the compatibility flags are up to 8 hexadecimal digits, and there are 1 to 6 constraint bytes of 1 or 2 hexadecimal digits',
+	},
+};
+
 // general_level_idc is 30 times the level number in Table A.8 of Rec. ITU-T H.265 (Annex A.4.1)
 const HEVClevels = {
 	30: '1',
@@ -231,6 +240,8 @@ export function decodeHEVC(val) {
 	}
 
 	if (argErr.length) return argErr;
+	// the checks above give more specific messages, the regex catches anything else that is not in the clause E.3 format
+	if (!expressions.HEVC.regex.test(val)) return [error('Regex mismatch!'), error(expressions.HEVC.format), error(expressions.HEVC.description)];
 
 	const constraints = [];
 	let general_one_picture_only_constraint_flag,

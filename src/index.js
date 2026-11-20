@@ -17,4 +17,3 @@ export { decode } from './decode.js';
 export { DVBclassification } from './dvb-mapping.js';
 export { findHandler } from './handler.js';
 export { simpleHTML, tabularHTML } from './formatters.js';
-export { expressions } from './regular_expressions.js';

@@ -38,7 +38,15 @@ import { BitList } from './bits.js';
 import { normal, error, warning } from './decode.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
-import { expressions } from './regular_expressions.js';
+
+// regular expressions for the codecs string
+const expressions = {
+	VVC: {
+		regex: /^(vvc1|vvi1)(\.\d+)(\.[LH]\d+)(\.C[a-zA-Z2-7]+)?(\.S[a-zA-Z2-7]{7}(\+[a-zA-Z2-7]{7})*)?(\.O(?:\d+(?:\+\d+)?|\+\d+))?$/,
+		regex_grouped: /^(?<four_cc>vvc1|vvi1)\.(?<profile>\d+)\.(?<tier>[LH])(?<level>\d+)(?:\.C(?<constraints>[a-zA-Z2-7]+))?(?:\.S(?<sub_profiles>[a-zA-Z2-7]{7}(?:\+[a-zA-Z2-7]{7})*))?(?:\.O(?=\d|\+\d)(?<ols_idx>\d+)?(?:\+(?<max_tid>\d+))?)?$/,
+		format: '<sample entry 4CC>.<general_profile_idc>.[LH]<op_level_idc>{.C<general_constraint_info>}{.S<general_sub_profile_idc>}{.O{<OlsIdx>}{+<MaxTid>}}'
+	},
+};
 
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'; // RFC 4648, clause 6
 

@@ -27,8 +27,16 @@
  */
 
 import { simpleHTML } from './formatters.js';
-import { expressions } from './regular_expressions.js';
 import { normal, info, error } from './decode.js';
+
+// regular expressions for the codecs string
+const expressions = {
+	DolbyVision: {
+		regex: /^(dvav|dvhe|dvh1|dva1|dav1)\.\d{2}\.\d{2}$/,
+		regex_grouped: /^(?<codec_type>dvav|dvhe|dvh1|dva1|dav1)\.(?<bitstream_profile_id>\d{2})\.(?<Dolby_Vision_level_id>\d{2})$/,
+		format: "[Codec_type].[bitstream_profile_ID].[Dolby_Vision_Level_ID]"
+	},
+};
 
  const DEBUGGING = false;
 
