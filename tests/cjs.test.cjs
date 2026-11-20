@@ -1,5 +1,5 @@
 /* globals describe, test, expect */
-const { decode, decodeHEVC, decodeLCEVC, decodeSTPP, decodeUWA, expressions, simpleHTML } = require('../dist/cjs/codec-string.cjs');
+const { decode, decodeHEVC, decodeHEVCLayerInfo, decodeLCEVC, decodeSTPP, decodeUWA, expressions, simpleHTML } = require('../dist/cjs/codec-string.cjs');
 
 describe('commonjs build test', () => {
 	test('H.264 decode', () => {
@@ -446,5 +446,20 @@ describe('commonjs build test', () => {
 		const text = decodeText(hevcDecodes(codec));
 		expect(text).toContain(flag);
 		expect(text.filter((t) => t.includes('"'))).toEqual([]);
+	});
+
+	// #61: lhevcptl is a MIME parameter, so a bare lhv1 or lhe1 in a codecs string has no PTL information
+	test.each(['lhv1', 'lhe1'])('Layered HEVC %s without lhevcptl does not throw', (fourCC) => {
+		const result = decode(`hev1.1.6.L93.B0, ${fourCC}`);
+		expect(result.decodes.length).toEqual(2);
+		expect(result.decodes[0].label).toEqual('HEVC/H.265');
+		expect(result.decodes[1].label).toEqual('Layered HEVC');
+		expect(result.decodes[1].parsed).toEqual([{ informative: 'no LHEVC ProfileTierLevel information' }]);
+	});
+
+	test('Layered HEVC decodes BLInternal from the lhevcptl MIME parameter (ISO/IEC 14496-15 example)', () => {
+		const parsed = decodeHEVCLayerInfo('codecs="hev1.1.6.L93.B0, lhv1"; lhevcptl="1, 1.6.1.6.L93.B0.0.0.0.0.0.7.80.L120.BF.88"');
+		expect(parsed[0]).toEqual({ decode: 'Coded pictures with nuh_layer_id==0 may be present in the bitstream.' });
+		expect(parsed.length).toEqual(2);
 	});
 });

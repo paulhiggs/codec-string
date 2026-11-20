@@ -258,7 +258,8 @@ export function decodeHEVC(val) {
 export function decodeHEVCLayerInfo(val) {
 	const rx = /lhevcptl="(.*)"/g;
 	const arr = rx.exec(val);
-	if (!arr[1]) return [info('no LHEVC ProfileTierLevel information')];
+	// lhevcptl is a MIME parameter (ISO/IEC 14496-15), so it is not present when only the codecs string is provided
+	if (!arr?.[1]) return [info('no LHEVC ProfileTierLevel information')];
 
 	const res = [];
 	// arr[1] contains the value provided in the lhevcptl mime parameter
