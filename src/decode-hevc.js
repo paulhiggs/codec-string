@@ -42,14 +42,16 @@ export function decodeHEVC(val) {
 		if (general_profile_idc == 3 || bitSet32(cap, 2)) return { str: 'Main Still Picture (3)', profile: 'Main Still' };
 		if (general_profile_idc == 4 || bitSet32(cap, 3)) return { str: 'Range Extensions (4)' };
 		if (general_profile_idc == 5 || bitSet32(cap, 4)) return { str: 'High Throughput (5)', profile: 'High Throughput' };
-		if (general_profile_idc == 6 || bitSet32(cap, 5)) return { str: 'Multiview Main (6)', profile: 'Multiview Main' };
+		// profile names according to Annexes A, G, H and I of Rec. ITU-T H.265 (V11)
+		if (general_profile_idc == 6 || bitSet32(cap, 5)) return { str: `Multiview Main ${gm8bcf ? '' : '10 '}(6)`, profile: gm8bcf ? 'Multiview Main' : 'Multiview Main 10' };
 		if (general_profile_idc == 7 || bitSet32(cap, 6)) return { str: `Scalable Main ${gm8bcf ? '' : '10 '}(7)`, profile: 'Scalable Main' };
 		if (general_profile_idc == 8 || bitSet32(cap, 7)) return { str: '3D Main (8)', profile: '3D Main' };
 		if (general_profile_idc == 9 || bitSet32(cap, 8)) return { str: 'Screen Content Coding (9)', profile: 'Screen Content' };
-		if (general_profile_idc == 10 || bitSet32(cap, 9)) return { str: 'Multiview (10)', profile: 'Multiview' };
+		if (general_profile_idc == 10 || bitSet32(cap, 9)) return { str: 'Scalable Format Range Extensions (10)', profile: 'Scalable Format Range Extensions' };
 		if (general_profile_idc == 11 || bitSet32(cap, 10)) return { str: 'High Throughput Screen Content Coding (11)', profile: 'High Throughput Screen Content' };
-		if (general_profile_idc == 12 || bitSet32(cap, 11)) return { str: 'Multiview extended (12)', profile: 'Multiview extended' };
-		if (general_profile_idc == 13 || bitSet32(cap, 12)) return { str: 'Multiview extended 10 (13)', profile: 'Multiview extended 10' };
+		if (general_profile_idc == 12 || bitSet32(cap, 11)) return { str: 'Multiview Extended (12)', profile: 'Multiview Extended' };
+		if (general_profile_idc == 13 || bitSet32(cap, 12)) return { str: 'Multiview Extended 10 (13)', profile: 'Multiview Extended 10' };
+		if (general_profile_idc == 14 || bitSet32(cap, 13)) return { str: 'Multiview Format Range Extensions (14)', profile: 'Multiview Format Range Extensions' };
 		return error('unknown profile');
 	}
 
