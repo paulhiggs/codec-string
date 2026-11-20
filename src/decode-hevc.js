@@ -66,27 +66,16 @@ export function decodeHEVC(val) {
 	if (!hexDigits(parts[2])) argErr.push(error(`general_profile_compatibility_flag not expressed in hexadecimal (${parts[2]})`));
 
 	const general_profile_compatibility_flag = parseInt(parts[2], 16);
-	let general_profile_idc,
-		general_profile_space;
-
-	if (parts[1][0] == 'A' || parts[1][0] == 'B' || parts[1][0] == 'C') {
-		const gp = sscanf(parts[1], '%c%d');
-		switch (gp[0].toUpperCase()) {
-			case 'A':
-				general_profile_space = 1;
-				break;
-			case 'B':
-				general_profile_space = 2;
-				break;
-			case 'C':
-				general_profile_space = 3;
-				break;
-		}
-		general_profile_idc = gp[1];
-	} else {
-		general_profile_space = 0;
-		general_profile_idc = parseInt(parts[1]);
-	}
+	// see annex E.3 of ISO/IEC 14496-15: general_profile_space is no character (0) or 'A', 'B', 'C' (1, 2, 3),
+	// followed by general_profile_idc as a decimal number
+	const profileParts = parts[1].match(/^(?<space>[A-Ca-c]?)(?<idc>\d+)$/);
+	if (!profileParts)
+		argErr.push(error(`invalid general_profile_space and general_profile_idc (${parts[1]}), expected an optional A, B or C followed by a decimal number`));
+	const space = profileParts?.groups.space ?? '';
+	const general_profile_space = space ? 'ABC'.indexOf(space.toUpperCase()) + 1 : 0,
+		general_profile_idc = parseInt(profileParts?.groups.idc, 10);
+	const profileSpaceWarning =
+		space && space != space.toUpperCase() ? warning(`general_profile_space should be uppercase (${space.toUpperCase()}), not ${space}`) : null;
 
 	// process the constraints as we need to extract the general_one_picture_only_constraint_flag
 
@@ -196,6 +185,7 @@ export function decodeHEVC(val) {
 	}
 
 	res.push(general_profile_space == -1 ? error('general_profile_space=') : normal(`general_profile_space=${general_profile_space}`));
+	if (profileSpaceWarning) res.push(profileSpaceWarning);
 
 	const profile = HEVCprofile(
 		general_profile_idc,
