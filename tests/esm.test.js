@@ -462,4 +462,14 @@ describe('ESM index test', () => {
 		expect(parsed[0]).toEqual({ decode: 'Coded pictures with nuh_layer_id==0 may be present in the bitstream.' });
 		expect(parsed.length).toEqual(2);
 	});
+
+	// #70: when the sample entry in a codecs list item is lhv1 or lhe1, no further data is provided in that list item (ISO/IEC 14496-15 clause E.4)
+	test.each([
+		['lhv1.1.6.L93.B0', 'no further data is permitted after lhv1 (1.6.L93.B0), use the lhevcptl MIME parameter'],
+		['lhe1.7.80.L120.BF', 'no further data is permitted after lhe1 (7.80.L120.BF), use the lhevcptl MIME parameter'],
+	])('Layered HEVC warns about data after the sample entry in %s', (codec, warning) => {
+		const result = decode(codec);
+		expect(result.decodes[0].label).toEqual('Layered HEVC');
+		expect(result.decodes[0].parsed).toEqual([{ warning }, { informative: 'no LHEVC ProfileTierLevel information' }]);
+	});
 });

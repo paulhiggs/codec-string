@@ -216,12 +216,18 @@ export function decodeHEVC(val) {
 }
 
 export function decodeHEVCLayerInfo(val) {
+	const res = [];
+
+	// see clause E.4 item 1) of ISO/IEC 14496-15: when the sample entry in a codecs list item is 'lhv1' or 'lhe1',
+	// no further data is provided in the same list item (the profile, tier and level are in the lhevcptl MIME parameter)
+	const listItem = val.match(/^(?<four_cc>lhv1|lhe1)\.(?<extra>.*)$/);
+	if (listItem) res.push(warning(`no further data is permitted after ${listItem.groups.four_cc} (${listItem.groups.extra}), use the lhevcptl MIME parameter`));
+
 	const rx = /lhevcptl="(.*)"/g;
 	const arr = rx.exec(val);
 	// lhevcptl is a MIME parameter (ISO/IEC 14496-15), so it is not present when only the codecs string is provided
-	if (!arr?.[1]) return [info('no LHEVC ProfileTierLevel information')];
+	if (!arr?.[1]) return [...res, info('no LHEVC ProfileTierLevel information')];
 
-	const res = [];
 	// arr[1] contains the value provided in the lhevcptl mime parameter
 	const parts = arr[1].split(",");
 	const BLInternal = parseInt(parts[0]);
