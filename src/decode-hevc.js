@@ -28,7 +28,7 @@
 const DEBUGGING = false;
 
 import { BitList, bitSet32 } from './bits.js';
-import { error, normal, info } from './decode.js';
+import { error, warning, normal, info } from './decode.js';
 import { hexDigits } from './utils.js';
 import { sscanf } from './sscanf-func.js';
 import { DVBclassification } from './dvb-mapping.js';
@@ -269,6 +269,8 @@ export function decodeHEVC(val) {
 	if (lev) {
 		res.push(normal(`Level ${lev}`));
 		coding_params.level = lev;
+		// see Annex A.4.1 of Rec. ITU-T H.265: the High tier is only specified for level 4 and above
+		if (coding_params.tier == 'High' && tier[1] < 120) res.push(warning(`High Tier is not specified for Level ${lev}, only for Level 4 and above`));
 	}
 	res.push(...constraints);
 
