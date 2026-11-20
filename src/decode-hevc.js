@@ -209,7 +209,7 @@ export function decodeHEVC(val) {
 		// general_reserved_zero_bit
 	}
 
-	res.push(general_profile_space == -1 ? error('general_profile_space=') : normal(`general_profile_space=${general_profile_space}`));
+	res.push(normal(`general_profile_space=${general_profile_space}`));
 	if (profileSpaceWarning) res.push(profileSpaceWarning);
 
 	const profile = HEVCprofile(
