@@ -160,7 +160,7 @@ export function decodeHEVC(val) {
 		constraints.push(normal(`general_max_420chroma_constraint_flag=${showbit(constraintFlags.bitset(40))}`));
 		constraints.push(normal(`general_max_monochrome_constraint_flag=${showbit(constraintFlags.bitset(39))}`));
 		constraints.push(normal(`general_intra_constraint_flag=${showbit(constraintFlags.bitset(38))}`));
-		constraints.push(normal(`general_one_picture_only_constraint_flag="${showbit(constraintFlags.bitset(37))}`));
+		constraints.push(normal(`general_one_picture_only_constraint_flag=${showbit(constraintFlags.bitset(37))}`));
 		general_one_picture_only_constraint_flag = constraintFlags.bitset(37);
 		constraints.push(normal(`general_lower_bit_rate_constraint_flag=${showbit(constraintFlags.bitset(36))}`));
 

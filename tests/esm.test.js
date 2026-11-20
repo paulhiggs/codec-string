@@ -436,4 +436,15 @@ describe('ESM index test', () => {
 	test.each(['D1', 'z1', 'AA1', 'A'])('HEVC regex rejects the profile %s', (profile) => {
 		expect(expressions.HEVC.regex.test(`hvc1.${profile}.6.L93.B0`)).toBe(false);
 	});
+
+	// #60: no stray quote in the general_one_picture_only_constraint_flag output
+	test.each([
+		['hvc1.4.10.L93.B0', 'general_one_picture_only_constraint_flag=0'],
+		['hvc1.4.10.L93.B0.10', 'general_one_picture_only_constraint_flag=1'],
+		['hvc1.2.4.L93.B0.10', 'general_one_picture_only_constraint_flag=1'],
+	])('HEVC shows general_one_picture_only_constraint_flag for %s', (codec, flag) => {
+		const text = decodeText(hevcDecodes(codec));
+		expect(text).toContain(flag);
+		expect(text.filter((t) => t.includes('"'))).toEqual([]);
+	});
 });
