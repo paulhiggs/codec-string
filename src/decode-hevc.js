@@ -149,7 +149,7 @@ export function decodeHEVC(val) {
 			general_profile_idc == 11 ||
 			bitSet32(general_profile_compatibility_flag, 10)
 		) {
-			constraints.push(normal(`general_max_12bit_constraint_flag=${showbit(constraintFlags.bitset(35))}`));
+			constraints.push(normal(`general_max_14bit_constraint_flag=${showbit(constraintFlags.bitset(35))}`));
 			// general_reserved_zero_33bits
 		} else {
 			// general_reserved_zero_34bits
