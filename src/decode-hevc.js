@@ -57,6 +57,24 @@ const HEVClevels = {
 	255: '8.5',
 };
 
+// the profiles that general_profile_compatibility_flag[ j ] can signal, see Annexes A, G, H and I of Rec. ITU-T H.265 (V11)
+const HEVCcompatibleProfileNames = {
+	1: 'Main',
+	2: 'Main 10',
+	3: 'Main Still Picture',
+	4: 'Format Range Extensions',
+	5: 'High Throughput',
+	6: 'Multiview Main',
+	7: 'Scalable Main',
+	8: '3D Main',
+	9: 'Screen Content Coding',
+	10: 'Scalable Format Range Extensions',
+	11: 'High Throughput Screen Content Coding',
+	12: 'Multiview Extended',
+	13: 'Multiview Extended 10',
+	14: 'Multiview Format Range Extensions',
+};
+
 // format range extensions profiles (general_profile_idc 4), see Table A.2 of Rec. ITU-T H.265 (V11)
 // flags are general_max_12bit, max_10bit, max_8bit, max_422chroma, max_420chroma, max_monochrome, intra and one_picture_only
 // general_lower_bit_rate_constraint_flag shall be 1, except for the Intra and Still Picture profiles where it can be 0 or 1
@@ -85,23 +103,39 @@ const FormatRangeExtensionsProfiles = [
 ];
 
 export function decodeHEVC(val) {
+	// the name of the profile with the given general_profile_idc, or null when it is not a known profile
+	// profile names according to Annexes A, G, H and I of Rec. ITU-T H.265 (V11)
+	function HEVCprofileName(idc, gopocf, gm8bcf) {
+		switch (idc) {
+			case 1: return { str: 'Main (1)', profile: 'Main' };
+			case 2: return { str: `Main 10 ${gopocf ? 'Still Picture ' : ''}(2)`, profile: 'Main 10' };
+			case 3: return { str: 'Main Still Picture (3)', profile: 'Main Still' };
+			case 4: return formatRangeExtensionsProfile();
+			case 5: return { str: 'High Throughput (5)', profile: 'High Throughput' };
+			case 6: return { str: `Multiview Main ${gm8bcf ? '' : '10 '}(6)`, profile: gm8bcf ? 'Multiview Main' : 'Multiview Main 10' };
+			case 7: return { str: `Scalable Main ${gm8bcf ? '' : '10 '}(7)`, profile: 'Scalable Main' };
+			case 8: return { str: '3D Main (8)', profile: '3D Main' };
+			case 9: return { str: 'Screen Content Coding (9)', profile: 'Screen Content' };
+			case 10: return { str: 'Scalable Format Range Extensions (10)', profile: 'Scalable Format Range Extensions' };
+			case 11: return { str: 'High Throughput Screen Content Coding (11)', profile: 'High Throughput Screen Content' };
+			case 12: return { str: 'Multiview Extended (12)', profile: 'Multiview Extended' };
+			case 13: return { str: 'Multiview Extended 10 (13)', profile: 'Multiview Extended 10' };
+			case 14: return { str: 'Multiview Format Range Extensions (14)', profile: 'Multiview Format Range Extensions' };
+		}
+		return null;
+	}
+
+	// the profile is given by general_profile_idc. Only when that is not a known profile is the first profile
+	// that general_profile_compatibility_flag signals compatibility with used instead
 	function HEVCprofile(gopocf, gm8bcf) {
-		if (profileOrCompatible(1)) return { str: 'Main (1)', profile: 'Main' };
-		if (profileOrCompatible(2)) return { str: `Main 10 ${gopocf ? 'Still Picture ' : ''}(2)`, profile: 'Main 10' };
-		if (profileOrCompatible(3)) return { str: 'Main Still Picture (3)', profile: 'Main Still' };
-		if (profileOrCompatible(4)) return formatRangeExtensionsProfile();
-		if (profileOrCompatible(5)) return { str: 'High Throughput (5)', profile: 'High Throughput' };
-		// profile names according to Annexes A, G, H and I of Rec. ITU-T H.265 (V11)
-		if (profileOrCompatible(6)) return { str: `Multiview Main ${gm8bcf ? '' : '10 '}(6)`, profile: gm8bcf ? 'Multiview Main' : 'Multiview Main 10' };
-		if (profileOrCompatible(7)) return { str: `Scalable Main ${gm8bcf ? '' : '10 '}(7)`, profile: 'Scalable Main' };
-		if (profileOrCompatible(8)) return { str: '3D Main (8)', profile: '3D Main' };
-		if (profileOrCompatible(9)) return { str: 'Screen Content Coding (9)', profile: 'Screen Content' };
-		if (profileOrCompatible(10)) return { str: 'Scalable Format Range Extensions (10)', profile: 'Scalable Format Range Extensions' };
-		if (profileOrCompatible(11)) return { str: 'High Throughput Screen Content Coding (11)', profile: 'High Throughput Screen Content' };
-		if (profileOrCompatible(12)) return { str: 'Multiview Extended (12)', profile: 'Multiview Extended' };
-		if (profileOrCompatible(13)) return { str: 'Multiview Extended 10 (13)', profile: 'Multiview Extended 10' };
-		if (profileOrCompatible(14)) return { str: 'Multiview Format Range Extensions (14)', profile: 'Multiview Format Range Extensions' };
-		return error('unknown profile');
+		const profile = HEVCprofileName(general_profile_idc, gopocf, gm8bcf);
+		if (profile) return profile;
+		for (const idc of compatibleProfiles()) {
+			const compatible = HEVCprofileName(idc, gopocf, gm8bcf);
+			if (compatible)
+				return { ...compatible, note: `general_profile_idc (${general_profile_idc}) is not a known profile, the profile is taken from general_profile_compatibility_flag[ ${idc} ]` };
+		}
+		return error(`unknown profile (${general_profile_idc})`);
 	}
 
 	// identify the format range extensions profile from the constraint flags, see Table A.2 of Rec. ITU-T H.265 (V11)
@@ -140,10 +174,12 @@ export function decodeHEVC(val) {
 	const profileSpaceWarning =
 		space && space != space.toUpperCase() ? warning(`general_profile_space should be uppercase (${space.toUpperCase()}), not ${space}`) : null;
 
-	// true when general_profile_idc is one of the given values, or the codecs string signals compatibility with one of them.
-	// Note: general_profile_compatibility_flag[ j ] is read from bit j-1 here, see #57
-	const profileOrCompatible = (...idcs) =>
-		idcs.some((idc) => general_profile_idc == idc || bitSet32(general_profile_compatibility_flag, idc - 1));
+	// general_profile_compatibility_flag[ j ] is bit j of the hexadecimal value, i.e. general_profile_compatibility_flag[ 31 ] is the
+	// most significant bit, see clause E.3 of ISO/IEC 14496-15 and clause 7.4.4 of Rec. ITU-T H.265
+	const compatibleProfiles = () => [...Array(32).keys()].filter((j) => bitSet32(general_profile_compatibility_flag, j));
+
+	// true when general_profile_idc is one of the given values, or general_profile_compatibility_flag[ idc ] is set for one of them
+	const profileOrCompatible = (...idcs) => idcs.some((idc) => general_profile_idc == idc || bitSet32(general_profile_compatibility_flag, idc));
 
 	// process the constraints as we need to extract the general_one_picture_only_constraint_flag
 
@@ -219,7 +255,11 @@ export function decodeHEVC(val) {
 	if (profile?.error) res.push(error(profile.error));
 	if (profile?.profile) coding_params.profile = profile.profile;
 	if (profile?.str) res.push(normal(`general_profile_idc=${profile.str}`));
+	if (profile?.note) res.push(info(profile.note));
 	if (profile?.warning) res.push(warning(profile.warning));
+	const compatible = compatibleProfiles();
+	if (compatible.length)
+		res.push(info(`compatible profiles: ${compatible.map((j) => `${HEVCcompatibleProfileNames[j] ?? 'reserved'} (${j})`).join(', ')}`));
 
 	const tier = sscanf(parts[3], '%c%d');
 	switch (tier[0].toUpperCase()) {

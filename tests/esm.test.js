@@ -519,4 +519,51 @@ describe('ESM index test', () => {
 			`the constraint flags (${flags}, general_lower_bit_rate_constraint_flag=1) do not identify a format range extensions profile in Table A.2`,
 		]);
 	});
+
+	// #57: general_profile_compatibility_flag[ j ] is bit j of the hexadecimal value (H.265 clause 7.4.4, ISO/IEC 14496-15 clause E.4)
+	// #58: the profile is given by general_profile_idc, the compatibility flags are only used when it is not a known profile
+	const informative = (parsed) => parsed.filter((p) => p.informative).map((p) => p.informative);
+	test.each([
+		['hvc1.1.6.L93.B0', 'Main (1)', 'Main (1), Main 10 (2)'],
+		['hvc1.2.4.L153.B0', 'Main 10 (2)', 'Main 10 (2)'],
+		['hvc1.2.6.L93.B0', 'Main 10 (2)', 'Main (1), Main 10 (2)'],
+		['hvc1.4.4.L93.B9.88', 'Main 12 (4)', 'Main 10 (2)'],
+		['hvc1.7.82.L120.BF.88', 'Scalable Main (7)', 'Main (1), Scalable Main (7)'],
+	])('HEVC takes the profile of %s from general_profile_idc', (codec, name, compatible) => {
+		const parsed = hevcDecodes(codec);
+		expect(errors(parsed)).toEqual([]);
+		expect(decodeText(parsed)).toContain(`general_profile_idc=${name}`);
+		expect(informative(parsed)).toContain(`compatible profiles: ${compatible}`);
+		expect(informative(parsed).filter((i) => i.includes('is not a known profile'))).toEqual([]);
+	});
+
+	test.each([
+		['hvc1.0.2.L93.B0', 'Main (1)', 0, 1, 'urn:dvb:metadata:cs:VideoCodecCS:2022:4.1.10'],
+		['hvc1.0.4.L93.B0', 'Main 10 (2)', 0, 2, 'urn:dvb:metadata:cs:VideoCodecCS:2022:4.2.10'],
+		['hvc1.20.2.L93.B0', 'Main (1)', 20, 1, 'urn:dvb:metadata:cs:VideoCodecCS:2022:4.1.10'],
+	])('HEVC takes the profile of %s from the compatibility flags', (codec, name, idc, flag, dvb) => {
+		const parsed = hevcDecodes(codec);
+		expect(decodeText(parsed)).toContain(`general_profile_idc=${name}`);
+		expect(informative(parsed)).toContain(`general_profile_idc (${idc}) is not a known profile, the profile is taken from general_profile_compatibility_flag[ ${flag} ]`);
+		expect(dvbTerm(parsed)).toEqual(dvb);
+	});
+
+	test('HEVC reports an unknown profile', () => {
+		expect(errors(hevcDecodes('hvc1.0.0.L93.B0'))).toEqual([{ error: 'unknown profile (0)' }]);
+		const parsed = hevcDecodes('hvc1.20.10000.L93.B0');
+		expect(errors(parsed)).toEqual([{ error: 'unknown profile (20)' }]);
+		expect(informative(parsed)).toContain('compatible profiles: reserved (16)');
+	});
+
+	// the profile_tier_level( ) conditions in H.265 clause 7.3.3 use general_profile_compatibility_flag[ j ]
+	test('HEVC shows the constraint flags for the profiles the compatibility flags signal', () => {
+		// Main only: no general_one_picture_only_constraint_flag (general_reserved_zero_43bits)
+		expect(decodeText(hevcDecodes('hvc1.1.2.L93.B0')).filter((t) => t.startsWith('general_one_picture_only'))).toEqual([]);
+		// Main, compatible with Main 10: general_one_picture_only_constraint_flag is present
+		expect(decodeText(hevcDecodes('hvc1.1.6.L93.B0'))).toContain('general_one_picture_only_constraint_flag=0');
+		// format range extensions: general_max_14bit_constraint_flag is not present (general_reserved_zero_34bits)
+		const rext = decodeText(hevcDecodes('hvc1.4.10.L93.B9.88'));
+		expect(rext).toContain('general_max_12bit_constraint_flag=1');
+		expect(rext.filter((t) => t.startsWith('general_max_14bit'))).toEqual([]);
+	});
 });
