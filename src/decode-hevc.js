@@ -344,8 +344,8 @@ export function decodeHEVCLayerInfo(val) {
 	// lhevcptl is a MIME parameter (ISO/IEC 14496-15), so it is not present when only the codecs string is provided
 	if (!arr?.[1]) return [...res, info('no LHEVC ProfileTierLevel information')];
 
-	// arr[1] contains the value provided in the lhevcptl mime parameter
-	const parts = arr[1].split(',');
+	// arr[1] contains the value provided in the lhevcptl mime parameter: BLInternal, ListItem1(, ListItemN)*
+	const parts = arr[1].split(',').map((p) => p.trim());
 	const BLInternal = parseInt(parts[0]);
 	switch (BLInternal) {
 		case 0:
@@ -358,18 +358,55 @@ export function decodeHEVCLayerInfo(val) {
 			res.push(error(`invalid value for BLInternal (${parts[0]})`));
 	}
 
+	if (parts.length < 2) res.push(error('lhevcptl requires at least one ListItem after BLInternal'));
+
 	for (let i = 1; i < parts.length; i++) {
-		const p2 = parts[i].split('.');
-		if (p2.length < 3) {
-			res.push(error(`invalid format for ListItem${i} (${parts[i]})`));
-		} else {
-			let listitem = `ListItem${i}: OlsIdx=${p2[0]}, MaxTid=${p2[1]}, PTL1=${p2[2]}`;
-			for (let j = 3; j < p2.length; j++) listitem += `, PTL${j - 1}=${p2[j]}`;
-			res.push(normal(listitem));
+		// each ListItem is OlsIdx.MaxTid.ProfileTierLevel1(.ProfileTierLevelN)*
+		const [olsIdx, maxTid, ...ptlParts] = parts[i].split('.');
+		if (!/^\d+$/.test(olsIdx ?? '') || !/^\d+$/.test(maxTid ?? '') || ptlParts.length == 0) {
+			res.push(error(`invalid format for ListItem${i} (${parts[i]}), expected OlsIdx.MaxTid.ProfileTierLevel1(.ProfileTierLevelN)*`));
+			continue;
 		}
+		res.push(normal(`ListItem${i}: OlsIdx=${olsIdx}, MaxTid=${maxTid}`));
+
+		const ptls = splitProfileTierLevels(ptlParts);
+		if (!ptls) {
+			res.push(error(`invalid profile-tier-level sub-strings in ListItem${i} (${ptlParts.join('.')})`));
+			continue;
+		}
+		// a tier and level in the constraint bytes means an earlier sub-string omitted its trailing zero bytes
+		if (ptls.some((ptl) => ptl.split('.').slice(3).some((part) => /^[LH]\d+$/i.test(part)))) {
+			res.push(error(`invalid profile-tier-level sub-strings in ListItem${i} (${ptlParts.join('.')}), trailing zero bytes can only be omitted for the last one`));
+			continue;
+		}
+		ptls.forEach((ptl, j) => {
+			res.push(normal(`ListItem${i} PTL${j + 1}=${ptl}`));
+			// each profile-tier-level sub-string is decoded as the single-layer HEVC codecs string (clause E.3)
+			// the DVB term is left out, as it would describe the sample entry type used for decoding, not the layer
+			res.push(...decodeHEVC(`hvc1.${ptl}`).filter((line) => !line.dvb_term));
+		});
 	}
 
 	return res;
+}
+
+// split the profile-tier-level sub-strings of an lhevcptl ListItem, see clause E.4 item 5) of ISO/IEC 14496-15:
+// each is general_profile_idc.general_profile_compatibility_flags.tier and level, then the constraint bytes, and
+// omission of trailing bytes that are zero is only allowed for the last sub-string, so all the others have six
+// constraint bytes (9 parts). The last one has at least one constraint byte (4 to 9 parts).
+// returns null when the parts cannot be split this way
+function splitProfileTierLevels(ptlParts) {
+	const FULL_PTL = 9,
+		MIN_PTL = 4;
+	const ptls = [];
+	let remaining = ptlParts;
+	while (remaining.length > FULL_PTL) {
+		ptls.push(remaining.slice(0, FULL_PTL).join('.'));
+		remaining = remaining.slice(FULL_PTL);
+	}
+	if (remaining.length < MIN_PTL) return null;
+	ptls.push(remaining.join('.'));
+	return ptls;
 }
 
 export function registerHEVC(addHandler) {

@@ -457,10 +457,67 @@ describe('commonjs build test', () => {
 		expect(result.decodes[1].parsed).toEqual([{ informative: 'no LHEVC ProfileTierLevel information' }]);
 	});
 
-	test('Layered HEVC decodes BLInternal from the lhevcptl MIME parameter (ISO/IEC 14496-15 example)', () => {
-		const parsed = decodeHEVCLayerInfo('codecs="hev1.1.6.L93.B0, lhv1"; lhevcptl="1, 1.6.1.6.L93.B0.0.0.0.0.0.7.80.L120.BF.88"');
-		expect(parsed[0]).toEqual({ decode: 'Coded pictures with nuh_layer_id==0 may be present in the bitstream.' });
-		expect(parsed.length).toEqual(2);
+	// #74: lhevcptl ListItems are OlsIdx.MaxTid.ProfileTierLevel1(.ProfileTierLevelN)*, and only the last
+	// profile-tier-level sub-string can omit trailing zero bytes (ISO/IEC 14496-15 clause E.4, examples from that clause)
+	const layerSummary = (parsed) =>
+		parsed.filter((p) => p.error || /^(Coded pictures|ListItem|general_profile_idc=|Level |Main Tier|High Tier)/.test(p.decode ?? '')).map((p) => p.error ?? p.decode);
+
+	test.each([
+		[
+			'codecs="hev1.1.6.L93.B0, lhv1"; lhevcptl="1, 1.6.1.6.L93.B0.0.0.0.0.0.7.80.L120.BF.88"',
+			[
+				'Coded pictures with nuh_layer_id==0 may be present in the bitstream.',
+				'ListItem1: OlsIdx=1, MaxTid=6',
+				'ListItem1 PTL1=1.6.L93.B0.0.0.0.0.0', 'general_profile_idc=Main (1)', 'Main Tier (L)', 'Level 3.1',
+				'ListItem1 PTL2=7.80.L120.BF.88', 'general_profile_idc=Scalable Main (7)', 'Main Tier (L)', 'Level 4',
+			],
+		],
+		[
+			'codecs="hev1.1.6.L123.B0"; lhevcptl="1, 0.6.1.6.L93.B0, 1.6.7.80.L120.BF.88"',
+			[
+				'Coded pictures with nuh_layer_id==0 may be present in the bitstream.',
+				'ListItem1: OlsIdx=0, MaxTid=6',
+				'ListItem1 PTL1=1.6.L93.B0', 'general_profile_idc=Main (1)', 'Main Tier (L)', 'Level 3.1',
+				'ListItem2: OlsIdx=1, MaxTid=6',
+				'ListItem2 PTL1=7.80.L120.BF.88', 'general_profile_idc=Scalable Main (7)', 'Main Tier (L)', 'Level 4',
+			],
+		],
+		[
+			'codecs="hev1.1.6.L93.B0, lhv1"; lhevcptl="1, 1.6.1.6.L93.B0.0.0.0.0.0.7.80.L120.BF.88, 2.6.1.6.L93.B0.0.0.0.0.0.6.40.L120.BF.88"',
+			[
+				'Coded pictures with nuh_layer_id==0 may be present in the bitstream.',
+				'ListItem1: OlsIdx=1, MaxTid=6',
+				'ListItem1 PTL1=1.6.L93.B0.0.0.0.0.0', 'general_profile_idc=Main (1)', 'Main Tier (L)', 'Level 3.1',
+				'ListItem1 PTL2=7.80.L120.BF.88', 'general_profile_idc=Scalable Main (7)', 'Main Tier (L)', 'Level 4',
+				'ListItem2: OlsIdx=2, MaxTid=6',
+				'ListItem2 PTL1=1.6.L93.B0.0.0.0.0.0', 'general_profile_idc=Main (1)', 'Main Tier (L)', 'Level 3.1',
+				'ListItem2 PTL2=6.40.L120.BF.88', 'general_profile_idc=Multiview Main (6)', 'Main Tier (L)', 'Level 4',
+			],
+		],
+		[
+			'codecs="lhv1, avc1.64081F"; lhevcptl="0, 1.6.7.80.L120.BF.88"',
+			[
+				'Coded pictures with nuh_layer_id==0 are not present in the bitstream.',
+				'ListItem1: OlsIdx=1, MaxTid=6',
+				'ListItem1 PTL1=7.80.L120.BF.88', 'general_profile_idc=Scalable Main (7)', 'Main Tier (L)', 'Level 4',
+			],
+		],
+	])('Layered HEVC decodes the lhevcptl MIME parameter in %s', (mime, expected) => {
+		const parsed = decodeHEVCLayerInfo(mime);
+		expect(layerSummary(parsed)).toEqual(expected);
+		expect(parsed.filter((p) => p.dvb_term)).toEqual([]);
+	});
+
+	test.each([
+		['1, 1.6.1.6.L93.B0.7.80.L120.BF.88', 'invalid profile-tier-level sub-strings in ListItem1 (1.6.L93.B0.7.80.L120.BF.88), trailing zero bytes can only be omitted for the last one'],
+		['1, 1.6.1.6.L93', 'invalid profile-tier-level sub-strings in ListItem1 (1.6.L93)'],
+		['1, 1.6.1.6.L93.B0.0.0.0.0.0.7', 'invalid profile-tier-level sub-strings in ListItem1 (1.6.L93.B0.0.0.0.0.0.7)'],
+		['1, x.6.1.6.L93.B0', 'invalid format for ListItem1 (x.6.1.6.L93.B0), expected OlsIdx.MaxTid.ProfileTierLevel1(.ProfileTierLevelN)*'],
+		['1, 1.6', 'invalid format for ListItem1 (1.6), expected OlsIdx.MaxTid.ProfileTierLevel1(.ProfileTierLevelN)*'],
+		['1', 'lhevcptl requires at least one ListItem after BLInternal'],
+		['3, 1.6.1.6.L93.B0', 'invalid value for BLInternal (3)'],
+	])('Layered HEVC reports an error for lhevcptl="%s"', (lhevcptl, message) => {
+		expect(decodeHEVCLayerInfo(`lhevcptl="${lhevcptl}"`).filter((p) => p.error)).toEqual([{ error: message }]);
 	});
 
 	// #70: when the sample entry in a codecs list item is lhv1 or lhe1, no further data is provided in that list item (ISO/IEC 14496-15 clause E.4)
