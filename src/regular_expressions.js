@@ -101,6 +101,6 @@ export const expressions = {
 		description: '<profiles> is one or more TTML profile identifiers from the W3C TTML profile registry, joined by + (all of) or | (any one of)'
 	},
 	HEVC: {
-		regex: /^(hev1|hvc1|hev2|hvc2|hev3|hvc3)\.([a-zA-Z]?\d{1,3})\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){1,6}$/,
+		regex: /^(hev1|hvc1|hev2|hvc2|hev3|hvc3)\.([A-Ca-c]?\d{1,3})\.[a-fA-F\d]{1,8}\.[LH]\d{1,3}(\.[a-fA-F\d]{1,2}){1,6}$/,
 	}
 };

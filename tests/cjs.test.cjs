@@ -412,4 +412,13 @@ describe('commonjs build test', () => {
 	test.each(['hev4', 'hvc0', 'lhv1', 'avc1'])('HEVC regex rejects %s', (fourCC) => {
 		expect(expressions.HEVC.regex.test(`${fourCC}.1.6.L93.B0`)).toBe(false);
 	});
+
+	// #71: the profile part is an optional general_profile_space letter A, B or C (lowercase is accepted, see #62)
+	test.each(['1', 'A1', 'B2', 'C3', 'a1', 'c3'])('HEVC regex accepts the profile %s', (profile) => {
+		expect(expressions.HEVC.regex.test(`hvc1.${profile}.6.L93.B0`)).toBe(true);
+	});
+
+	test.each(['D1', 'z1', 'AA1', 'A'])('HEVC regex rejects the profile %s', (profile) => {
+		expect(expressions.HEVC.regex.test(`hvc1.${profile}.6.L93.B0`)).toBe(false);
+	});
 });
