@@ -1,5 +1,5 @@
 /**
- * @copyright: Copyright (c) 2021-2024
+ * @copyright: Copyright (c) 2021-2026
  * @author: Paul Higgs
  * @file: decode-hevc.js
  *
@@ -85,7 +85,6 @@ const FormatRangeExtensionsProfiles = [
 ];
 
 export function decodeHEVC(val) {
-
 	function HEVCprofile(gopocf, gm8bcf) {
 		if (profileOrCompatible(1)) return { str: 'Main (1)', profile: 'Main' };
 		if (profileOrCompatible(2)) return { str: `Main 10 ${gopocf ? 'Still Picture ' : ''}(2)`, profile: 'Main 10' };
@@ -269,9 +268,9 @@ export function decodeHEVCLayerInfo(val) {
 	if (!arr?.[1]) return [...res, info('no LHEVC ProfileTierLevel information')];
 
 	// arr[1] contains the value provided in the lhevcptl mime parameter
-	const parts = arr[1].split(",");
+	const parts = arr[1].split(',');
 	const BLInternal = parseInt(parts[0]);
-  switch (BLInternal) {
+	switch (BLInternal) {
 		case 0:
 			res.push(normal('Coded pictures with nuh_layer_id==0 are not present in the bitstream.'));
 			break;
@@ -281,14 +280,14 @@ export function decodeHEVCLayerInfo(val) {
 		default:
 			res.push(error(`invalid value for BLInternal (${parts[0]})`));
 	}
-	for (let i=1; i<parts.length; i++) {
-		const p2 = parts[i].split(".");
-		if (p2.length < 3)
+
+	for (let i = 1; i < parts.length; i++) {
+		const p2 = parts[i].split('.');
+		if (p2.length < 3) {
 			res.push(error(`invalid format for ListItem${i} (${parts[i]})`));
-		else {
+		} else {
 			let listitem = `ListItem${i}: OlsIdx=${p2[0]}, MaxTid=${p2[1]}, PTL1=${p2[2]}`;
-			for (let j=3; j<p2.length; j++) 
-				listitem += `, PTL${j-1}=${p2[j]}`;
+			for (let j = 3; j < p2.length; j++) listitem += `, PTL${j - 1}=${p2[j]}`;
 			res.push(normal(listitem));
 		}
 	}
@@ -299,6 +298,6 @@ export function decodeHEVCLayerInfo(val) {
 export function registerHEVC(addHandler) {
 	const outputHTML = (label, messages) => simpleHTML(label, messages, DEBUGGING);
 
-	addHandler(['hev1', 'hvc1', 'hev2', 'hvc2','hev3', 'hvc3'], 'HEVC/H.265', decodeHEVC, outputHTML);
+	addHandler(['hev1', 'hvc1', 'hev2', 'hvc2', 'hev3', 'hvc3'], 'HEVC/H.265', decodeHEVC, outputHTML);
 	addHandler(['lhv1', 'lhe1'], 'Layered HEVC', decodeHEVCLayerInfo, outputHTML);
 }
