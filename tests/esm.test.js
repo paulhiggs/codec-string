@@ -1,5 +1,5 @@
 /* globals describe, test, expect */
-import { decode, decodeLCEVC, decodeSTPP, decodeUWA, simpleHTML } from '../dist/esm/codec-string.js';
+import { decode, decodeHEVC, decodeLCEVC, decodeSTPP, decodeUWA, simpleHTML } from '../dist/esm/codec-string.js';
 
 describe('ESM index test', () => {
 	test('H.264 decode', () => {
@@ -306,5 +306,85 @@ describe('ESM index test', () => {
 		const html = decode('evc1.vprf1.vtoh000001').decodes[0].toHTML();
 		expect(html).toContain('tr:nth-child(even) {background-color: #f2f2f2;}');
 		expect(html).toContain('<td>Toolset High (vtoh)</td><td>0x000001</td>');
+	});
+
+	// HEVC codec strings, ISO/IEC 14496-15 annex E.3 and Rec. ITU-T H.265 (V11)
+	const hevcDecodes = (codec) => {
+		const result = decode(codec);
+		expect(result).toBeDefined();
+		expect(result.decodes.length).toEqual(1);
+		expect(result.decodes[0].label).toEqual('HEVC/H.265');
+		return result.decodes[0].parsed;
+	};
+
+	test('HEVC decode hvc1.1.6.L93.B0', () => {
+		const parsed = hevcDecodes('hvc1.1.6.L93.B0');
+		expect(errors(parsed)).toEqual([]);
+		expect(warnings(parsed)).toEqual([]);
+		expect(decodeText(parsed)).toEqual(expect.arrayContaining(['general_profile_space=0', 'general_profile_idc=Main (1)', 'Main Tier (L)', 'Level 3.1', 'scan=progressive']));
+	});
+
+	// #69: the High tier is only specified for level 4 and above (H.265 annex A.4.1)
+	test.each([
+		['hvc1.1.6.H60.B0', 'High Tier is not specified for Level 2, only for Level 4 and above'],
+		['hvc1.1.6.H93.B0', 'High Tier is not specified for Level 3.1, only for Level 4 and above'],
+	])('HEVC warns about the High tier below level 4 (%s)', (codec, warning) => {
+		expect(warnings(hevcDecodes(codec))).toEqual([warning]);
+	});
+
+	test.each(['hvc1.1.6.H120.B0', 'hvc1.1.6.L60.B0'])('HEVC does not warn about the tier for %s', (codec) => {
+		expect(warnings(hevcDecodes(codec))).toEqual([]);
+	});
+
+	// #62: general_profile_space is no character or 'A', 'B', 'C' (ISO/IEC 14496-15 annex E.3)
+	test.each([
+		['hvc1.A1.6.L93.B0', 1],
+		['hvc1.B1.6.L93.B0', 2],
+		['hvc1.C1.6.L93.B0', 3],
+	])('HEVC decodes the profile space in %s', (codec, space) => {
+		const parsed = hevcDecodes(codec);
+		expect(warnings(parsed)).toEqual([]);
+		expect(decodeText(parsed)).toContain(`general_profile_space=${space}`);
+		expect(decodeText(parsed)).toContain('general_profile_idc=Main (1)');
+	});
+
+	test('HEVC accepts a lowercase profile space with a warning', () => {
+		const parsed = hevcDecodes('hvc1.a1.6.L93.B0');
+		expect(decodeText(parsed)).toContain('general_profile_space=1');
+		expect(decodeText(parsed)).toContain('general_profile_idc=Main (1)');
+		expect(warnings(parsed)).toEqual(['general_profile_space should be uppercase (A), not a']);
+	});
+
+	test.each(['D1', '1x', 'A'])('HEVC rejects the profile %s', (profile) => {
+		expect(hevcDecodes(`hvc1.${profile}.6.L93.B0`)).toEqual([
+			{ error: `invalid general_profile_space and general_profile_idc (${profile}), expected an optional A, B or C followed by a decimal number` },
+		]);
+	});
+
+	// #59: the constraint bit after general_lower_bit_rate_constraint_flag
+	test('HEVC labels general_max_14bit_constraint_flag', () => {
+		const text = decodeText(hevcDecodes('hvc1.5.20.L93.B0.04'));
+		expect(text).toContain('general_max_14bit_constraint_flag=1');
+		expect(text.filter((t) => t.startsWith('general_max_12bit_constraint_flag='))).toEqual(['general_max_12bit_constraint_flag=0']);
+	});
+
+	// #65: profile names from Rec. ITU-T H.265 (V11) annexes G and H
+	test.each([
+		['hvc1.6.40.L93.BE', 'Multiview Main (6)'],
+		['hvc1.6.40.L93.BC', 'Multiview Main 10 (6)'],
+		['hvc1.7.80.L93.BE', 'Scalable Main (7)'],
+		['hvc1.7.80.L93.BC', 'Scalable Main 10 (7)'],
+		['hvc1.10.400.L93.B0', 'Scalable Format Range Extensions (10)'],
+		['hvc1.12.1000.L93.B0', 'Multiview Extended (12)'],
+		['hvc1.13.2000.L93.B0', 'Multiview Extended 10 (13)'],
+		['hvc1.14.4000.L93.B0', 'Multiview Format Range Extensions (14)'],
+	])('HEVC profile name for %s', (codec, name) => {
+		const parsed = hevcDecodes(codec);
+		expect(errors(parsed)).toEqual([]);
+		expect(decodeText(parsed)).toContain(`general_profile_idc=${name}`);
+	});
+
+	test('HEVC decodeHEVC can be called directly', () => {
+		expect(decodeHEVC('hvc1.1.6.L93.B0')).toContainEqual({ decode: 'general_profile_idc=Main (1)' });
 	});
 });
