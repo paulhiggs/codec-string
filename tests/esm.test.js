@@ -387,4 +387,20 @@ describe('ESM index test', () => {
 	test('HEVC decodeHEVC can be called directly', () => {
 		expect(decodeHEVC('hvc1.1.6.L93.B0')).toContainEqual({ decode: 'general_profile_idc=Main (1)' });
 	});
+
+	// #66: general_level_idc is 30 times the level number (H.265 table A.8)
+	test.each([
+		[30, '1'], [60, '2'], [63, '2.1'], [90, '3'], [93, '3.1'], [120, '4'], [123, '4.1'],
+		[150, '5'], [153, '5.1'], [156, '5.2'], [180, '6'], [183, '6.1'], [186, '6.2'],
+	])('HEVC general_level_idc %i is Level %s', (idc, level) => {
+		const parsed = hevcDecodes(`hvc1.1.6.L${idc}.B0`);
+		expect(errors(parsed)).toEqual([]);
+		expect(decodeText(parsed)).toContain(`Level ${level}`);
+	});
+
+	test('HEVC reports an unknown level', () => {
+		const parsed = hevcDecodes('hvc1.1.6.L91.B0');
+		expect(errors(parsed)).toEqual([{ error: 'unknown Level (91)' }]);
+		expect(decodeText(parsed).filter((t) => t.startsWith('Level '))).toEqual([]);
+	});
 });

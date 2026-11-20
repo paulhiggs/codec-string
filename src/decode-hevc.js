@@ -34,6 +34,23 @@ import { sscanf } from './sscanf-func.js';
 import { DVBclassification } from './dvb-mapping.js';
 import { simpleHTML } from './formatters.js';
 
+// general_level_idc is 30 times the level number in Table A.8 of Rec. ITU-T H.265 (Annex A.4.1)
+const HEVClevels = {
+	30: '1',
+	60: '2',
+	63: '2.1',
+	90: '3',
+	93: '3.1',
+	120: '4',
+	123: '4.1',
+	150: '5',
+	153: '5.1',
+	156: '5.2',
+	180: '6',
+	183: '6.1',
+	186: '6.2',
+};
+
 export function decodeHEVC(val) {
 
 	function HEVCprofile(general_profile_idc, cap, gopocf, gm8bcf) {
@@ -214,51 +231,9 @@ export function decodeHEVC(val) {
 			break;
 	}
 
-	let lev = null;
-	switch (tier[1]) {
-		case 30:
-			lev = '1';
-			break;
-		case 60:
-			lev = '2';
-			break;
-		case 63:
-			lev = '2.1';
-			break;
-		case 90:
-			lev = '3';
-			break;
-		case 93:
-			lev = '3.1';
-			break;
-		case 120:
-			lev = '4';
-			break;
-		case 123:
-			lev = '4.1';
-			break;
-		case 150:
-			lev = '5';
-			break;
-		case 153:
-			lev = '5.1';
-			break;
-		case 156:
-			lev = '5.2';
-			break;
-		case 180:
-			lev = '6';
-			break;
-		case 183:
-			lev = '6.1';
-			break;
-		case 186:
-			lev = '6.2';
-			break;
-		default:
-			res.push(error(`unknown Level (${tier[1]})`));
-	}
-	if (lev) {
+	const lev = HEVClevels[tier[1]];
+	if (!lev) res.push(error(`unknown Level (${tier[1]})`));
+	else {
 		res.push(normal(`Level ${lev}`));
 		coding_params.level = lev;
 		// see Annex A.4.1 of Rec. ITU-T H.265: the High tier is only specified for level 4 and above
