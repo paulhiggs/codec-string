@@ -57,13 +57,40 @@ const HEVClevels = {
 	255: '8.5',
 };
 
+// format range extensions profiles (general_profile_idc 4), see Table A.2 of Rec. ITU-T H.265 (V11)
+// flags are general_max_12bit, max_10bit, max_8bit, max_422chroma, max_420chroma, max_monochrome, intra and one_picture_only
+// general_lower_bit_rate_constraint_flag shall be 1, except for the Intra and Still Picture profiles where it can be 0 or 1
+const FormatRangeExtensionsProfiles = [
+	{ flags: '11111100', name: 'Monochrome' },
+	{ flags: '11011100', name: 'Monochrome 10' },
+	{ flags: '10011100', name: 'Monochrome 12' },
+	{ flags: '00011100', name: 'Monochrome 16' },
+	{ flags: '10011000', name: 'Main 12' },
+	{ flags: '11010000', name: 'Main 4:2:2 10' },
+	{ flags: '10010000', name: 'Main 4:2:2 12' },
+	{ flags: '11100000', name: 'Main 4:4:4' },
+	{ flags: '11000000', name: 'Main 4:4:4 10' },
+	{ flags: '10000000', name: 'Main 4:4:4 12' },
+	{ flags: '11111010', name: 'Main Intra', anyLowerBitRate: true },
+	{ flags: '11011010', name: 'Main 10 Intra', anyLowerBitRate: true },
+	{ flags: '10011010', name: 'Main 12 Intra', anyLowerBitRate: true },
+	{ flags: '11010010', name: 'Main 4:2:2 10 Intra', anyLowerBitRate: true },
+	{ flags: '10010010', name: 'Main 4:2:2 12 Intra', anyLowerBitRate: true },
+	{ flags: '11100010', name: 'Main 4:4:4 Intra', anyLowerBitRate: true },
+	{ flags: '11000010', name: 'Main 4:4:4 10 Intra', anyLowerBitRate: true },
+	{ flags: '10000010', name: 'Main 4:4:4 12 Intra', anyLowerBitRate: true },
+	{ flags: '00000010', name: 'Main 4:4:4 16 Intra', anyLowerBitRate: true },
+	{ flags: '11100011', name: 'Main 4:4:4 Still Picture', anyLowerBitRate: true },
+	{ flags: '00000011', name: 'Main 4:4:4 16 Still Picture', anyLowerBitRate: true },
+];
+
 export function decodeHEVC(val) {
 
 	function HEVCprofile(gopocf, gm8bcf) {
 		if (profileOrCompatible(1)) return { str: 'Main (1)', profile: 'Main' };
 		if (profileOrCompatible(2)) return { str: `Main 10 ${gopocf ? 'Still Picture ' : ''}(2)`, profile: 'Main 10' };
 		if (profileOrCompatible(3)) return { str: 'Main Still Picture (3)', profile: 'Main Still' };
-		if (profileOrCompatible(4)) return { str: 'Range Extensions (4)' };
+		if (profileOrCompatible(4)) return formatRangeExtensionsProfile();
 		if (profileOrCompatible(5)) return { str: 'High Throughput (5)', profile: 'High Throughput' };
 		// profile names according to Annexes A, G, H and I of Rec. ITU-T H.265 (V11)
 		if (profileOrCompatible(6)) return { str: `Multiview Main ${gm8bcf ? '' : '10 '}(6)`, profile: gm8bcf ? 'Multiview Main' : 'Multiview Main 10' };
@@ -76,6 +103,18 @@ export function decodeHEVC(val) {
 		if (profileOrCompatible(13)) return { str: 'Multiview Extended 10 (13)', profile: 'Multiview Extended 10' };
 		if (profileOrCompatible(14)) return { str: 'Multiview Format Range Extensions (14)', profile: 'Multiview Format Range Extensions' };
 		return error('unknown profile');
+	}
+
+	// identify the format range extensions profile from the constraint flags, see Table A.2 of Rec. ITU-T H.265 (V11)
+	function formatRangeExtensionsProfile() {
+		const flags = [44, 43, 42, 41, 40, 39, 38, 37].map((bit) => showbit(constraintFlags.bitset(bit))).join(''),
+			lowerBitRate = constraintFlags.bitset(36);
+		const rext = FormatRangeExtensionsProfiles.find((p) => p.flags == flags && (lowerBitRate || p.anyLowerBitRate));
+		if (rext) return { str: `${rext.name} (4)`, profile: rext.name };
+		return {
+			str: 'Format Range Extensions (4)',
+			warning: `the constraint flags (${flags}, general_lower_bit_rate_constraint_flag=${showbit(lowerBitRate)}) do not identify a format range extensions profile in Table A.2`,
+		};
 	}
 
 	const showbit = (v) => (v ? '1' : '0');
@@ -181,6 +220,7 @@ export function decodeHEVC(val) {
 	if (profile?.error) res.push(error(profile.error));
 	if (profile?.profile) coding_params.profile = profile.profile;
 	if (profile?.str) res.push(normal(`general_profile_idc=${profile.str}`));
+	if (profile?.warning) res.push(warning(profile.warning));
 
 	const tier = sscanf(parts[3], '%c%d');
 	switch (tier[0].toUpperCase()) {

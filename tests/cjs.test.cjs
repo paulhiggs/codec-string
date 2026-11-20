@@ -472,4 +472,51 @@ describe('commonjs build test', () => {
 		expect(result.decodes[0].label).toEqual('Layered HEVC');
 		expect(result.decodes[0].parsed).toEqual([{ warning }, { informative: 'no LHEVC ProfileTierLevel information' }]);
 	});
+
+	// #68: format range extensions profiles from the constraint flags (H.265 table A.2)
+	// rextConstraints() builds the first two constraint bytes: progressive, non-packed and frame-only, then the eight
+	// table A.2 flags (general_max_12bit ... general_one_picture_only) and general_lower_bit_rate_constraint_flag
+	const rextConstraints = (flags, lowerBitRate) => {
+		const bits = `1011${flags}${lowerBitRate}000`;
+		return [bits.slice(0, 8), bits.slice(8)].map((b) => parseInt(b, 2).toString(16).toUpperCase().padStart(2, '0')).join('.');
+	};
+	const rextProfiles = [
+		['Monochrome', '11111100', false], ['Monochrome 10', '11011100', false], ['Monochrome 12', '10011100', false],
+		['Monochrome 16', '00011100', false], ['Main 12', '10011000', false], ['Main 4:2:2 10', '11010000', false],
+		['Main 4:2:2 12', '10010000', false], ['Main 4:4:4', '11100000', false], ['Main 4:4:4 10', '11000000', false],
+		['Main 4:4:4 12', '10000000', false], ['Main Intra', '11111010', true], ['Main 10 Intra', '11011010', true],
+		['Main 12 Intra', '10011010', true], ['Main 4:2:2 10 Intra', '11010010', true], ['Main 4:2:2 12 Intra', '10010010', true],
+		['Main 4:4:4 Intra', '11100010', true], ['Main 4:4:4 10 Intra', '11000010', true], ['Main 4:4:4 12 Intra', '10000010', true],
+		['Main 4:4:4 16 Intra', '00000010', true], ['Main 4:4:4 Still Picture', '11100011', true], ['Main 4:4:4 16 Still Picture', '00000011', true],
+	];
+
+	test('HEVC rextConstraints() builds the expected constraint bytes', () => {
+		expect(rextConstraints('10011000', 1)).toEqual('B9.88');
+	});
+
+	test.each(rextProfiles)('HEVC format range extensions profile %s', (name, flags, anyLowerBitRate) => {
+		const parsed = hevcDecodes(`hvc1.4.10.L93.${rextConstraints(flags, 1)}`);
+		expect(warnings(parsed)).toEqual([]);
+		expect(decodeText(parsed)).toContain(`general_profile_idc=${name} (4)`);
+
+		// general_lower_bit_rate_constraint_flag can only be 0 for the Intra and Still Picture profiles
+		const lowerBitRate0 = hevcDecodes(`hvc1.4.10.L93.${rextConstraints(flags, 0)}`);
+		if (anyLowerBitRate) {
+			expect(warnings(lowerBitRate0)).toEqual([]);
+			expect(decodeText(lowerBitRate0)).toContain(`general_profile_idc=${name} (4)`);
+		} else {
+			expect(decodeText(lowerBitRate0)).toContain('general_profile_idc=Format Range Extensions (4)');
+			expect(warnings(lowerBitRate0)).toEqual([
+				`the constraint flags (${flags}, general_lower_bit_rate_constraint_flag=0) do not identify a format range extensions profile in Table A.2`,
+			]);
+		}
+	});
+
+	test.each(['11111111', '00000000', '01111100'])('HEVC warns about the reserved format range extensions flags %s', (flags) => {
+		const parsed = hevcDecodes(`hvc1.4.10.L93.${rextConstraints(flags, 1)}`);
+		expect(decodeText(parsed)).toContain('general_profile_idc=Format Range Extensions (4)');
+		expect(warnings(parsed)).toEqual([
+			`the constraint flags (${flags}, general_lower_bit_rate_constraint_flag=1) do not identify a format range extensions profile in Table A.2`,
+		]);
+	});
 });
