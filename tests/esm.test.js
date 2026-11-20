@@ -392,10 +392,25 @@ describe('ESM index test', () => {
 	test.each([
 		[30, '1'], [60, '2'], [63, '2.1'], [90, '3'], [93, '3.1'], [120, '4'], [123, '4.1'],
 		[150, '5'], [153, '5.1'], [156, '5.2'], [180, '6'], [183, '6.1'], [186, '6.2'],
+		[189, '6.3'], [210, '7'], [213, '7.1'], [216, '7.2'],
 	])('HEVC general_level_idc %i is Level %s', (idc, level) => {
 		const parsed = hevcDecodes(`hvc1.1.6.L${idc}.B0`);
 		expect(errors(parsed)).toEqual([]);
 		expect(decodeText(parsed)).toContain(`Level ${level}`);
+	});
+
+	// #64: level 8.5 is not in table A.8, and requires the High tier (H.265 annex A.4.1)
+	test('HEVC decodes level 8.5', () => {
+		const parsed = hevcDecodes('hvc1.1.6.H255.B0');
+		expect(errors(parsed)).toEqual([]);
+		expect(warnings(parsed)).toEqual([]);
+		expect(decodeText(parsed)).toContain('Level 8.5');
+	});
+
+	test('HEVC warns about level 8.5 with the Main tier', () => {
+		const parsed = hevcDecodes('hvc1.1.6.L255.B0');
+		expect(decodeText(parsed)).toContain('Level 8.5');
+		expect(warnings(parsed)).toEqual(['Level 8.5 requires the High Tier (H)']);
 	});
 
 	test('HEVC reports an unknown level', () => {

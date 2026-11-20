@@ -49,6 +49,12 @@ const HEVClevels = {
 	180: '6',
 	183: '6.1',
 	186: '6.2',
+	189: '6.3',
+	210: '7',
+	213: '7.1',
+	216: '7.2',
+	// level 8.5 is not in Table A.8: it labels bitstreams that can exceed the limits of all other levels
+	255: '8.5',
 };
 
 export function decodeHEVC(val) {
@@ -238,6 +244,8 @@ export function decodeHEVC(val) {
 		coding_params.level = lev;
 		// see Annex A.4.1 of Rec. ITU-T H.265: the High tier is only specified for level 4 and above
 		if (coding_params.tier == 'High' && tier[1] < 120) res.push(warning(`High Tier is not specified for Level ${lev}, only for Level 4 and above`));
+		// see Annex A.4.1 of Rec. ITU-T H.265: general_tier_flag shall be equal to 1 (High tier) for level 8.5
+		if (coding_params.tier == 'Main' && tier[1] == 255) res.push(warning('Level 8.5 requires the High Tier (H)'));
 	}
 	res.push(...constraints);
 
