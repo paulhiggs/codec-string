@@ -138,6 +138,34 @@ npm run start
 In a browser go to the page http://localhost:8080/tests/index.html
 this will list all of the available browser-based tests.
 
+### Releases
+
+The decoder page at https://paulhiggs.github.io/codec-string/ is the
+`dist/script` build, deployed to GitHub Pages by the
+[Release workflow](.github/workflows/release.yml) whenever a release is
+published. To make a release:
+
+1. Set the new `version` in `package.json` (e.g. `0.2.0`), commit and push it to `main`.
+2. Publish a release on GitHub with the tag `v` followed by that version:
+
+   ```sh
+   gh release create v0.2.0 --title "codec-string 0.2.0" --notes-file release-notes.md
+   ```
+
+The workflow then:
+
+* checks that the tag matches the version in `package.json`
+* builds the bundles and runs the tests (`npm run build`), and stops if any fail
+* attaches `codec-string-<version>.tgz` (from `npm pack`) and
+  `codec-string-<version>-web.zip` (the `dist/script` page) to the release
+* deploys `dist/script` to GitHub Pages
+
+The workflow can also be run by hand (*Actions > Release > Run workflow*)
+to deploy the current `main` branch to GitHub Pages without a release.
+
+GitHub Pages must be enabled once for this repository, with
+*Settings > Pages > Build and deployment > Source* set to *GitHub Actions*.
+
 ### Acknowledgements
 
 Some code review and fixes were carried out with the help of

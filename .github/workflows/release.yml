@@ -1,0 +1,85 @@
+name: Release
+
+# When a GitHub release is published:
+#   1. build the bundles and run the tests (npm run build)
+#   2. attach the npm package and the web page files to the release
+#   3. deploy the web page (dist/script) to GitHub Pages, https://paulhiggs.github.io/codec-string/
+#
+# It can also be run by hand (Actions > Release > Run workflow) to deploy the current main branch to GitHub Pages
+# without making a release. Nothing is attached in that case.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+# only one deployment to GitHub Pages at a time, and don't cancel one that is in progress
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to attach files to the release
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+
+      - name: Check that the release tag matches the version in package.json
+        if: github.event_name == 'release'
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "v$VERSION" ]; then
+            echo "::error::the release tag ($TAG) does not match the version in package.json (v$VERSION)"
+            exit 1
+          fi
+
+      - name: Provision NPM
+        run: npm install
+
+      - name: Build the bundles and run the tests
+        run: npm run build
+
+      - name: Package the release files
+        id: package
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          npm pack
+          (cd dist/script && zip -r "../../codec-string-$VERSION-web.zip" .)
+          echo "files=codec-string-$VERSION.tgz codec-string-$VERSION-web.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Attach the files to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$TAG" ${{ steps.package.outputs.files }} --clobber
+
+      - name: Upload the web page for GitHub Pages
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/script
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write # to deploy to GitHub Pages
+      id-token: write # to verify the deployment comes from this workflow
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
