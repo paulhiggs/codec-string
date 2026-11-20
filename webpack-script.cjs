@@ -10,7 +10,14 @@ module.exports = merge(
 	}),
 	{
 		entry: {
-			'codec-string': './src/index.cjs',
+			// only the library entry sets window.CodecString: if app set it as well, app's empty exports would replace the library
+			'codec-string': {
+				import: './src/index.cjs',
+				library: {
+					name: 'CodecString',
+					type: 'window',
+				},
+			},
 			app: {
 				dependOn: 'codec-string',
 				import: './src/global/app.js',
@@ -19,13 +26,8 @@ module.exports = merge(
 		output: {
 			enabledLibraryTypes: ['window'],
 			path: path.resolve(__dirname, 'dist/script'),
-			library: {
-				name: 'CodecString',
-				type: 'window',
-			},
 		},
-		experiments: {
-			outputModule: true,
-		},
+		// no experiments.outputModule here: this build is loaded with plain <script> tags and sets window.CodecString,
+		// so it must not contain ES module syntax (export / import)
 	}
 );

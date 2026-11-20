@@ -45,7 +45,8 @@ const webpackSettings = ({ clean, chunks, scriptLoading }) => ({
 			chunksSortMode: 'none',
 			chunks: chunks ? chunks : ['codec-string', 'app'],
 			hash: false,
-			inject: 'head',
+			// the template places htmlWebpackPlugin.tags.headTags itself, so the plugin must not inject them as well
+			inject: false,
 			scriptLoading,
 		}),
 	],
