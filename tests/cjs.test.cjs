@@ -566,4 +566,70 @@ describe('commonjs build test', () => {
 		expect(rext).toContain('general_max_12bit_constraint_flag=1');
 		expect(rext.filter((t) => t.startsWith('general_max_14bit'))).toEqual([]);
 	});
+
+	// #73: constraint flags for general_profile_idc 12, 13 and 14 (H.265 clauses G.11.1.2 and G.11.1.3, Table G.2)
+	// multiviewConstraints() builds the first two constraint bytes: progressive, non-packed and frame-only, then
+	// general_max_12bit ... general_one_picture_only, general_lower_bit_rate and general_max_14bit
+	const multiviewConstraints = ({ b14, b12, b10, b8, c422, c420, mono, intra, onePic, lowerBitRate }) => {
+		const bits = `1011${b12}${b10}${b8}${c422}${c420}${mono}${intra}${onePic}${lowerBitRate}${b14}00`;
+		return [bits.slice(0, 8), bits.slice(8)].map((b) => parseInt(b, 2).toString(16).toUpperCase().padStart(2, '0')).join('.');
+	};
+	const MV_EXTENDED = { b14: 0, b12: 1, b10: 1, b8: 1, c422: 1, c420: 1, mono: 0, intra: 0, onePic: 0, lowerBitRate: 1 };
+	const MV_EXTENDED_10 = { ...MV_EXTENDED, b8: 0 };
+	const MV_MONO = { b14: 1, b12: 1, b10: 1, b8: 1, c422: 1, c420: 1, mono: 1, intra: 0, onePic: 0, lowerBitRate: 1 };
+
+	test('HEVC multiviewConstraints() builds the expected constraint bytes', () => {
+		expect(multiviewConstraints(MV_EXTENDED)).toEqual('BF.88');
+		expect(multiviewConstraints(MV_MONO)).toEqual('BF.CC');
+	});
+
+	test.each([
+		['Multiview Extended (12)', 'hvc1.12.1000.L93', MV_EXTENDED],
+		['Multiview Extended 10 (13)', 'hvc1.13.2000.L93', MV_EXTENDED_10],
+	])('HEVC shows the constraint flags for %s', (name, codec, flags) => {
+		const parsed = hevcDecodes(`${codec}.${multiviewConstraints(flags)}`);
+		expect(warnings(parsed)).toEqual([]);
+		expect(decodeText(parsed)).toEqual(
+			expect.arrayContaining([
+				`general_profile_idc=${name}`,
+				'general_max_12bit_constraint_flag=1',
+				'general_max_10bit_constraint_flag=1',
+				`general_max_8bit_constraint_flag=${flags.b8}`,
+				'general_lower_bit_rate_constraint_flag=1',
+			])
+		);
+		expect(decodeText(parsed).filter((t) => t.startsWith('general_max_14bit'))).toEqual([]);
+	});
+
+	test('HEVC warns when the constraint flags do not indicate Multiview Extended', () => {
+		expect(warnings(hevcDecodes(`hvc1.12.1000.L93.${multiviewConstraints(MV_EXTENDED_10)}`))).toEqual([
+			'the constraint flags (110110001) do not indicate conformance to the Multiview Extended profile (111110001), see clause G.11.1.2',
+		]);
+		expect(warnings(hevcDecodes(`hvc1.13.2000.L93.${multiviewConstraints(MV_EXTENDED)}`))).toEqual([
+			'the constraint flags (111110001) do not indicate conformance to the Multiview Extended 10 profile (110110001), see clause G.11.1.2',
+		]);
+	});
+
+	test.each([
+		['Multiview Monochrome', MV_MONO],
+		['Multiview Monochrome 10', { ...MV_MONO, b8: 0 }],
+		['Multiview Monochrome 12', { ...MV_MONO, b8: 0, b10: 0 }],
+		['Multiview Monochrome 16', { ...MV_MONO, b8: 0, b10: 0, b12: 0, b14: 0 }],
+	])('HEVC multiview format range extensions profile %s', (name, flags) => {
+		const parsed = hevcDecodes(`hvc1.14.4000.L93.${multiviewConstraints(flags)}`);
+		expect(warnings(parsed)).toEqual([]);
+		expect(decodeText(parsed)).toContain(`general_profile_idc=${name} (14)`);
+		expect(decodeText(parsed)).toContain(`general_max_14bit_constraint_flag=${flags.b14}`);
+	});
+
+	test.each([
+		[{ ...MV_MONO, lowerBitRate: 0 }, '111111100', 0],
+		[{ ...MV_MONO, mono: 0 }, '111111000', 1],
+	])('HEVC warns about the reserved multiview format range extensions flags %o', (flags, flagString, lowerBitRate) => {
+		const parsed = hevcDecodes(`hvc1.14.4000.L93.${multiviewConstraints(flags)}`);
+		expect(decodeText(parsed)).toContain('general_profile_idc=Multiview Format Range Extensions (14)');
+		expect(warnings(parsed)).toEqual([
+			`the constraint flags (${flagString}, general_lower_bit_rate_constraint_flag=${lowerBitRate}) do not identify a multiview format range extensions profile in Table G.2`,
+		]);
+	});
 });

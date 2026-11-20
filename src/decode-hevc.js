@@ -102,6 +102,16 @@ const FormatRangeExtensionsProfiles = [
 	{ flags: '00000011', name: 'Main 4:4:4 16 Still Picture', anyLowerBitRate: true },
 ];
 
+// multiview format range extensions profiles (general_profile_idc 14), see Table G.2 of Rec. ITU-T H.265 (V11)
+// flags are general_max_14bit, max_12bit, max_10bit, max_8bit, max_422chroma, max_420chroma, max_monochrome, intra and
+// one_picture_only, and general_lower_bit_rate_constraint_flag shall be 1
+const MultiviewFormatRangeExtensionsProfiles = [
+	{ flags: '111111100', name: 'Multiview Monochrome' },
+	{ flags: '111011100', name: 'Multiview Monochrome 10' },
+	{ flags: '110011100', name: 'Multiview Monochrome 12' },
+	{ flags: '000011100', name: 'Multiview Monochrome 16' },
+];
+
 export function decodeHEVC(val) {
 	// the name of the profile with the given general_profile_idc, or null when it is not a known profile
 	// profile names according to Annexes A, G, H and I of Rec. ITU-T H.265 (V11)
@@ -118,9 +128,9 @@ export function decodeHEVC(val) {
 			case 9: return { str: 'Screen Content Coding (9)', profile: 'Screen Content' };
 			case 10: return { str: 'Scalable Format Range Extensions (10)', profile: 'Scalable Format Range Extensions' };
 			case 11: return { str: 'High Throughput Screen Content Coding (11)', profile: 'High Throughput Screen Content' };
-			case 12: return { str: 'Multiview Extended (12)', profile: 'Multiview Extended' };
-			case 13: return { str: 'Multiview Extended 10 (13)', profile: 'Multiview Extended 10' };
-			case 14: return { str: 'Multiview Format Range Extensions (14)', profile: 'Multiview Format Range Extensions' };
+			case 12: return multiviewExtendedProfile('Multiview Extended', 12, '111110001');
+			case 13: return multiviewExtendedProfile('Multiview Extended 10', 13, '110110001');
+			case 14: return multiviewFormatRangeExtensionsProfile();
 		}
 		return null;
 	}
@@ -147,6 +157,31 @@ export function decodeHEVC(val) {
 		return {
 			str: 'Format Range Extensions (4)',
 			warning: `the constraint flags (${flags}, general_lower_bit_rate_constraint_flag=${showbit(lowerBitRate)}) do not identify a format range extensions profile in Table A.2`,
+		};
+	}
+
+	// the values of the given constraint flags as a string of 0 and 1
+	const flagString = (bits) => bits.map((bit) => showbit(constraintFlags.bitset(bit))).join('');
+
+	// the Multiview Extended and Multiview Extended 10 profiles require these values of general_max_12bit ... general_one_picture_only
+	// and general_lower_bit_rate_constraint_flag, see clause G.11.1.2 of Rec. ITU-T H.265 (V11)
+	function multiviewExtendedProfile(name, idc, requiredFlags) {
+		const res = { str: `${name} (${idc})`, profile: name };
+		const flags = flagString([44, 43, 42, 41, 40, 39, 38, 37, 36]);
+		if (flags != requiredFlags)
+			res.warning = `the constraint flags (${flags}) do not indicate conformance to the ${name} profile (${requiredFlags}), see clause G.11.1.2`;
+		return res;
+	}
+
+	// identify the multiview format range extensions profile from the constraint flags, see Table G.2 of Rec. ITU-T H.265 (V11)
+	function multiviewFormatRangeExtensionsProfile() {
+		const flags = flagString([35, 44, 43, 42, 41, 40, 39, 38, 37]),
+			lowerBitRate = constraintFlags.bitset(36);
+		const mvrext = lowerBitRate ? MultiviewFormatRangeExtensionsProfiles.find((p) => p.flags == flags) : undefined;
+		if (mvrext) return { str: `${mvrext.name} (14)`, profile: mvrext.name };
+		return {
+			str: 'Multiview Format Range Extensions (14)',
+			warning: `the constraint flags (${flags}, general_lower_bit_rate_constraint_flag=${showbit(lowerBitRate)}) do not identify a multiview format range extensions profile in Table G.2`,
 		};
 	}
 
@@ -213,8 +248,10 @@ export function decodeHEVC(val) {
 	constraints.push(normal(`general_non_packed_constraint_flag=${showbit(constraintFlags.bitset(46))}`));
 	constraints.push(normal(`general_frame_only_constraint_flag=${showbit(constraintFlags.bitset(45))}`));
 
-	// the conditions below follow profile_tier_level( ) in clause 7.3.3 of Rec. ITU-T H.265 (V11)
-	if (profileOrCompatible(4, 5, 6, 7, 8, 9, 10, 11)) {
+	// the conditions below follow profile_tier_level( ) in clause 7.3.3 of Rec. ITU-T H.265 (V11), which only lists
+	// profiles 4 to 11. Profiles 12 and 13 (clause G.11.1.2) and 14 (clause G.11.1.3, with general_max_14bit_constraint_flag)
+	// are defined in terms of the same constraint flags, so they are included here too
+	if (profileOrCompatible(4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14)) {
 		constraints.push(normal(`general_max_12bit_constraint_flag=${showbit(constraintFlags.bitset(44))}`));
 		constraints.push(normal(`general_max_10bit_constraint_flag=${showbit(constraintFlags.bitset(43))}`));
 		general_max_8bit_constraint_flag = constraintFlags.bitset(42);
@@ -227,7 +264,7 @@ export function decodeHEVC(val) {
 		general_one_picture_only_constraint_flag = constraintFlags.bitset(37);
 		constraints.push(normal(`general_lower_bit_rate_constraint_flag=${showbit(constraintFlags.bitset(36))}`));
 
-		if (profileOrCompatible(5, 9, 10, 11)) {
+		if (profileOrCompatible(5, 9, 10, 11, 14)) {
 			constraints.push(normal(`general_max_14bit_constraint_flag=${showbit(constraintFlags.bitset(35))}`));
 			// general_reserved_zero_33bits
 		} else {
