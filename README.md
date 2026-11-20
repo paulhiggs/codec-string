@@ -165,6 +165,10 @@ to deploy the current `main` branch to GitHub Pages without a release.
 
 GitHub Pages must be enabled once for this repository, with
 *Settings > Pages > Build and deployment > Source* set to *GitHub Actions*.
+The `github-pages` environment that this creates only allows deployments
+from `main`, so the release tags must be allowed as well: in
+*Settings > Environments > github-pages > Deployment branches and tags*,
+add a rule of type *Tag* with the pattern `v*`.
 
 ### Acknowledgements
 
